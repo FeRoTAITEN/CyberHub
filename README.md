@@ -1,41 +1,81 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CyberHub
 
-## Getting Started
+> **SALAM Cyber-Security Sector**
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Project Overview
+
+**CyberHub** is an integrated platform for managing the Cyber-Security sector at Salam Company. It automates processes, streamlines collaboration between departments, and tracks the workflow of projects and tasks from the client's request to final project delivery.
+
+---
+
+## 🧩 Key Features
+- **Client Management:** Register and manage client data, and link them to projects.
+- **Project Management:** Create and monitor projects, tracking every step in the project lifecycle.
+- **Dynamic Workflow:** Support for default or custom workflows per project, with customizable steps and responsible departments.
+- **Interactive Dashboard:** Real-time statistics, alerts, tasks, and achievements for each employee.
+- **Multi-language & Theming:** Professional UI supporting both English and Arabic, with multiple themes (dark, light, cyber, etc.).
+- **Department & Employee Management:** View and manage employees, departments, teams, and achievements.
+- **Policies & News Management:** Publish policies, updates, and internal news.
+
+---
+
+## 🏗️ Project Structure
+
+```
+nextlandtest/
+├── src/
+│   ├── app/           # Application pages (Next.js App Router)
+│   ├── components/    # Shared UI components
+│   ├── lib/           # Helper libraries (translation, etc.)
+│   └── locales/       # Translation files (ar/en)
+├── public/            # Images, fonts, icons
+├── README.md
+└── ...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
+- **Next.js 14** (App Router)
+- **React 18**
+- **TypeScript**
+- **Tailwind CSS**
+- **Framer Motion** (animations)
+- **Context API** (language & theme management)
+- **JSON files for mock data**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🌐 Workflow Example
+1. **Client** registers their data.
+2. **Compliance Department** creates and approves the project.
+3. The project passes to the **Design Department**.
+4. Then to the **GRC Department**.
+5. Finally, to the **SOC Department**.
+6. Every step is tracked, including who handled it and when.
 
-To learn more about Next.js, take a look at the following resources:
+> Admins can create custom workflows for any project via the admin panel.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📦 Getting Started
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Then open [http://localhost:3000](http://localhost:3000)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-# CyberHub
-SALAM Cyber-Secutity Sector
->>>>>>> 6ae037b1f737054a77c92debc11d6fb4f809c34c
+---
+
+## 👨‍💻 Team
+- Salam Cyber-Security Team
+- Professional React/Next.js Developers
+
+---
+
+## 🏢 Copyright
+All rights reserved © Salam Cyber-Security Sector
