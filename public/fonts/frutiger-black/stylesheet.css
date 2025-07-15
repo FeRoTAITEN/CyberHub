@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Frutiger LT Arabic 75';
+    src: url('FrutigerLTArabic-75Black.woff2') format('woff2'),
+        url('FrutigerLTArabic-75Black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+

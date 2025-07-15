@@ -1,0 +1,31 @@
+{
+  "employees": [
+    {
+      "id": 1,
+      "name": "Sara Alahmad",
+      "jobTitle": "Senior Software Engineer",
+      "department": "Software Development",
+      "email": "sara.alahmad@example.com",
+      "phone": "+966500000001",
+      "avatar": "/images/sara.png",
+      "location": "Riyadh, Saudi Arabia",
+      "hireDate": "2021-03-15",
+      "status": "Active",
+      "projects": [
+        { "name": "HR System", "role": "Team Lead" },
+        { "name": "Employee Portal", "role": "Lead Developer" }
+      ],
+      "achievements": [
+        { "title": "Employee of the Month", "date": "2023-11" },
+        { "title": "Launched New Project", "date": "2023-06" }
+      ],
+      "leaveBalance": 14,
+      "taskCompletion": 87,
+      "projectCompletion": 65,
+      "courses": [
+        { "title": "Information Security", "completed": true },
+        { "title": "Project Management", "completed": false }
+      ]
+    }
+  ]
+} 

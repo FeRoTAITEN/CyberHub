@@ -1,26 +1,1871 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Inter:wght@400;700&family=Tajawal:wght@400;700&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* إضافة خطوط مخصصة من ملفات محلية */
+@font-face {
+  font-family: 'Frutiger LT Arabic 65';
+  src: url('/fonts/frutiger-bold/FrutigerLTArabic-65Bold.woff2') format('woff2'),
+       url('/fonts/frutiger-bold/FrutigerLTArabic-65Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Frutiger LT Arabic 75';
+  src: url('/fonts/frutiger-black/FrutigerLTArabic-75Black.woff2') format('woff2'),
+       url('/fonts/frutiger-black/FrutigerLTArabic-75Black.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'fontello';
+  src: url('/fonts/icomoon/icomoon.woff2') format('woff2'),
+       url('/fonts/icomoon/icomoon.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'VT323';
+  src: url('/fonts/VT323-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* الخط الأساسي للموقع - سيتم تطبيقه على جميع النصوص */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  --font-primary-arabic: 'Cairo', 'Noto Sans Arabic', 'Tajawal', 'Almarai', 'Amiri', 'Frutiger LT Arabic 65', sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.font-cairo {
+  font-family: 'Cairo', 'Inter', Arial, Helvetica, sans-serif !important;
+}
+.font-tajawal {
+  font-family: 'Tajawal', 'Inter', Arial, Helvetica, sans-serif !important;
+}
+.font-noto {
+  font-family: 'Noto Sans Arabic', 'Inter', Arial, Helvetica, sans-serif !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.font-amiri {
+  font-family: 'Amiri', 'Inter', Arial, Helvetica, sans-serif !important;
+}
+
+.font-frutiger {
+  font-family: 'Frutiger LT Arabic 65', 'Frutiger LT Arabic 75', 'Inter', Arial, Helvetica, sans-serif !important;
+}
+
+.font-icomoon {
+  font-family: 'fontello', 'Inter', Arial, Helvetica, sans-serif !important;
+}
+
+.font-vt323 {
+  font-family: 'VT323', monospace !important;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+.animate-typing {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 0.15em solid #39ff14;
+  animation: typing 1.5s steps(30, end) 1;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.drop-shadow-neon-green {
+  filter: drop-shadow(0 0 6px #39ff14) drop-shadow(0 0 2px #39ff14);
+}
+
+@layer base {
+  /* تعريف الخطوط المتغيرة */
+:root {
+    --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    --font-jetbrains: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+    --font-noto-arabic: 'Noto Sans Arabic', 'Cairo', 'Tajawal', 'Almarai', 'Amiri', 'Frutiger LT Arabic 65', sans-serif;
+    --font-cairo: 'Cairo', 'Noto Sans Arabic', 'Tajawal', 'Almarai', 'Amiri', 'Frutiger LT Arabic 65', sans-serif;
+  }
+
+  html {
+    background-color: rgb(0, 32, 53);
+    color: #ffffff;
+  }
+  
+  body {
+    background-color: rgb(0, 32, 53);
+    color: #ffffff;
+    min-height: 100vh;
+    font-feature-settings: 'liga' 1, 'calt' 1;
+    text-rendering: optimizeLegibility;
+    transition: font-family 0.3s ease;
+  }
+
+  /* تطبيق الخطوط على جميع النصوص */
+  body.font-cairo {
+    font-family: 'Cairo', var(--font-primary-arabic), Arial, Helvetica, sans-serif !important;
+  }
+
+  body.font-tajawal {
+    font-family: 'Tajawal', var(--font-primary-arabic), Arial, Helvetica, sans-serif !important;
+  }
+
+  body.font-noto {
+    font-family: 'Noto Sans Arabic', var(--font-primary-arabic), Arial, Helvetica, sans-serif !important;
+  }
+
+  body.font-amiri {
+    font-family: 'Amiri', var(--font-primary-arabic), Arial, Helvetica, sans-serif !important;
+  }
+
+  body.font-frutiger {
+    font-family: 'Frutiger LT Arabic 65', 'Frutiger LT Arabic 75', var(--font-primary-arabic), Arial, Helvetica, sans-serif !important;
+  }
+
+  body.font-icomoon {
+    font-family: 'fontello', var(--font-primary-arabic), Arial, Helvetica, sans-serif !important;
+  }
+
+  /* الخط الأساسي للموقع - سيتم تطبيقه عند عدم اختيار خط محدد */
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) {
+    font-family: var(--font-primary) !important;
+  }
+
+  /* تطبيق الخط الأساسي للعربية */
+  [dir="rtl"] body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) {
+    font-family: var(--font-primary-arabic) !important;
+  }
+
+  /* خطوط للغة العربية */
+  [dir="rtl"] {
+    direction: rtl;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  [dir="ltr"] {
+    direction: ltr;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    direction: rtl;
+  }
+
+  [dir="ltr"] {
+    direction: ltr;
+  }
+
+  /* تطبيق الخطوط على جميع العناصر المهمة */
+  body.font-cairo *,
+  body.font-cairo h1,
+  body.font-cairo h2,
+  body.font-cairo h3,
+  body.font-cairo h4,
+  body.font-cairo h5,
+  body.font-cairo h6,
+  body.font-cairo p,
+  body.font-cairo span,
+  body.font-cairo div,
+  body.font-cairo button,
+  body.font-cairo input,
+  body.font-cairo textarea,
+  body.font-cairo label,
+  body.font-cairo a {
+    font-family: inherit !important;
+  }
+
+  body.font-tajawal *,
+  body.font-tajawal h1,
+  body.font-tajawal h2,
+  body.font-tajawal h3,
+  body.font-tajawal h4,
+  body.font-tajawal h5,
+  body.font-tajawal h6,
+  body.font-tajawal p,
+  body.font-tajawal span,
+  body.font-tajawal div,
+  body.font-tajawal button,
+  body.font-tajawal input,
+  body.font-tajawal textarea,
+  body.font-tajawal label,
+  body.font-tajawal a {
+    font-family: inherit !important;
+  }
+
+  body.font-noto *,
+  body.font-noto h1,
+  body.font-noto h2,
+  body.font-noto h3,
+  body.font-noto h4,
+  body.font-noto h5,
+  body.font-noto h6,
+  body.font-noto p,
+  body.font-noto span,
+  body.font-noto div,
+  body.font-noto button,
+  body.font-noto input,
+  body.font-noto textarea,
+  body.font-noto label,
+  body.font-noto a {
+    font-family: inherit !important;
+  }
+
+  body.font-amiri *,
+  body.font-amiri h1,
+  body.font-amiri h2,
+  body.font-amiri h3,
+  body.font-amiri h4,
+  body.font-amiri h5,
+  body.font-amiri h6,
+  body.font-amiri p,
+  body.font-amiri span,
+  body.font-amiri div,
+  body.font-amiri button,
+  body.font-amiri input,
+  body.font-amiri textarea,
+  body.font-amiri label,
+  body.font-amiri a {
+    font-family: inherit !important;
+  }
+
+  body.font-frutiger *,
+  body.font-frutiger h1,
+  body.font-frutiger h2,
+  body.font-frutiger h3,
+  body.font-frutiger h4,
+  body.font-frutiger h5,
+  body.font-frutiger h6,
+  body.font-frutiger p,
+  body.font-frutiger span,
+  body.font-frutiger div,
+  body.font-frutiger button,
+  body.font-frutiger input,
+  body.font-frutiger textarea,
+  body.font-frutiger label,
+  body.font-frutiger a {
+    font-family: inherit !important;
+  }
+
+  body.font-icomoon *,
+  body.font-icomoon h1,
+  body.font-icomoon h2,
+  body.font-icomoon h3,
+  body.font-icomoon h4,
+  body.font-icomoon h5,
+  body.font-icomoon h6,
+  body.font-icomoon p,
+  body.font-icomoon span,
+  body.font-icomoon div,
+  body.font-icomoon button,
+  body.font-icomoon input,
+  body.font-icomoon textarea,
+  body.font-icomoon label,
+  body.font-icomoon a {
+    font-family: inherit !important;
+  }
+
+  /* تطبيق الخط الأساسي على جميع العناصر */
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) *,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h1,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h2,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h3,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h4,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h5,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h6,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) p,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) span,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) div,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) button,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) input,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) textarea,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) label,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) a {
+    font-family: inherit !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .btn-primary {
+    @apply bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105;
+  }
+  
+  .btn-secondary {
+    @apply bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 border border-slate-600 hover:border-green-500/50;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg;
+  }
+  
+  .btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg;
+  }
+
+  .btn-outline {
+    @apply bg-transparent border-2 border-green-600 text-green-400 hover:bg-green-600 hover:text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300;
+  }
+  
+  .card {
+    @apply bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-2xl shadow-2xl p-8 backdrop-blur-sm;
+  }
+  
+  .card-hover {
+    @apply card hover:border-green-500/50 hover:shadow-green-500/20 transition-all duration-500 transform hover:scale-[1.02];
+  }
+
+  .card-glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl;
+  }
+  
+  .input-field {
+    @apply w-full p-4 rounded-xl bg-slate-800/80 border border-slate-600/50 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm;
+  }
+  
+  .table-header {
+    @apply bg-slate-800/80 text-green-400 font-semibold border-b border-slate-700/50 backdrop-blur-sm;
+  }
+  
+  .table-row {
+    @apply border-b border-slate-700/30 hover:bg-slate-800/50 transition-all duration-300 backdrop-blur-sm;
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, rgb(0, 32, 53) 0%, rgb(0, 20, 35) 50%, rgb(0, 15, 25) 100%);
+  }
+
+  .gradient-bg-alt {
+    background: linear-gradient(135deg, rgb(0, 32, 53) 0%, rgb(0, 25, 40) 100%);
+  }
+
+  /* Theme Backgrounds */
+  .theme-light {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  }
+
+  .theme-light .gradient-bg {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  }
+
+  /* Light theme text colors */
+  .theme-light {
+    color: #1e293b;
+  }
+
+  .theme-light h1,
+  .theme-light h2,
+  .theme-light h3,
+  .theme-light h4,
+  .theme-light h5,
+  .theme-light h6 {
+    color: #0f172a;
+  }
+
+  /* Light theme body and html overrides */
+  .theme-light html {
+    background-color: #f8fafc;
+    color: #1e293b;
+  }
+
+  .theme-light body {
+    background-color: #f8fafc;
+    color: #1e293b;
+  }
+
+
+
+
+
+  .theme-light .text-slate-400 {
+    color: #64748b !important;
+  }
+
+  .theme-light .text-slate-500 {
+    color: #64748b !important;
+  }
+
+  /* Light theme cards */
+  .theme-light .card {
+    @apply bg-white/95 backdrop-blur-md border border-slate-200/70 shadow-xl;
+  }
+
+  .theme-light .card-hover {
+    @apply bg-white/95 backdrop-blur-md border border-slate-200/70 shadow-xl hover:border-green-500/50 hover:shadow-green-500/20;
+  }
+
+  /* Light theme navigation */
+  .theme-light nav {
+    @apply bg-white/90 backdrop-blur-md border-b border-slate-200/70;
+  }
+
+  .theme-light .nav-link {
+    @apply text-slate-700 hover:text-slate-900 hover:bg-slate-100;
+  }
+
+  .theme-light .nav-link.active {
+    @apply bg-green-600;
+    color: white;
+  }
+
+  /* Light theme buttons */
+  .theme-light .lang-switch {
+    @apply bg-white/90 border border-slate-200/70 text-slate-700 hover:bg-slate-100;
+  }
+
+  .theme-light .lang-switch:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  /* Light theme alerts and notifications */
+  .theme-light .alert-critical {
+    @apply bg-red-50 border-red-200 text-red-800;
+  }
+
+  .theme-light .alert-warning {
+    @apply bg-yellow-50 border-yellow-200 text-yellow-800;
+  }
+
+  .theme-light .alert-info {
+    @apply bg-blue-50 border-blue-200 text-blue-800;
+  }
+
+  .theme-light .alert-success {
+    @apply bg-green-50 border-green-200 text-green-800;
+  }
+
+  /* Light theme statistics and dashboard elements */
+  .theme-light .stat-card {
+    @apply bg-white/95 border border-slate-200/70 shadow-xl;
+  }
+
+  .theme-light .stat-card:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  .theme-light .stat-value {
+    @apply text-green-600;
+  }
+
+  .theme-light .stat-label {
+    @apply text-slate-600;
+  }
+
+  .theme-light .stat-change-positive {
+    @apply text-green-600;
+  }
+
+  .theme-light .stat-change-negative {
+    @apply text-red-600;
+  }
+
+  /* Light theme reports and activity */
+  .theme-light .activity-item {
+    @apply bg-white/90 border border-slate-200/70;
+  }
+
+  .theme-light .activity-item:hover {
+    @apply bg-slate-50/90 border-green-500/30;
+  }
+
+  .theme-light .report-card {
+    @apply bg-white/95 border border-slate-200/70 shadow-xl;
+  }
+
+  .theme-light .report-card:hover {
+    @apply border-blue-500/50 shadow-blue-500/20;
+  }
+
+  /* Light theme form elements */
+  .theme-light .input-field {
+    @apply bg-white/90 border border-slate-200/70 text-slate-900 focus:ring-green-500 focus:border-green-500;
+  }
+
+  /* Light theme tables */
+  .theme-light .table-header {
+    @apply bg-slate-100/90 text-slate-900 border-b border-slate-200/70;
+  }
+
+  .theme-light .table-row {
+    @apply border-b border-slate-200/50 hover:bg-slate-50/90;
+  }
+
+
+
+  /* Light theme text gradients */
+  .theme-light .text-gradient {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Light theme cyber glow */
+  .theme-light .cyber-glow {
+    box-shadow: 0 0 30px rgba(5, 150, 105, 0.3);
+  }
+
+  .theme-light .cyber-glow-strong {
+    box-shadow: 0 0 50px rgba(5, 150, 105, 0.4);
+  }
+
+  /* Light theme borders */
+  .theme-light .cyber-border {
+    border: 2px solid rgba(5, 150, 105, 0.3);
+  }
+
+  .theme-light .cyber-border-strong {
+    border: 2px solid rgba(5, 150, 105, 0.5);
+  }
+
+  /* Light theme specific dashboard elements */
+  .theme-light .stat-card {
+    @apply bg-white/95 border border-slate-200/70 shadow-xl;
+  }
+
+  .theme-light .stat-card:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  /* Light theme dropdown menus */
+  .theme-light .card-glass {
+    @apply bg-white/95 backdrop-blur-xl border border-slate-200/70 shadow-xl;
+  }
+
+  /* Light theme specific text overrides */
+  .theme-light .text-green-400 {
+    color: #059669 !important;
+  }
+
+  .theme-light .text-red-400 {
+    color: #dc2626 !important;
+  }
+
+  .theme-light .text-yellow-400 {
+    color: #ca8a04 !important;
+  }
+
+  .theme-light .text-blue-400 {
+    color: #2563eb !important;
+  }
+
+  /* Light theme additional overrides for full compatibility */
+  .theme-light .text-slate-300 {
+    color: #64748b !important;
+  }
+
+  .theme-light .text-white {
+    color: #0f172a !important;
+  }
+
+  .theme-light .bg-slate-900\/80 {
+    background-color: rgba(248, 250, 252, 0.8) !important;
+  }
+
+  .theme-light .bg-slate-900\/95 {
+    background-color: rgba(248, 250, 252, 0.95) !important;
+  }
+
+  .theme-light .border-slate-700 {
+    border-color: #cbd5e1 !important;
+  }
+
+  .theme-light .border-slate-600 {
+    border-color: #94a3b8 !important;
+  }
+
+  /* Light theme specific dashboard overrides */
+  .theme-light .bg-slate-800 {
+    background-color: #f1f5f9 !important;
+  }
+
+  .theme-light .bg-slate-700 {
+    background-color: #e2e8f0 !important;
+  }
+
+  .theme-light .bg-slate-600 {
+    background-color: #cbd5e1 !important;
+  }
+
+  .theme-light .text-green-400 {
+    color: #059669 !important;
+  }
+
+  .theme-light .text-blue-400 {
+    color: #2563eb !important;
+  }
+
+  .theme-light .text-yellow-400 {
+    color: #ca8a04 !important;
+  }
+
+  .theme-light .text-purple-400 {
+    color: #7c3aed !important;
+  }
+
+  .theme-light .text-orange-400 {
+    color: #ea580c !important;
+  }
+
+  .theme-light .text-cyan-400 {
+    color: #0891b2 !important;
+  }
+
+  /* Light theme quick links and activity items */
+  .theme-light .quick-link {
+    @apply bg-white/95 border border-slate-200/70 shadow-xl;
+  }
+
+  .theme-light .quick-link:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  .theme-light .activity-success {
+    @apply text-green-600;
+  }
+
+  .theme-light .activity-info {
+    @apply text-blue-600;
+  }
+
+  .theme-light .activity-error {
+    @apply text-red-600;
+  }
+
+  .theme-light .event-item {
+    @apply bg-white/90 border border-slate-200/70;
+  }
+
+  .theme-light .event-item:hover {
+    @apply bg-slate-50/90 border-green-500/30;
+  }
+
+  .theme-light .threat-item {
+    @apply bg-white/95 border border-slate-200/70;
+  }
+
+  .theme-light .threat-item:hover {
+    @apply border-red-500/50 shadow-red-500/20;
+  }
+
+
+
+  .theme-midnight {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+  }
+
+  .theme-midnight .gradient-bg {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+  }
+
+  /* Midnight theme text colors */
+  .theme-midnight {
+    color: #e2e8f0;
+  }
+
+  .theme-midnight h1,
+  .theme-midnight h2,
+  .theme-midnight h3,
+  .theme-midnight h4,
+  .theme-midnight h5,
+  .theme-midnight h6 {
+    color: #f8fafc;
+  }
+
+
+
+  .theme-midnight .text-slate-400 {
+    color: #94a3b8 !important;
+  }
+
+  .theme-midnight .text-slate-500 {
+    color: #94a3b8 !important;
+  }
+
+  /* Midnight theme cards */
+  .theme-midnight .card {
+    @apply bg-slate-800/95 backdrop-blur-md border border-slate-600/70 shadow-xl;
+  }
+
+  .theme-midnight .card-hover {
+    @apply bg-slate-800/95 backdrop-blur-md border border-slate-600/70 shadow-xl hover:border-green-500/50 hover:shadow-green-500/20;
+  }
+
+  /* Midnight theme navigation */
+  .theme-midnight nav {
+    @apply bg-slate-900/90 backdrop-blur-md border-b border-slate-700/70;
+  }
+
+  .theme-midnight .nav-link {
+    @apply text-slate-300 hover:text-white hover:bg-slate-700;
+  }
+
+  .theme-midnight .nav-link.active {
+    @apply bg-green-600;
+    color: white;
+  }
+
+  /* Midnight theme buttons */
+  .theme-midnight .lang-switch {
+    @apply bg-slate-800/90 border border-slate-600/70 text-slate-300 hover:bg-slate-700;
+  }
+
+  .theme-midnight .lang-switch:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  /* Midnight theme alerts */
+  .theme-midnight .alert-critical {
+    @apply bg-red-900/40 border-red-400/60 text-red-200;
+  }
+
+  .theme-midnight .alert-warning {
+    @apply bg-yellow-900/40 border-yellow-400/60 text-yellow-200;
+  }
+
+  .theme-midnight .alert-info {
+    @apply bg-blue-900/40 border-blue-400/60 text-blue-200;
+  }
+
+  .theme-midnight .alert-success {
+    @apply bg-green-900/40 border-green-400/60 text-green-200;
+  }
+
+  /* Midnight theme form elements */
+  .theme-midnight .input-field {
+    @apply bg-slate-800/90 border border-slate-600/70 text-slate-200 focus:ring-green-500 focus:border-green-500;
+  }
+
+  /* Midnight theme tables */
+  .theme-midnight .table-header {
+    @apply bg-slate-800/90 text-slate-200 border-b border-slate-600/70;
+  }
+
+  .theme-midnight .table-row {
+    @apply border-b border-slate-600/50 hover:bg-slate-700/90;
+  }
+
+  /* Midnight theme specific elements */
+
+
+  /* Midnight theme text gradients */
+  .theme-midnight .text-gradient {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Midnight theme cyber glow */
+  .theme-midnight .cyber-glow {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+  }
+
+  .theme-midnight .cyber-glow-strong {
+    box-shadow: 0 0 50px rgba(34, 197, 94, 0.5);
+  }
+
+  /* Midnight theme borders */
+  .theme-midnight .cyber-border {
+    border: 2px solid rgba(34, 197, 94, 0.4);
+  }
+
+  .theme-midnight .cyber-border-strong {
+    border: 2px solid rgba(34, 197, 94, 0.6);
+  }
+
+  /* Midnight theme specific dashboard elements */
+  .theme-midnight .stat-card {
+    @apply bg-slate-800/95 border border-slate-600/70 shadow-xl;
+  }
+
+  .theme-midnight .stat-card:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  /* Midnight theme dropdown menus */
+  .theme-midnight .card-glass {
+    @apply bg-slate-800/95 backdrop-blur-xl border border-slate-600/70 shadow-xl;
+  }
+
+  /* Midnight theme specific text overrides */
+  .theme-midnight .text-green-400 {
+    color: #22c55e !important;
+  }
+
+  .theme-midnight .text-red-400 {
+    color: #f87171 !important;
+  }
+
+  .theme-midnight .text-yellow-400 {
+    color: #facc15 !important;
+  }
+
+  .theme-midnight .text-blue-400 {
+    color: #60a5fa !important;
+  }
+
+  .theme-novel {
+    background: linear-gradient(135deg, #fdf6e3 0%, #f5f5dc 25%, #f0f0e0 50%, #e8e8d8 75%, #dcdcc8 100%);
+  }
+
+  .theme-novel .gradient-bg {
+    background: linear-gradient(135deg, #fdf6e3 0%, #f5f5dc 25%, #f0f0e0 50%, #e8e8d8 75%, #dcdcc8 100%);
+  }
+
+  /* Novel theme text colors */
+  .theme-novel {
+    color: #2d3748;
+  }
+
+  .theme-novel h1,
+  .theme-novel h2,
+  .theme-novel h3,
+  .theme-novel h4,
+  .theme-novel h5,
+  .theme-novel h6 {
+    color: #1a202c;
+  }
+
+  /* Novel theme body and html overrides */
+  .theme-novel html {
+    background-color: #fdf6e3;
+    color: #2d3748;
+  }
+
+  .theme-novel body {
+    background-color: #fdf6e3;
+    color: #2d3748;
+  }
+
+
+
+  .theme-novel .text-slate-400 {
+    color: #4a5568 !important;
+  }
+
+  .theme-novel .text-slate-500 {
+    color: #4a5568 !important;
+  }
+
+  /* Novel theme cards */
+  .theme-novel .card {
+    @apply bg-white/95 backdrop-blur-md border border-yellow-200/70 shadow-xl;
+  }
+
+  .theme-novel .card-hover {
+    @apply bg-white/95 backdrop-blur-md border border-yellow-200/70 shadow-xl hover:border-green-500/50 hover:shadow-green-500/20;
+  }
+
+  /* Novel theme navigation */
+  .theme-novel nav {
+    @apply bg-yellow-50/90 backdrop-blur-md border-b border-yellow-200/70;
+  }
+
+  .theme-novel .nav-link {
+    @apply text-gray-700 hover:text-gray-900 hover:bg-yellow-100;
+  }
+
+  .theme-novel .nav-link.active {
+    @apply bg-green-600;
+    color: white;
+  }
+
+  /* Novel theme buttons */
+  .theme-novel .lang-switch {
+    @apply bg-white/90 border border-yellow-200/70 text-gray-700 hover:bg-yellow-50;
+  }
+
+  .theme-novel .lang-switch:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  /* Novel theme alerts */
+  .theme-novel .alert-critical {
+    @apply bg-red-50 border-red-200 text-red-800;
+  }
+
+  .theme-novel .alert-warning {
+    @apply bg-yellow-50 border-yellow-200 text-yellow-800;
+  }
+
+  .theme-novel .alert-info {
+    @apply bg-blue-50 border-blue-200 text-blue-800;
+  }
+
+  .theme-novel .alert-success {
+    @apply bg-green-50 border-green-200 text-green-800;
+  }
+
+  /* Novel theme statistics and dashboard elements */
+  .theme-novel .stat-card {
+    @apply bg-white/95 border border-yellow-200/70 shadow-xl;
+  }
+
+  .theme-novel .stat-card:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  .theme-novel .stat-value {
+    @apply text-green-600;
+  }
+
+  .theme-novel .stat-label {
+    @apply text-gray-600;
+  }
+
+  .theme-novel .stat-change-positive {
+    @apply text-green-600;
+  }
+
+  .theme-novel .stat-change-negative {
+    @apply text-red-600;
+  }
+
+  /* Novel theme reports and activity */
+  .theme-novel .activity-item {
+    @apply bg-white/90 border border-yellow-200/70;
+  }
+
+  .theme-novel .activity-item:hover {
+    @apply bg-yellow-50/90 border-green-500/30;
+  }
+
+  .theme-novel .report-card {
+    @apply bg-white/95 border border-yellow-200/70 shadow-xl;
+  }
+
+  .theme-novel .report-card:hover {
+    @apply border-blue-500/50 shadow-blue-500/20;
+  }
+
+  /* Novel theme form elements */
+  .theme-novel .input-field {
+    @apply bg-white/90 border border-yellow-200/70 text-gray-900 focus:ring-green-500 focus:border-green-500;
+  }
+
+  /* Novel theme tables */
+  .theme-novel .table-header {
+    @apply bg-yellow-50/90 text-gray-900 border-b border-yellow-200/70;
+  }
+
+  .theme-novel .table-row {
+    @apply border-b border-yellow-200/50 hover:bg-yellow-50/90;
+  }
+
+  /* Novel theme specific elements */
+
+
+  /* Novel theme text gradients */
+  .theme-novel .text-gradient {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Novel theme cyber glow */
+  .theme-novel .cyber-glow {
+    box-shadow: 0 0 30px rgba(5, 150, 105, 0.3);
+  }
+
+  .theme-novel .cyber-glow-strong {
+    box-shadow: 0 0 50px rgba(5, 150, 105, 0.4);
+  }
+
+  /* Novel theme borders */
+  .theme-novel .cyber-border {
+    border: 2px solid rgba(5, 150, 105, 0.3);
+  }
+
+  .theme-novel .cyber-border-strong {
+    border: 2px solid rgba(5, 150, 105, 0.5);
+  }
+
+  /* Novel theme specific dashboard elements */
+  .theme-novel .stat-card {
+    @apply bg-white/95 border border-yellow-200/70 shadow-xl;
+  }
+
+  .theme-novel .stat-card:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  /* Novel theme dropdown menus */
+  .theme-novel .card-glass {
+    @apply bg-white/95 backdrop-blur-xl border border-yellow-200/70 shadow-xl;
+  }
+
+  /* Novel theme specific text overrides */
+  .theme-novel .text-green-400 {
+    color: #059669 !important;
+  }
+
+  .theme-novel .text-red-400 {
+    color: #dc2626 !important;
+  }
+
+  .theme-novel .text-yellow-400 {
+    color: #ca8a04 !important;
+  }
+
+  .theme-novel .text-blue-400 {
+    color: #2563eb !important;
+  }
+
+  /* Novel theme additional overrides for full compatibility */
+  .theme-novel .text-slate-300 {
+    color: #4a5568 !important;
+  }
+
+  .theme-novel .text-white {
+    color: #1a202c !important;
+  }
+
+  .theme-novel .bg-slate-900\/80 {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  .theme-novel .bg-slate-900\/95 {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  .theme-novel .border-slate-700 {
+    border-color: #e2e8f0 !important;
+  }
+
+  .theme-novel .border-slate-600 {
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Novel theme specific dashboard overrides */
+  .theme-novel .bg-slate-800 {
+    background-color: #fdf6e3 !important;
+  }
+
+  .theme-novel .bg-slate-700 {
+    background-color: #f5f5dc !important;
+  }
+
+  .theme-novel .bg-slate-600 {
+    background-color: #e8e8d8 !important;
+  }
+
+  .theme-novel .text-green-400 {
+    color: #059669 !important;
+  }
+
+  .theme-novel .text-blue-400 {
+    color: #2563eb !important;
+  }
+
+  .theme-novel .text-yellow-400 {
+    color: #ca8a04 !important;
+  }
+
+  .theme-novel .text-purple-400 {
+    color: #7c3aed !important;
+  }
+
+  .theme-novel .text-orange-400 {
+    color: #ea580c !important;
+  }
+
+  .theme-novel .text-cyan-400 {
+    color: #0891b2 !important;
+  }
+
+  /* Novel theme quick links and activity items */
+  .theme-novel .quick-link {
+    @apply bg-white/95 border border-yellow-200/70 shadow-xl;
+  }
+
+  .theme-novel .quick-link:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  .theme-novel .activity-success {
+    @apply text-green-600;
+  }
+
+  .theme-novel .activity-info {
+    @apply text-blue-600;
+  }
+
+  .theme-novel .activity-error {
+    @apply text-red-600;
+  }
+
+  .theme-novel .event-item {
+    @apply bg-white/90 border border-yellow-200/70;
+  }
+
+  .theme-novel .event-item:hover {
+    @apply bg-yellow-50/90 border-green-500/30;
+  }
+
+  .theme-novel .threat-item {
+    @apply bg-white/95 border border-yellow-200/70;
+  }
+
+  .theme-novel .threat-item:hover {
+    @apply border-red-500/50 shadow-red-500/20;
+  }
+
+  .theme-cyber {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 25%, #2d2d2d 50%, #404040 75%, #525252 100%);
+  }
+
+  .theme-cyber .gradient-bg {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 25%, #2d2d2d 50%, #404040 75%, #525252 100%);
+  }
+
+  /* Cyber theme text colors */
+  .theme-cyber {
+    color: #d4d4d8;
+  }
+
+  .theme-cyber h1,
+  .theme-cyber h2,
+  .theme-cyber h3,
+  .theme-cyber h4,
+  .theme-cyber h5,
+  .theme-cyber h6 {
+    color: #fafafa;
+  }
+
+
+
+  .theme-cyber .text-slate-400 {
+    color: #a1a1aa !important;
+  }
+
+  .theme-cyber .text-slate-500 {
+    color: #a1a1aa !important;
+  }
+
+  /* Cyber theme cards */
+  .theme-cyber .card {
+    @apply bg-zinc-900/95 backdrop-blur-md border border-zinc-700/70 shadow-xl;
+  }
+
+  .theme-cyber .card-hover {
+    @apply bg-zinc-900/95 backdrop-blur-md border border-zinc-700/70 shadow-xl hover:border-green-500/50 hover:shadow-green-500/20;
+  }
+
+  /* Cyber theme navigation */
+  .theme-cyber nav {
+    @apply bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/70;
+  }
+
+  .theme-cyber .nav-link {
+    @apply text-zinc-300 hover:text-white hover:bg-zinc-800;
+  }
+
+  .theme-cyber .nav-link.active {
+    @apply bg-green-600;
+    color: white;
+  }
+
+  /* Cyber theme buttons */
+  .theme-cyber .lang-switch {
+    @apply bg-zinc-900/90 border border-zinc-700/70 text-zinc-300 hover:bg-zinc-800;
+  }
+
+  .theme-cyber .lang-switch:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  /* Cyber theme alerts */
+  .theme-cyber .alert-critical {
+    @apply bg-red-950/40 border-red-400/60 text-red-200;
+  }
+
+  .theme-cyber .alert-warning {
+    @apply bg-yellow-950/40 border-yellow-400/60 text-yellow-200;
+  }
+
+  .theme-cyber .alert-info {
+    @apply bg-blue-950/40 border-blue-400/60 text-blue-200;
+  }
+
+  .theme-cyber .alert-success {
+    @apply bg-green-950/40 border-green-400/60 text-green-200;
+  }
+
+  /* Cyber theme form elements */
+  .theme-cyber .input-field {
+    @apply bg-zinc-900/90 border border-zinc-700/70 text-zinc-200 focus:ring-green-500 focus:border-green-500;
+  }
+
+  /* Cyber theme tables */
+  .theme-cyber .table-header {
+    @apply bg-zinc-900/90 text-zinc-200 border-b border-zinc-700/70;
+  }
+
+  .theme-cyber .table-row {
+    @apply border-b border-zinc-700/50 hover:bg-zinc-800/90;
+  }
+
+  /* Cyber theme specific elements */
+
+
+  /* Cyber theme text gradients */
+  .theme-cyber .text-gradient {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Cyber theme cyber glow - enhanced for cyber theme */
+  .theme-cyber .cyber-glow {
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.5);
+  }
+
+  .theme-cyber .cyber-glow-strong {
+    box-shadow: 0 0 60px rgba(34, 197, 94, 0.7);
+  }
+
+  /* Cyber theme borders */
+  .theme-cyber .cyber-border {
+    border: 2px solid rgba(34, 197, 94, 0.5);
+  }
+
+  .theme-cyber .cyber-border-strong {
+    border: 2px solid rgba(34, 197, 94, 0.8);
+  }
+
+  /* Cyber theme specific dashboard elements */
+  .theme-cyber .stat-card {
+    @apply bg-zinc-900/95 border border-zinc-700/70 shadow-xl;
+  }
+
+  .theme-cyber .stat-card:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  /* Cyber theme dropdown menus */
+  .theme-cyber .card-glass {
+    @apply bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/70 shadow-xl;
+  }
+
+  /* Cyber theme specific text overrides */
+  .theme-cyber .text-green-400 {
+    color: #22c55e !important;
+  }
+
+  .theme-cyber .text-red-400 {
+    color: #f87171 !important;
+  }
+
+  .theme-cyber .text-yellow-400 {
+    color: #facc15 !important;
+  }
+
+  .theme-cyber .text-blue-400 {
+    color: #60a5fa !important;
+  }
+  
+  .cyber-glow {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+  }
+
+  .cyber-glow-strong {
+    box-shadow: 0 0 50px rgba(34, 197, 94, 0.6);
+  }
+  
+  .cyber-border {
+    border: 2px solid rgba(34, 197, 94, 0.3);
+  }
+
+  .cyber-border-strong {
+    border: 2px solid rgba(34, 197, 94, 0.6);
+  }
+  
+  .alert-critical {
+    @apply bg-red-900/30 border-red-500/50 text-red-300 backdrop-blur-sm;
+  }
+  
+  .alert-warning {
+    @apply bg-yellow-900/30 border-yellow-500/50 text-yellow-300 backdrop-blur-sm;
+  }
+  
+  .alert-info {
+    @apply bg-green-900/30 border-green-500/50 text-green-300 backdrop-blur-sm;
+  }
+  
+  .alert-success {
+    @apply bg-green-900/30 border-green-500/50 text-green-300 backdrop-blur-sm;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, hsl(142.1, 76.2%, 36.3%) 0%, #16a34a 100%);
+  }
+
+  .border-gradient {
+    border: 2px solid transparent;
+    background: linear-gradient(rgb(0, 32, 53), rgb(0, 32, 53)) padding-box,
+                linear-gradient(135deg, #22c55e, #16a34a) border-box;
+  }
+
+  .glass-effect {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Language switcher styles */
+  .lang-switch {
+    @apply relative inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-800/80 border border-slate-600/50 hover:bg-slate-700/80 transition-all duration-300 backdrop-blur-sm;
+    color: white;
+  }
+
+  .lang-switch:hover {
+    @apply border-green-500/50 shadow-green-500/20;
+  }
+
+  /* Navigation improvements */
+  .nav-link {
+    @apply px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative overflow-hidden;
+  }
+
+  .nav-link::before {
+    content: '';
+    @apply absolute inset-0 bg-green-600/20 transform scale-x-0 transition-transform duration-300 origin-left;
+  }
+
+  .nav-link:hover::before {
+    @apply scale-x-100;
+  }
+
+  .nav-link.active {
+    @apply bg-green-600 text-white cyber-glow;
+  }
+
+  /* Card improvements */
+  .stat-card {
+    @apply card text-center hover-lift;
+  }
+
+  .stat-card:hover {
+    @apply cyber-border-strong;
+  }
+
+  /* Button improvements */
+  .btn-icon {
+    @apply p-3 rounded-xl transition-all duration-300 hover:scale-110;
+  }
+
+  /* Form improvements */
+  .form-group {
+    @apply space-y-2;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-slate-300 mb-2;
+  }
+
+  .form-error {
+    @apply text-red-400 text-sm mt-1;
+  }
+
+  /* Loading states */
+  .loading-skeleton {
+    @apply animate-pulse bg-slate-700/50 rounded;
+  }
+
+  /* Responsive improvements */
+  .container-responsive {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Typography improvements */
+  .heading-1 {
+    @apply text-4xl md:text-6xl font-bold text-white leading-tight;
+  }
+
+  .heading-2 {
+    @apply text-3xl md:text-4xl font-bold text-white leading-tight;
+  }
+
+  .heading-3 {
+    @apply text-2xl md:text-3xl font-semibold text-white leading-tight;
+  }
+
+  .body-text {
+    @apply text-slate-300 leading-relaxed;
+  }
+
+  .caption-text {
+    @apply text-slate-400 text-sm;
+  }
+
+  /* فئات الخطوط المتخصصة */
+  .font-tech {
+    font-family: var(--font-jetbrains);
+    font-feature-settings: 'liga' 1, 'calt' 1;
+  }
+
+  .font-display {
+    font-family: var(--font-inter);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  .font-arabic {
+    font-family: var(--font-cairo);
+    line-height: 1.6;
+  }
+
+  .font-english {
+    font-family: var(--font-inter);
+    line-height: 1.5;
+  }
+
+  /* تحسين عرض الأرقام والرموز */
+  .font-mono {
+    font-family: var(--font-jetbrains);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Page Transition Animations */
+  .page-enter {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .page-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .page-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+  }
+
+  /* Title Animation */
+  .title-animate {
+    animation: titleSlideIn 0.8s ease-out forwards;
+  }
+
+  @keyframes titleSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Subtitle Animation */
+  .subtitle-animate {
+    animation: subtitleFadeIn 1s ease-out 0.3s forwards;
+    opacity: 0;
+  }
+
+  @keyframes subtitleFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Icon Animation */
+  .icon-animate {
+    animation: iconBounce 0.8s ease-out 0.2s forwards;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  @keyframes iconBounce {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(20px);
+    }
+    50% {
+      transform: scale(1.1) translateY(0);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Content Animation */
+  .content-animate {
+    animation: contentSlideUp 0.8s ease-out 0.5s forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  @keyframes contentSlideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Stagger Animation for Cards */
+  .stagger-animate {
+    animation: staggerFadeIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .stagger-animate:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-animate:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-animate:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-animate:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-animate:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-animate:nth-child(6) { animation-delay: 0.6s; }
+
+  @keyframes staggerFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Unified Page Header Styles */
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .page-header-icon {
+    width: 6rem;
+    height: 6rem;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    box-shadow: 0 0 30px rgba(5, 150, 105, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-header-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+      transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .page-subtitle {
+    font-size: 1.25rem;
+    color: #cbd5e1;
+    max-width: 48rem;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  /* Light theme adjustments for page headers */
+  .theme-light .page-title {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .theme-light .page-subtitle {
+    color: #64748b;
+  }
+
+  .theme-light .page-header-icon {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 0 30px rgba(5, 150, 105, 0.2);
+  }
+
+  /* Text Scramble Effect */
+  .text-scramble {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* Navigation Layout Improvements */
+  .nav-link {
+    position: relative;
+    font-weight: 500;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    min-width: fit-content;
+    text-align: center;
+  }
+
+  /* Logo spacing improvements */
+  .nav-logo {
+    flex-shrink: 0;
+  }
+
+  .nav-right-section {
+    flex-shrink: 0;
+  }
+
+  .nav-center-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #059669, #10b981);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+
+  .nav-link:hover::before {
+    width: 100%;
+  }
+
+  .nav-link.active {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+  }
+
+  .nav-link.active::before {
+    display: none;
+  }
+
+  /* Mobile menu animations */
+  @keyframes slideInFromTop {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.theme-novel .page-title {
+  background: none !important;
+  color: #222b3a !important;
+  -webkit-text-fill-color: unset !important;
+  text-shadow: 0 2px 8px #fff4;
+}
+.theme-novel .page-subtitle {
+  color: #4b5563 !important;
+  text-shadow: 0 1px 4px #fff2;
+}
+
+/* === Custom Scrollbar for All Themes === */
+/* Default (dark) theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Light Theme Scrollbar */
+.theme-light ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.theme-light ::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+
+.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Midnight Theme Scrollbar */
+.theme-midnight ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.theme-midnight ::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+.theme-midnight ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Novel Theme Scrollbar */
+.theme-novel ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.theme-novel ::-webkit-scrollbar-thumb {
+  background: #d97706;
+  border-radius: 4px;
+}
+
+.theme-novel ::-webkit-scrollbar-thumb:hover {
+  background: #b45309;
+}
+
+/* Cyber Theme Scrollbar */
+.theme-cyber ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.theme-cyber ::-webkit-scrollbar-thumb {
+  background: #00ffea;
+  border-radius: 4px;
+}
+
+.theme-cyber ::-webkit-scrollbar-thumb:hover {
+  background: #00d4c4;
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #1e293b;
+}
+
+.theme-light * {
+  scrollbar-color: #94a3b8 #f8fafc;
+}
+
+.theme-midnight * {
+  scrollbar-color: #475569 #0f172a;
+}
+
+.theme-novel * {
+  scrollbar-color: #d97706 #fef3c7;
+}
+
+.theme-cyber * {
+  scrollbar-color: #00ffea #0a0a0a;
 }

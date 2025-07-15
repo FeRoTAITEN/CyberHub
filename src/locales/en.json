@@ -1,0 +1,63 @@
+{
+  "home": {
+    "welcome": "Welcome to",
+    "portal": "Cyber Hub",
+    "subtitle": "The central portal for the Cyber Security Department at Salam Company",
+    "important_alerts": "Important Alerts",
+    "quick_links": "Quick Links",
+    "recent_activity": "Recent Activity",
+    "active_projects": "Active Projects",
+    "employees": "Employees",
+    "security_incidents": "Security Incidents",
+    "security_rate": "Security Rate"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About the Department",
+    "news": "News & Updates",
+    "staff": "Staff Directory",
+    "qa": "Q&A",
+    "games": "Educational Games",
+    "policies": "Cybersecurity Policies",
+    "projects": "Project Management",
+    "more": "More"
+  },
+  "policies": {
+    "title": "Cybersecurity Policies",
+    "intro": "Comprehensive security policies and procedures for Salam Company",
+    "lastUpdated": "Last Updated"
+  },
+  "news": {
+    "title": "News & Updates",
+    "intro": "Latest cybersecurity news and important updates"
+  },
+  "staff": {
+    "title": "Staff Directory",
+    "intro": "Meet our cybersecurity team members"
+  },
+  "projects": {
+    "title": "Project Management",
+    "intro": "Current and completed cybersecurity projects",
+    "manager": "Manager",
+    "period": "Period",
+    "status": {
+      "active": "Active",
+      "planning": "Planning",
+      "completed": "Completed"
+    }
+  },
+  "font": {
+    "switch": "Change Font",
+    "default": "Default",
+    "cairo": "Cairo",
+    "tajawal": "Tajawal",
+    "noto": "Noto Sans Arabic",
+    "amiri": "Amiri",
+    "frutiger": "Frutiger LT Arabic",
+    "icomoon": "Icomoon"
+  },
+  "lang": {
+    "en": "English",
+    "ar": "Arabic"
+  }
+} 
