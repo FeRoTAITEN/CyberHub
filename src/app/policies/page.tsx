@@ -113,17 +113,16 @@ export default function PoliciesPage() {
   const { t } = useTranslation(lang);
 
   const handleDownload = (policy: any) => {
-    // في التطبيق الحقيقي، هنا سيتم تحميل الملف
-    console.log(`Downloading ${policy.title[lang]}`);
-    alert(
-      `${lang === "ar" ? "سيتم تحميل" : "Downloading"}: ${policy.title[lang]}`
-    );
+    const link = document.createElement('a');
+    link.href = policy.file_url;
+    link.download = policy.title[lang];
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleView = (policy: any) => {
-    // في التطبيق الحقيقي، هنا سيتم عرض الملف
-    console.log(`Viewing ${policy.title[lang]}`);
-    alert(`${lang === "ar" ? "سيتم عرض" : "Viewing"}: ${policy.title[lang]}`);
+    window.open(policy.file_url, '_blank');
   };
 
   return (

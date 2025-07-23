@@ -1,0 +1,27 @@
+We are adding a new feature to the Cyber Hub platform: a secure, permission-based survey system.
+
+Feature Overview:
+- Users with specific permission (e.g., `can_create_survey`) can create new surveys and generate unique invitation links (URLs).
+- Each link is a unique, secure UUID token that leads to a standalone public-facing survey form.
+- Invitees open the link, fill in their basic information (name, department, etc.), then complete a satisfaction survey.
+- Responses are submitted and stored securely in the system and linked to the corresponding invite and survey.
+
+Requirements:
+- Follow existing UI layout, theming, and translation structure (ar.json and en.json).
+- Support both Arabic and English with full dynamic i18n.
+- Survey and responses must be responsive, accessible, and secure.
+- Use existing components, hooks, and utility functions where possible.
+- All comments must be written in English only.
+- Each invitation URL should expire after use or within a configurable time window (e.g., 48 hours).
+
+Technical Notes:
+- Use a stateless and scalable design — the platform supports auto-scaling and load balancing.
+- Survey content (questions) should be stored in the database and rendered dynamically.
+- Responses should be saved securely and tied to the invite token.
+
+Before implementation:
+- Check for existing form components or response handlers.
+- Reuse shared design patterns and layout wrappers.
+- Ensure that no duplicate submission can occur with the same token.
+
+Ask questions or inspect current structure before proceeding.

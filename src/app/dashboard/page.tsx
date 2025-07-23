@@ -3,15 +3,16 @@
 import Navigation from '@/components/Navigation';
 import { useTheme } from '../ClientLayout';
 import { useLang } from '../ClientLayout';
+import { useEffect, useState } from 'react';
 import { ChartBarIcon, ClipboardDocumentCheckIcon, UserIcon, BriefcaseIcon, BuildingOffice2Icon, EnvelopeIcon, DevicePhoneMobileIcon, AcademicCapIcon, TrophyIcon, StarIcon } from '@heroicons/react/24/outline';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
 const employee = {
-  name: 'تركي الشهري',
+  name: 'Turki Alshehri',
   position: 'Full Stack Developer',
-  department: 'قسم التطوير',
-  email: 'ahmed@company.com',
+  department: 'Cyber Security Sector',
+  email: 'tu.alshehri@salam.sa',
   phone: '+966501234567',
 };
 
@@ -87,38 +88,62 @@ const achievementsData = [
   },
 ];
 
+// ThemeCardStyles provides theme-dependent classes for card, text, and avatar backgrounds
+// All color classes below are now theme-driven for consistency with the home page
 const themeCardStyles = {
   default: {
     card: 'bg-[#0a1826] border border-slate-600',
     name: 'text-green-400',
     department: 'text-slate-400',
     secondary: 'text-blue-300',
+    avatar: 'bg-slate-800 border-green-400',
   },
   light: {
     card: 'bg-white border border-slate-200',
     name: 'text-blue-700',
     department: 'text-slate-400',
     secondary: 'text-slate-700',
+    avatar: 'bg-blue-100 border-blue-400',
   },
   midnight: {
     card: 'bg-slate-900 border border-slate-700',
     name: 'text-white',
     department: 'text-slate-400',
     secondary: 'text-blue-300',
+    avatar: 'bg-slate-800 border-blue-400',
   },
   novel: {
     card: 'bg-gradient-to-br from-slate-100 to-slate-300 border border-slate-300',
     name: 'text-slate-900',
     department: 'text-slate-500',
     secondary: 'text-blue-700',
+    avatar: 'bg-slate-200 border-slate-400',
   },
   cyber: {
     card: 'bg-gradient-to-br from-[#0f172a] to-[#0a1826] border border-green-500/30 shadow-[0_0_24px_#39ff14cc]',
-    name: 'text-green-400 drop-shadow-neon-green',
+    name: 'text-green-400',
     department: 'text-slate-400',
     secondary: 'text-cyan-300',
+    avatar: 'bg-[#0a1826] border-green-400',
   },
 };
+
+// Hack effect utility for scrambling text
+const HACK_CHARS = '@#$%&*0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function scrambleText(target: string, progress: number): string {
+  // Returns a string where the first 'progress' chars are correct, rest are random
+  let out = '';
+  for (let i = 0; i < target.length; i++) {
+    if (i < progress) {
+      out += target[i];
+    } else if (target[i] === ' ') {
+      out += ' ';
+    } else {
+      out += HACK_CHARS[Math.floor(Math.random() * HACK_CHARS.length)];
+    }
+  }
+  return out;
+}
 
 export default function DashboardPage() {
   const { theme } = useTheme();
@@ -148,49 +173,163 @@ export default function DashboardPage() {
       <Navigation />
       <main className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 content-animate">
-          {/* Employee Card */}
+          {/* User Info and Achievements Cards - visually identical to other cards in all themes */}
           <aside className="md:col-span-1 flex flex-col items-center justify-start gap-6">
-            <div className={`card-hover group p-8 rounded-xl w-full flex flex-col items-center text-center ${styles.card}`} dir={dir}>
-              <div className="bg-slate-800 rounded-full p-3 border-2 border-green-400 mb-4">
-                <UserIcon className="w-16 h-16 text-green-400" />
+            {/* User Info Card - strict card style, no extra effects, now with typographie hack effect */}
+            <div className={`card card-hover ${styles.card} p-8 rounded-xl w-full flex flex-col items-center text-center`} dir={dir}>
+              {/* User avatar with theme-driven background and border, no extra effects */}
+              <div className={`rounded-full p-3 border-2 mb-4 ${styles.card}`}>
+                <UserIcon className="w-16 h-16 text-base-content" />
               </div>
-              {/* Full Name */}
-              <div className={`text-2xl font-bold mb-2 flex items-center gap-2 ${rowDir} ${styles.name}`} style={{ fontFamily: 'VT323, monospace' }}>
-                <UserIcon className={`w-6 h-6 ${styles.name}`} />
-                {employee.name}
+              {/* Typographie hack effect for user info */}
+              {(() => {
+                const name = employee.name;
+                const position = employee.position;
+                const department = employee.department;
+                const email = employee.email;
+                const phone = employee.phone;
+                // State for each line's progress
+                const [nameProgress, setNameProgress] = useState(0);
+                const [showPosition, setShowPosition] = useState(false);
+                const [positionProgress, setPositionProgress] = useState(0);
+                const [showDepartment, setShowDepartment] = useState(false);
+                const [departmentProgress, setDepartmentProgress] = useState(0);
+                const [showEmail, setShowEmail] = useState(false);
+                const [emailProgress, setEmailProgress] = useState(0);
+                const [showPhone, setShowPhone] = useState(false);
+                const [phoneProgress, setPhoneProgress] = useState(0);
+                // Hack effect for name
+                useEffect(() => {
+                  setNameProgress(0);
+                  setShowPosition(false);
+                  setPositionProgress(0);
+                  setShowDepartment(false);
+                  setDepartmentProgress(0);
+                  setShowEmail(false);
+                  setEmailProgress(0);
+                  setShowPhone(false);
+                  setPhoneProgress(0);
+                  if (!name) return;
+                  let i = 0;
+                  function step() {
+                    if (i <= name.length) {
+                      setNameProgress(i);
+                      i++;
+                      setTimeout(step, 70);
+                    } else {
+                      setShowPosition(true);
+                    }
+                  }
+                  step();
+                }, [name]);
+                // Hack effect for position
+                useEffect(() => {
+                  if (!showPosition) return;
+                  let i = 0;
+                  function step() {
+                    if (i <= position.length) {
+                      setPositionProgress(i);
+                      i++;
+                      setTimeout(step, 55);
+                    } else {
+                      setShowDepartment(true);
+                    }
+                  }
+                  step();
+                }, [showPosition, position]);
+                // Hack effect for department
+                useEffect(() => {
+                  if (!showDepartment) return;
+                  let i = 0;
+                  function step() {
+                    if (i <= department.length) {
+                      setDepartmentProgress(i);
+                      i++;
+                      setTimeout(step, 55);
+                    } else {
+                      setShowEmail(true);
+                    }
+                  }
+                  step();
+                }, [showDepartment, department]);
+                // Hack effect for email
+                useEffect(() => {
+                  if (!showEmail) return;
+                  let i = 0;
+                  function step() {
+                    if (i <= email.length) {
+                      setEmailProgress(i);
+                      i++;
+                      setTimeout(step, 55);
+                    } else {
+                      setShowPhone(true);
+                    }
+                  }
+                  step();
+                }, [showEmail, email]);
+                // Hack effect for phone
+                useEffect(() => {
+                  if (!showPhone) return;
+                  let i = 0;
+                  function step() {
+                    if (i <= phone.length) {
+                      setPhoneProgress(i);
+                      i++;
+                      setTimeout(step, 55);
+                    }
+                  }
+                  step();
+                }, [showPhone, phone]);
+                return (
+                  <>
+                    {/* Name with hack effect, largest and most prominent */}
+                    <div className={`text-2xl font-bold mb-2 flex items-center gap-2 ${styles.name}`} style={{ minHeight: 36 }}>
+                      {scrambleText(name, nameProgress)}
               </div>
-              {/* Department */}
-              <div className={`text-base mb-2 flex items-center gap-2 ${rowDir} ${styles.department}`} style={{ fontFamily: 'VT323, monospace' }}>
-                <BuildingOffice2Icon className={`w-5 h-5 ${styles.department}`} />
-                {employee.department}
+                    {/* Position, medium size, secondary color */}
+                    {showPosition && (
+                      <div className={`text-lg font-semibold mb-2 flex items-center gap-2 ${styles.secondary}`} style={{ minHeight: 30 }}>
+                        <BriefcaseIcon className="w-5 h-5 text-base-content" />
+                        {scrambleText(position, positionProgress)}
               </div>
-              {/* Job Title */}
-              <div className={`text-lg font-semibold mb-2 flex items-center gap-2 ${rowDir} ${styles.secondary}`} style={{ fontFamily: 'VT323, monospace' }}>
-                <BriefcaseIcon className={`w-5 h-5 ${styles.secondary}`} />
-                {employee.position}
+                    )}
+                    {/* Department, smaller, department color */}
+                    {showDepartment && (
+                      <div className={`text-base mb-2 flex items-center gap-2 ${styles.department}`} style={{ minHeight: 28 }}>
+                        <BuildingOffice2Icon className="w-5 h-5 text-base-content" />
+                        {scrambleText(department, departmentProgress)}
               </div>
-              {/* Email */}
-              <div className={`text-base mb-2 flex items-center gap-2 ${rowDir} ${styles.secondary}`} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-                <EnvelopeIcon className={`w-5 h-5 ${styles.secondary}`} />
-                {employee.email}
+                    )}
+                    {/* Email, normal size, secondary color */}
+                    {showEmail && (
+                      <div className={`text-base mb-2 flex items-center gap-2 ${styles.secondary}`} style={{ minHeight: 28 }}>
+                        <EnvelopeIcon className="w-5 h-5 text-base-content" />
+                        {scrambleText(email, emailProgress)}
               </div>
-              {/* Phone */}
-              <div className={`text-base flex items-center gap-2 ${rowDir} ${styles.secondary}`} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-                <DevicePhoneMobileIcon className={`w-5 h-5 ${styles.secondary}`} />
-                {employee.phone}
+                    )}
+                    {/* Phone, normal size, secondary color */}
+                    {showPhone && (
+                      <div className={`text-base flex items-center gap-2 ${styles.secondary}`} style={{ minHeight: 28 }}>
+                        <DevicePhoneMobileIcon className="w-5 h-5 text-base-content" />
+                        {scrambleText(phone, phoneProgress)}
               </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
-            {/* User Achievements Card */}
-            <div className={`card-hover group p-6 rounded-xl w-full flex flex-col items-start ${styles.card}`} dir={dir}>
+            {/* Achievements Card - strict card style, no extra effects */}
+            <div className={`card card-hover ${styles.card} p-8 rounded-xl w-full flex flex-col items-start`} dir={dir}>
               <div className="flex items-center gap-2 mb-4">
-                <TrophyIcon className="w-7 h-7 text-yellow-400" />
-                <h3 className="text-lg font-bold text-white">
+                <TrophyIcon className="w-7 h-7 text-base-content" />
+                <h3 className="text-lg font-bold">
                   {lang === 'ar' ? 'إنجازات المستخدم' : 'User Achievements'}
                 </h3>
               </div>
               <ul className="space-y-3 w-full">
                 {achievementsData.map((ach, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-slate-200 text-sm">
+                  <li key={idx} className="flex items-center gap-2 text-sm">
+                    {/* Achievement icon and text, no extra effects */}
                     {ach.icon}
                     <span>{lang === 'ar' ? ach.ar : ach.en}</span>
                   </li>

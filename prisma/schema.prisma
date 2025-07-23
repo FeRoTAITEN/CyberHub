@@ -1,0 +1,100 @@
+// Prisma schema for Cyber Hub Survey System
+// All comments in English only
+
+  generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Survey {
+  id          Int               @id @default(autoincrement())
+  title_en    String
+  title_ar    String
+  created_by  Int
+  created_at  DateTime          @default(now())
+  updated_at  DateTime          @updatedAt
+  permanent_token String?       @unique // Permanent link token that never expires
+  questions   SurveyQuestion[]
+  invites     SurveyInvite[]
+  responses   SurveyResponse[]
+}
+
+model SurveyQuestion {
+  id         Int      @id @default(autoincrement())
+  survey     Survey   @relation(fields: [survey_id], references: [id], onDelete: Cascade)
+  survey_id  Int
+  question_type String // 'text', 'rating', 'choice', 'comments'
+  label_en   String
+  label_ar   String
+  required   Boolean  @default(false)
+  order      Int      @default(0)
+  // Rating scale configuration
+  rating_scale String? // 'satisfaction', 'expectations', 'reliability', 'clarity', 'agreement'
+  rating_options Json? // Store rating options as JSON
+  answers    SurveyAnswer[]
+}
+
+model SurveyInvite {
+  id         Int      @id @default(autoincrement())
+  survey     Survey   @relation(fields: [survey_id], references: [id], onDelete: Cascade)
+  survey_id  Int
+  token      String   @unique
+  expires_at DateTime
+  used       Boolean  @default(false)
+  invited_by Int
+  created_at DateTime @default(now())
+  used_at    DateTime?
+  responses  SurveyResponse[]
+}
+
+model SurveyResponse {
+  id                  Int            @id @default(autoincrement())
+  invite              SurveyInvite?  @relation(fields: [invite_id], references: [id], onDelete: Cascade)
+  invite_id           Int?
+  survey              Survey         @relation(fields: [survey_id], references: [id], onDelete: Cascade)
+  survey_id           Int
+  responder_name      String
+  responder_department String
+  submitted_at        DateTime       @default(now())
+  answers             SurveyAnswer[]
+}
+
+model SurveyAnswer {
+  id           Int            @id @default(autoincrement())
+  response     SurveyResponse @relation(fields: [response_id], references: [id], onDelete: Cascade)
+  response_id  Int
+  question     SurveyQuestion @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  question_id  Int
+  answer       String?
+  question_label String? // Store question text for better display
+}
+
+model Department {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  manager     Employee?  @relation("DepartmentManager", fields: [manager_id], references: [id])
+  manager_id  Int?
+  employees   Employee[]
+}
+
+model Employee {
+  id           Int         @id @default(autoincrement())
+  name         String
+  name_ar      String?
+  email        String     @unique
+  phone        String?
+  job_title    String?
+  job_title_ar String?
+  department   Department @relation(fields: [department_id], references: [id])
+  department_id Int
+  avatar       String?
+  location     String?
+  hire_date    DateTime?
+  status       String?
+  manages      Department[] @relation("DepartmentManager")
+} 

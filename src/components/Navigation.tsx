@@ -62,6 +62,8 @@ const Navigation = () => {
     { name: t('nav.projects'), href: '/projects', icon: ChartBarIcon },
     // تصغير اسم لوحة التحكم
     { name: lang === 'ar' ? 'لوحة' : 'Dash', href: '/dashboard', icon: ChartBarIcon },
+    // Add Services page to More dropdown
+    { name: lang === 'ar' ? 'الخدمات' : 'Services', href: '/services', icon: ShieldCheckIcon },
   ];
 
   // تحديد العناصر المرئية حسب حجم الشاشة

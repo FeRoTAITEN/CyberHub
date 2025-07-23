@@ -1,0 +1,898 @@
+[
+  {
+    "id": 1,
+    "category": "general",
+    "question": { "en": "What is cybersecurity?", "ar": "ما هو الأمن السيبراني؟" },
+    "answer": { "en": "Cybersecurity is the practice of protecting systems, networks, and programs from digital attacks.", "ar": "الأمن السيبراني هو ممارسة حماية الأنظمة والشبكات والبرامج من الهجمات الرقمية." },
+    "tags": ["basics", "security"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 2,
+    "category": "general",
+    "question": { "en": "Why is cybersecurity important for businesses?", "ar": "لماذا الأمن السيبراني مهم للأعمال؟" },
+    "answer": { "en": "It protects sensitive data, maintains customer trust, and ensures business continuity.", "ar": "يحمي البيانات الحساسة، ويحافظ على ثقة العملاء، ويضمن استمرارية الأعمال." },
+    "tags": ["business", "importance"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 3,
+    "category": "general",
+    "question": { "en": "What are the main types of cyber threats?", "ar": "ما هي أنواع التهديدات السيبرانية الرئيسية؟" },
+    "answer": { "en": "Malware, phishing, ransomware, DDoS attacks, and insider threats.", "ar": "البرمجيات الخبيثة، التصيد الاحتيالي، برامج الفدية، هجمات حجب الخدمة، والتهديدات الداخلية." },
+    "tags": ["threats", "types"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 4,
+    "category": "general",
+    "question": { "en": "What is the CIA triad in cybersecurity?", "ar": "ما هو مثلث CIA في الأمن السيبراني؟" },
+    "answer": { "en": "Confidentiality, Integrity, and Availability—three core principles of cybersecurity.", "ar": "السرية، السلامة، والتوافر—ثلاثة مبادئ أساسية في الأمن السيبراني." },
+    "tags": ["CIA", "principles"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 5,
+    "category": "general",
+    "question": { "en": "What is social engineering?", "ar": "ما هو الهندسة الاجتماعية؟" },
+    "answer": { "en": "Manipulating people into giving up confidential information.", "ar": "التلاعب بالأشخاص للحصول على معلومات سرية." },
+    "tags": ["social engineering", "attacks"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 6,
+    "category": "general",
+    "question": { "en": "What is a firewall?", "ar": "ما هو جدار الحماية؟" },
+    "answer": { "en": "A firewall is a security device or software that monitors and controls incoming and outgoing network traffic.", "ar": "جدار الحماية هو جهاز أو برنامج أمني يراقب ويتحكم في حركة المرور الشبكية الواردة والصادرة." },
+    "tags": ["firewall", "network"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 7,
+    "category": "general",
+    "question": { "en": "What is the difference between a threat, vulnerability, and risk?", "ar": "ما الفرق بين التهديد والثغرة والمخاطرة؟" },
+    "answer": { "en": "A threat is a potential danger, a vulnerability is a weakness, and risk is the likelihood of a threat exploiting a vulnerability.", "ar": "التهديد هو خطر محتمل، والثغرة هي نقطة ضعف، والمخاطرة هي احتمال استغلال التهديد للثغرة." },
+    "tags": ["risk", "vulnerability", "threat"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 8,
+    "category": "general",
+    "question": { "en": "What is multi-factor authentication (MFA)?", "ar": "ما هو التحقق متعدد العوامل؟" },
+    "answer": { "en": "MFA is a security system that requires more than one method of authentication from independent categories of credentials.", "ar": "التحقق متعدد العوامل هو نظام أمني يتطلب أكثر من وسيلة تحقق من فئات بيانات اعتماد مستقلة." },
+    "tags": ["MFA", "authentication"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 9,
+    "category": "general",
+    "question": { "en": "What is the role of a CISO?", "ar": "ما هو دور مدير أمن المعلومات (CISO)؟" },
+    "answer": { "en": "A CISO (Chief Information Security Officer) is responsible for an organization's information and data security.", "ar": "مدير أمن المعلومات مسؤول عن أمن المعلومات والبيانات في المؤسسة." },
+    "tags": ["CISO", "roles"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 10,
+    "category": "general",
+    "question": { "en": "What is a security policy?", "ar": "ما هي سياسة الأمان؟" },
+    "answer": { "en": "A set of rules and practices that specify how an organization manages, protects, and distributes sensitive information.", "ar": "مجموعة من القواعد والممارسات التي تحدد كيفية إدارة المؤسسة للمعلومات الحساسة وحمايتها وتوزيعها." },
+    "tags": ["policy", "rules"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 11,
+    "category": "passwords",
+    "question": { "en": "What makes a password strong?", "ar": "ما الذي يجعل كلمة المرور قوية؟" },
+    "answer": { "en": "Length, complexity, unpredictability, and not reusing passwords.", "ar": "الطول، التعقيد، العشوائية، وعدم إعادة استخدام كلمات المرور." },
+    "tags": ["passwords", "strength"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 12,
+    "category": "passwords",
+    "question": { "en": "How often should I change my passwords?", "ar": "كم مرة يجب أن أغير كلمة المرور؟" },
+    "answer": { "en": "Change passwords regularly, especially after a breach or suspected compromise.", "ar": "غيّر كلمات المرور بانتظام، خاصة بعد حدوث اختراق أو اشتباه في تسريب." },
+    "tags": ["passwords", "change"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 13,
+    "category": "passwords",
+    "question": { "en": "What is a password manager?", "ar": "ما هو مدير كلمات المرور؟" },
+    "answer": { "en": "A password manager is a tool that stores and manages your passwords securely.", "ar": "مدير كلمات المرور هو أداة تخزن وتدير كلمات المرور الخاصة بك بشكل آمن." },
+    "tags": ["passwords", "manager"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 14,
+    "category": "passwords",
+    "question": { "en": "Is it safe to write down passwords?", "ar": "هل من الآمن كتابة كلمات المرور؟" },
+    "answer": { "en": "It is not recommended. If you must, store them in a secure, locked place.", "ar": "لا يُنصح بذلك. إذا اضطررت، احفظها في مكان آمن ومغلق." },
+    "tags": ["passwords", "safety"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 15,
+    "category": "passwords",
+    "question": { "en": "What is two-factor authentication (2FA)?", "ar": "ما هو التحقق بخطوتين؟" },
+    "answer": { "en": "2FA is an extra layer of security requiring not only a password and username but also something only the user has on them.", "ar": "التحقق بخطوتين هو طبقة أمان إضافية تتطلب كلمة مرور واسم مستخدم بالإضافة إلى شيء يملكه المستخدم فقط." },
+    "tags": ["2FA", "authentication"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 16,
+    "category": "passwords",
+    "question": { "en": "What is password entropy?", "ar": "ما هو تعقيد كلمة المرور (entropy)؟" },
+    "answer": { "en": "Password entropy is a measure of how unpredictable a password is.", "ar": "تعقيد كلمة المرور هو مقياس لمدى عشوائية كلمة المرور وصعوبة تخمينها." },
+    "tags": ["passwords", "entropy"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 17,
+    "category": "passwords",
+    "question": { "en": "Why should I avoid using the same password for multiple accounts?", "ar": "لماذا يجب أن أتجنب استخدام نفس كلمة المرور لأكثر من حساب؟" },
+    "answer": { "en": "If one account is compromised, all accounts with the same password are at risk.", "ar": "إذا تم اختراق حساب واحد، تصبح جميع الحسابات التي تستخدم نفس كلمة المرور معرضة للخطر." },
+    "tags": ["passwords", "reuse"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 18,
+    "category": "passwords",
+    "question": { "en": "What is a passphrase?", "ar": "ما هي عبارة المرور؟" },
+    "answer": { "en": "A passphrase is a sequence of words or a sentence used as a password, usually longer and more secure.", "ar": "عبارة المرور هي سلسلة من الكلمات أو جملة تُستخدم ككلمة مرور، وغالبًا ما تكون أطول وأكثر أمانًا." },
+    "tags": ["passwords", "passphrase"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 19,
+    "category": "passwords",
+    "question": { "en": "What is credential stuffing?", "ar": "ما هو هجوم تعبئة بيانات الاعتماد؟" },
+    "answer": { "en": "Credential stuffing is a cyberattack where stolen account credentials are used to gain unauthorized access to user accounts.", "ar": "تعبئة بيانات الاعتماد هو هجوم سيبراني يتم فيه استخدام بيانات اعتماد مسروقة للوصول غير المصرح به إلى حسابات المستخدمين." },
+    "tags": ["passwords", "attacks"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 20,
+    "category": "passwords",
+    "question": { "en": "What is brute force attack?", "ar": "ما هو هجوم القوة الغاشمة؟" },
+    "answer": { "en": "A brute force attack is a trial-and-error method used to decode encrypted data such as passwords.", "ar": "هجوم القوة الغاشمة هو طريقة تعتمد على التجربة والخطأ لفك تشفير البيانات مثل كلمات المرور." },
+    "tags": ["passwords", "brute-force"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 21,
+    "category": "phishing",
+    "question": { "en": "What is phishing?", "ar": "ما هو التصيد الاحتيالي؟" },
+    "answer": { "en": "Phishing is a cyberattack that uses disguised email as a weapon to trick the recipient into believing the message is something they want or need.", "ar": "التصيد الاحتيالي هو هجوم سيبراني يستخدم البريد الإلكتروني المتنكر كوسيلة لخداع المستلم ليعتقد أن الرسالة شيء يريده أو يحتاجه." },
+    "tags": ["phishing", "email"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 22,
+    "category": "phishing",
+    "question": { "en": "How can I recognize a phishing email?", "ar": "كيف أتعرف على رسالة تصيد احتيالي؟" },
+    "answer": { "en": "Look for urgent language, suspicious links, requests for personal information, and poor grammar.", "ar": "ابحث عن لغة عاجلة، روابط مشبوهة، طلبات لمعلومات شخصية، وأخطاء نحوية." },
+    "tags": ["phishing", "recognition"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 23,
+    "category": "phishing",
+    "question": { "en": "What should I do if I receive a phishing email?", "ar": "ماذا أفعل إذا استلمت رسالة تصيد احتيالي؟" },
+    "answer": { "en": "Do not click any links or download attachments. Report the email to your IT or security team.", "ar": "لا تنقر على أي روابط أو تفتح مرفقات. أبلغ قسم تقنية المعلومات أو فريق الأمن السيبراني." },
+    "tags": ["phishing", "response"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 24,
+    "category": "phishing",
+    "question": { "en": "What is spear phishing?", "ar": "ما هو التصيد الاحتيالي الموجه؟" },
+    "answer": { "en": "Spear phishing is a targeted attempt to steal sensitive information from a specific victim, such as an individual or organization.", "ar": "التصيد الاحتيالي الموجه هو محاولة مستهدفة لسرقة معلومات حساسة من ضحية معينة مثل فرد أو منظمة." },
+    "tags": ["phishing", "spear-phishing"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 25,
+    "category": "phishing",
+    "question": { "en": "What is whaling in cybersecurity?", "ar": "ما هو صيد الحيتان في الأمن السيبراني؟" },
+    "answer": { "en": "Whaling is a type of phishing attack that targets high-profile individuals such as executives or senior officials.", "ar": "صيد الحيتان هو نوع من هجمات التصيد الاحتيالي يستهدف شخصيات بارزة مثل المدراء التنفيذيين أو المسؤولين الكبار." },
+    "tags": ["phishing", "whaling"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 26,
+    "category": "phishing",
+    "question": { "en": "What is vishing?", "ar": "ما هو التصيد الصوتي (vishing)؟" },
+    "answer": { "en": "Vishing is phishing conducted by phone call instead of email.", "ar": "التصيد الصوتي هو تصيد احتيالي يتم عبر مكالمة هاتفية بدلاً من البريد الإلكتروني." },
+    "tags": ["phishing", "vishing"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 27,
+    "category": "phishing",
+    "question": { "en": "What is smishing?", "ar": "ما هو التصيد عبر الرسائل النصية (smishing)؟" },
+    "answer": { "en": "Smishing is phishing conducted via SMS or text messages.", "ar": "التصيد عبر الرسائل النصية هو تصيد احتيالي يتم عبر الرسائل القصيرة أو النصية." },
+    "tags": ["phishing", "smishing"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 28,
+    "category": "phishing",
+    "question": { "en": "How can organizations protect against phishing?", "ar": "كيف يمكن للمؤسسات الحماية من التصيد الاحتيالي؟" },
+    "answer": { "en": "By training employees, using email filters, and implementing strong security policies.", "ar": "من خلال تدريب الموظفين، واستخدام مرشحات البريد الإلكتروني، وتطبيق سياسات أمان قوية." },
+    "tags": ["phishing", "protection"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 29,
+    "category": "phishing",
+    "question": { "en": "What is a phishing simulation?", "ar": "ما هي محاكاة التصيد الاحتيالي؟" },
+    "answer": { "en": "A phishing simulation is a test where fake phishing emails are sent to employees to assess their awareness.", "ar": "محاكاة التصيد الاحتيالي هي اختبار يتم فيه إرسال رسائل تصيد وهمية للموظفين لقياس وعيهم." },
+    "tags": ["phishing", "simulation"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 30,
+    "category": "phishing",
+    "question": { "en": "What is a phishing kit?", "ar": "ما هو عدة التصيد الاحتيالي؟" },
+    "answer": { "en": "A phishing kit is a collection of tools that makes it easier for attackers to launch phishing attacks.", "ar": "عدة التصيد الاحتيالي هي مجموعة من الأدوات التي تسهل على المهاجمين تنفيذ هجمات التصيد." },
+    "tags": ["phishing", "kit"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 31,
+    "category": "malware",
+    "question": { "en": "What is malware?", "ar": "ما هو البرمجيات الخبيثة؟" },
+    "answer": { "en": "Malware is software designed to disrupt, damage, or gain unauthorized access to computer systems.", "ar": "البرمجيات الخبيثة هي برامج مصممة لتعطيل أو إتلاف أو الوصول غير المصرح به إلى أنظمة الكمبيوتر." },
+    "tags": ["malware", "definition"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 32,
+    "category": "malware",
+    "question": { "en": "What are common types of malware?", "ar": "ما هي أنواع البرمجيات الخبيثة الشائعة؟" },
+    "answer": { "en": "Viruses, worms, trojans, ransomware, spyware, and adware.", "ar": "الفيروسات، الديدان، أحصنة طروادة، برامج الفدية، برامج التجسس، وبرامج الإعلانات المزعجة." },
+    "tags": ["malware", "types"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 33,
+    "category": "malware",
+    "question": { "en": "What is ransomware?", "ar": "ما هو برامج الفدية؟" },
+    "answer": { "en": "Ransomware is malware that encrypts a victim's files and demands payment for the decryption key.", "ar": "برامج الفدية هي برمجيات خبيثة تقوم بتشفير ملفات الضحية وتطلب فدية مقابل مفتاح فك التشفير." },
+    "tags": ["malware", "ransomware"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 34,
+    "category": "malware",
+    "question": { "en": "How can I protect my computer from malware?", "ar": "كيف أحمي جهازي من البرمجيات الخبيثة؟" },
+    "answer": { "en": "Keep software updated, use antivirus, avoid suspicious downloads, and enable firewalls.", "ar": "حافظ على تحديث البرامج، استخدم برامج مكافحة الفيروسات، تجنب التحميلات المشبوهة، وفعّل جدران الحماية." },
+    "tags": ["malware", "protection"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 35,
+    "category": "malware",
+    "question": { "en": "What is a trojan horse?", "ar": "ما هو حصان طروادة؟" },
+    "answer": { "en": "A trojan horse is malware disguised as legitimate software.", "ar": "حصان طروادة هو برمجية خبيثة تتنكر كبرنامج شرعي." },
+    "tags": ["malware", "trojan"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 36,
+    "category": "malware",
+    "question": { "en": "What is spyware?", "ar": "ما هو برامج التجسس؟" },
+    "answer": { "en": "Spyware is malware that secretly monitors user activity and collects information.", "ar": "برامج التجسس هي برمجيات خبيثة تراقب نشاط المستخدم وتجمع المعلومات سراً." },
+    "tags": ["malware", "spyware"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 37,
+    "category": "malware",
+    "question": { "en": "What is adware?", "ar": "ما هو برامج الإعلانات المزعجة؟" },
+    "answer": { "en": "Adware is software that automatically displays or downloads advertising material.", "ar": "برامج الإعلانات المزعجة هي برامج تعرض أو تنزل مواد إعلانية تلقائياً." },
+    "tags": ["malware", "adware"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 38,
+    "category": "malware",
+    "question": { "en": "What is a computer virus?", "ar": "ما هو الفيروس الحاسوبي؟" },
+    "answer": { "en": "A computer virus is a type of malware that attaches itself to a program or file and can spread to other computers.", "ar": "الفيروس الحاسوبي هو نوع من البرمجيات الخبيثة يلتصق ببرنامج أو ملف ويمكن أن ينتشر إلى أجهزة أخرى." },
+    "tags": ["malware", "virus"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 39,
+    "category": "malware",
+    "question": { "en": "What is a worm in cybersecurity?", "ar": "ما هي الدودة في الأمن السيبراني؟" },
+    "answer": { "en": "A worm is a type of malware that replicates itself to spread to other computers.", "ar": "الدودة هي نوع من البرمجيات الخبيثة يتكاثر ذاتياً لينتشر إلى أجهزة أخرى." },
+    "tags": ["malware", "worm"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 40,
+    "category": "malware",
+    "question": { "en": "What is a rootkit?", "ar": "ما هو الروتكيت؟" },
+    "answer": { "en": "A rootkit is a collection of software tools that enable unauthorized access to a computer.", "ar": "الروتكيت هو مجموعة من الأدوات البرمجية التي تتيح الوصول غير المصرح به إلى جهاز الكمبيوتر." },
+    "tags": ["malware", "rootkit"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 41,
+    "category": "malware",
+    "question": { "en": "What is a keylogger?", "ar": "ما هو كيلوجر؟" },
+    "answer": { "en": "A keylogger is malware that records keystrokes to steal information.", "ar": "كيلوجر هو برمجية خبيثة تسجل ضغطات المفاتيح لسرقة المعلومات." },
+    "tags": ["malware", "keylogger"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 42,
+    "category": "malware",
+    "question": { "en": "What is a botnet?", "ar": "ما هو بوت نت؟" },
+    "answer": { "en": "A botnet is a network of infected computers controlled by an attacker.", "ar": "بوت نت هو شبكة من أجهزة الكمبيوتر المصابة التي يتحكم فيها المهاجم." },
+    "tags": ["malware", "botnet"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 43,
+    "category": "malware",
+    "question": { "en": "What is zero-day malware?", "ar": "ما هو البرمجيات الخبيثة يوم الصفر؟" },
+    "answer": { "en": "Zero-day malware is a new, previously unknown malware that exploits a vulnerability before it is patched.", "ar": "البرمجيات الخبيثة يوم الصفر هي برمجيات جديدة غير معروفة سابقاً تستغل ثغرة قبل إصلاحها." },
+    "tags": ["malware", "zero-day"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 44,
+    "category": "malware",
+    "question": { "en": "What is anti-malware software?", "ar": "ما هو برنامج مكافحة البرمجيات الخبيثة؟" },
+    "answer": { "en": "Anti-malware software is designed to detect, prevent, and remove malicious software.", "ar": "برنامج مكافحة البرمجيات الخبيثة مصمم لاكتشاف ومنع وإزالة البرمجيات الضارة." },
+    "tags": ["malware", "anti-malware"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 45,
+    "category": "malware",
+    "question": { "en": "What is a payload in malware?", "ar": "ما هو الحمولة (payload) في البرمجيات الخبيثة؟" },
+    "answer": { "en": "A payload is the part of malware that performs the malicious action.", "ar": "الحمولة هي الجزء من البرمجية الخبيثة الذي ينفذ الفعل الضار." },
+    "tags": ["malware", "payload"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 46,
+    "category": "malware",
+    "question": { "en": "What is a backdoor in cybersecurity?", "ar": "ما هو الباب الخلفي في الأمن السيبراني؟" },
+    "answer": { "en": "A backdoor is a method of bypassing normal authentication to gain access to a system.", "ar": "الباب الخلفي هو وسيلة لتجاوز المصادقة العادية للوصول إلى النظام." },
+    "tags": ["malware", "backdoor"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 47,
+    "category": "malware",
+    "question": { "en": "What is a logic bomb?", "ar": "ما هو القنبلة المنطقية؟" },
+    "answer": { "en": "A logic bomb is a piece of code intentionally inserted into a software system that will set off a malicious function when certain conditions are met.", "ar": "القنبلة المنطقية هي جزء من الشيفرة يُدرج عمداً في نظام برمجي لتنفيذ فعل ضار عند تحقق شروط معينة." },
+    "tags": ["malware", "logic-bomb"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 48,
+    "category": "malware",
+    "question": { "en": "What is a dropper in malware?", "ar": "ما هو الدروبر في البرمجيات الخبيثة؟" },
+    "answer": { "en": "A dropper is a type of malware designed to install other malware onto a target system.", "ar": "الدروبر هو نوع من البرمجيات الخبيثة مصمم لتثبيت برمجيات خبيثة أخرى على النظام المستهدف." },
+    "tags": ["malware", "dropper"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 49,
+    "category": "malware",
+    "question": { "en": "What is a fileless malware attack?", "ar": "ما هو هجوم البرمجيات الخبيثة بدون ملفات؟" },
+    "answer": { "en": "A fileless malware attack uses legitimate programs to infect a computer without leaving files on the disk.", "ar": "هجوم البرمجيات الخبيثة بدون ملفات يستخدم برامج شرعية لإصابة الكمبيوتر دون ترك ملفات على القرص." },
+    "tags": ["malware", "fileless"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 50,
+    "category": "malware",
+    "question": { "en": "What is a polymorphic virus?", "ar": "ما هو الفيروس المتغير (polymorphic)؟" },
+    "answer": { "en": "A polymorphic virus is a type of malware that constantly changes its code to avoid detection.", "ar": "الفيروس المتغير هو نوع من البرمجيات الخبيثة يغير شيفرته باستمرار لتجنب الاكتشاف." },
+    "tags": ["malware", "polymorphic"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 51,
+    "category": "vpn",
+    "question": { "en": "What is a VPN and how does it work?", "ar": "ما هو VPN وكيف يعمل؟" },
+    "answer": { "en": "A VPN (Virtual Private Network) encrypts your internet connection and hides your IP address for privacy.", "ar": "VPN (الشبكة الخاصة الافتراضية) يقوم بتشفير اتصالك بالإنترنت ويخفي عنوان IP الخاص بك لزيادة الخصوصية." },
+    "tags": ["vpn", "privacy"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 52,
+    "category": "backup",
+    "question": { "en": "Why is regular data backup important?", "ar": "لماذا النسخ الاحتياطي المنتظم للبيانات مهم؟" },
+    "answer": { "en": "Regular backups protect your data from loss due to hardware failure, cyberattacks, or accidental deletion.", "ar": "النسخ الاحتياطي المنتظم يحمي بياناتك من الفقدان بسبب تعطل الأجهزة أو الهجمات السيبرانية أو الحذف غير المقصود." },
+    "tags": ["backup", "data"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 53,
+    "category": "incident",
+    "question": { "en": "What should you do if you suspect a security incident?", "ar": "ماذا تفعل إذا اشتبهت في حادث أمني؟" },
+    "answer": { "en": "Report the incident to your IT or security team immediately and avoid interacting with suspicious content.", "ar": "أبلغ قسم تقنية المعلومات أو فريق الأمن فوراً وتجنب التفاعل مع المحتوى المشبوه." },
+    "tags": ["incident", "response"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 54,
+    "category": "compliance",
+    "question": { "en": "What is GDPR?", "ar": "ما هو GDPR؟" },
+    "answer": { "en": "GDPR is a European regulation for data protection and privacy for individuals within the EU.", "ar": "GDPR هو لائحة أوروبية لحماية البيانات والخصوصية للأفراد داخل الاتحاد الأوروبي." },
+    "tags": ["compliance", "GDPR"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 55,
+    "category": "encryption",
+    "question": { "en": "Why is encryption important for sensitive data?", "ar": "لماذا التشفير مهم للبيانات الحساسة؟" },
+    "answer": { "en": "Encryption protects sensitive data from unauthorized access, even if it is stolen.", "ar": "التشفير يحمي البيانات الحساسة من الوصول غير المصرح به حتى إذا تم سرقتها." },
+    "tags": ["encryption", "data"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 56,
+    "category": "social",
+    "question": { "en": "How can you stay safe on social media?", "ar": "كيف تبقى آمناً على وسائل التواصل الاجتماعي؟" },
+    "answer": { "en": "Be cautious about what you share, use privacy settings, and avoid unknown links or friend requests.", "ar": "كن حذراً فيما تشاركه، واستخدم إعدادات الخصوصية، وتجنب الروابط أو طلبات الصداقة غير المعروفة." },
+    "tags": ["social media", "safety"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 57,
+    "category": "general",
+    "question": { "en": "What is cyber hygiene?", "ar": "ما هو النظافة السيبرانية؟" },
+    "answer": { "en": "Cyber hygiene refers to practices and steps that users take to maintain system health and improve online security.", "ar": "النظافة السيبرانية تشير إلى الممارسات والخطوات التي يتخذها المستخدمون للحفاظ على صحة النظام وتحسين الأمان عبر الإنترنت." },
+    "tags": ["general", "hygiene"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 58,
+    "category": "passwords",
+    "question": { "en": "What is a passphrase and why is it recommended?", "ar": "ما هي عبارة المرور ولماذا يُنصح بها؟" },
+    "answer": { "en": "A passphrase is a sequence of words used as a password, usually longer and more secure than a single word.", "ar": "عبارة المرور هي سلسلة من الكلمات تُستخدم ككلمة مرور، وغالباً ما تكون أطول وأكثر أماناً من كلمة واحدة." },
+    "tags": ["passwords", "passphrase"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 59,
+    "category": "phishing",
+    "question": { "en": "What is spear phishing?", "ar": "ما هو التصيد الاحتيالي الموجه؟" },
+    "answer": { "en": "Spear phishing is a targeted phishing attack aimed at a specific individual or organization.", "ar": "التصيد الاحتيالي الموجه هو هجوم تصيد يستهدف فرداً أو منظمة معينة." },
+    "tags": ["phishing", "spear-phishing"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 60,
+    "category": "malware",
+    "question": { "en": "What is spyware and how can you avoid it?", "ar": "ما هو برامج التجسس وكيف يمكنك تجنبه؟" },
+    "answer": { "en": "Spyware is software that secretly monitors your activity. Avoid it by not downloading unknown files and using security software.", "ar": "برامج التجسس هي برامج تراقب نشاطك سراً. تجنبها بعدم تحميل ملفات غير معروفة واستخدام برامج الحماية." },
+    "tags": ["malware", "spyware"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 61,
+    "category": "general",
+    "question": { "en": "What is a security breach?", "ar": "ما هو خرق الأمان؟" },
+    "answer": { "en": "A security breach is an incident where unauthorized individuals gain access to data, applications, networks, or devices.", "ar": "خرق الأمان هو حادث يحصل فيه أشخاص غير مصرح لهم على بيانات أو تطبيقات أو شبكات أو أجهزة." },
+    "tags": ["general", "breach"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 62,
+    "category": "passwords",
+    "question": { "en": "What is password expiration policy?", "ar": "ما هي سياسة انتهاء صلاحية كلمة المرور؟" },
+    "answer": { "en": "A password expiration policy requires users to change their passwords after a certain period for better security.", "ar": "سياسة انتهاء صلاحية كلمة المرور تتطلب من المستخدمين تغيير كلمات المرور بعد فترة زمنية معينة لتعزيز الأمان." },
+    "tags": ["passwords", "policy"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 63,
+    "category": "phishing",
+    "question": { "en": "What is a phishing website?", "ar": "ما هو موقع التصيد الاحتيالي؟" },
+    "answer": { "en": "A phishing website is a fake site designed to steal personal information by imitating a legitimate one.", "ar": "موقع التصيد الاحتيالي هو موقع مزيف مصمم لسرقة المعلومات الشخصية من خلال تقليد موقع شرعي." },
+    "tags": ["phishing", "website"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 64,
+    "category": "malware",
+    "question": { "en": "What is a computer worm?", "ar": "ما هي الدودة الحاسوبية؟" },
+    "answer": { "en": "A computer worm is a type of malware that replicates itself to spread to other computers without user intervention.", "ar": "الدودة الحاسوبية هي نوع من البرمجيات الخبيثة يتكاثر ذاتياً لينتشر إلى أجهزة أخرى دون تدخل المستخدم." },
+    "tags": ["malware", "worm"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 65,
+    "category": "vpn",
+    "question": { "en": "Can a VPN make you completely anonymous online?", "ar": "هل يمكن أن يجعلك VPN مجهولاً تماماً على الإنترنت؟" },
+    "answer": { "en": "No, a VPN increases privacy but does not make you completely anonymous online.", "ar": "لا، VPN يزيد الخصوصية لكنه لا يجعلك مجهولاً تماماً على الإنترنت." },
+    "tags": ["vpn", "anonymity"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 66,
+    "category": "backup",
+    "question": { "en": "What is cloud backup?", "ar": "ما هو النسخ الاحتياطي السحابي؟" },
+    "answer": { "en": "Cloud backup is storing copies of your data on remote servers accessed via the internet.", "ar": "النسخ الاحتياطي السحابي هو تخزين نسخ من بياناتك على خوادم بعيدة يتم الوصول إليها عبر الإنترنت." },
+    "tags": ["backup", "cloud"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 67,
+    "category": "incident",
+    "question": { "en": "What is an incident response plan?", "ar": "ما هو خطة الاستجابة للحوادث؟" },
+    "answer": { "en": "An incident response plan is a set of procedures for detecting, responding to, and recovering from security incidents.", "ar": "خطة الاستجابة للحوادث هي مجموعة من الإجراءات لاكتشاف الحوادث الأمنية والاستجابة لها والتعافي منها." },
+    "tags": ["incident", "response"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 68,
+    "category": "compliance",
+    "question": { "en": "What is HIPAA?", "ar": "ما هو HIPAA؟" },
+    "answer": { "en": "HIPAA is a US law designed to protect sensitive patient health information.", "ar": "HIPAA هو قانون أمريكي مصمم لحماية المعلومات الصحية الحساسة للمرضى." },
+    "tags": ["compliance", "HIPAA"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 69,
+    "category": "encryption",
+    "question": { "en": "What is end-to-end encryption?", "ar": "ما هو التشفير من الطرف إلى الطرف؟" },
+    "answer": { "en": "End-to-end encryption ensures that only the communicating users can read the messages.", "ar": "التشفير من الطرف إلى الطرف يضمن أن المستخدمين المتواصلين فقط يمكنهم قراءة الرسائل." },
+    "tags": ["encryption", "end-to-end"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 70,
+    "category": "social",
+    "question": { "en": "What is social engineering on social media?", "ar": "ما هو الهندسة الاجتماعية على وسائل التواصل الاجتماعي؟" },
+    "answer": { "en": "It is manipulating people on social platforms to reveal confidential information or perform actions that compromise security.", "ar": "هو التلاعب بالأشخاص على المنصات الاجتماعية للكشف عن معلومات سرية أو القيام بأفعال تعرض الأمان للخطر." },
+    "tags": ["social", "engineering"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 71,
+    "category": "general",
+    "question": { "en": "What is cyberbullying?", "ar": "ما هو التنمر الإلكتروني؟" },
+    "answer": { "en": "Cyberbullying is the use of digital platforms to harass, threaten, or humiliate someone.", "ar": "التنمر الإلكتروني هو استخدام المنصات الرقمية لمضايقة أو تهديد أو إذلال شخص ما." },
+    "tags": ["general", "cyberbullying"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 72,
+    "category": "passwords",
+    "question": { "en": "What is a password manager and why should you use one?", "ar": "ما هو مدير كلمات المرور ولماذا يجب عليك استخدامه؟" },
+    "answer": { "en": "A password manager securely stores and manages your passwords, making it easier to use strong, unique passwords for every account.", "ar": "مدير كلمات المرور يخزن ويدير كلمات المرور الخاصة بك بأمان، مما يسهل استخدام كلمات مرور قوية وفريدة لكل حساب." },
+    "tags": ["passwords", "manager"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": 73,
+    "category": "phishing",
+    "question": { "en": "What is a phishing simulation and why is it important?", "ar": "ما هي محاكاة التصيد الاحتيالي ولماذا هي مهمة؟" },
+    "answer": { "en": "A phishing simulation is a test to see how users respond to fake phishing attempts, helping organizations train employees to recognize real threats.", "ar": "محاكاة التصيد الاحتيالي هي اختبار لمعرفة كيفية استجابة المستخدمين لمحاولات تصيد وهمية، مما يساعد المؤسسات على تدريب الموظفين على التعرف على التهديدات الحقيقية." },
+    "tags": ["phishing", "simulation"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 74,
+    "category": "malware",
+    "question": { "en": "What is a rootkit and how is it dangerous?", "ar": "ما هو الروتكيت ولماذا هو خطير؟" },
+    "answer": { "en": "A rootkit is a type of malware that allows attackers to gain and maintain privileged access to a system while hiding its presence.", "ar": "الروتكيت هو نوع من البرمجيات الخبيثة يسمح للمهاجمين بالحصول على وصول مميز إلى النظام مع إخفاء وجوده." },
+    "tags": ["malware", "rootkit"],
+    "difficulty": "advanced"
+  },
+  {
+    "id": 75,
+    "category": "vpn",
+    "question": { "en": "What are the limitations of using a VPN?", "ar": "ما هي حدود استخدام VPN؟" },
+    "answer": { "en": "A VPN does not protect against all threats, may slow down your connection, and some services can still track you.", "ar": "VPN لا يحمي من جميع التهديدات، وقد يبطئ اتصالك، وبعض الخدمات يمكنها تتبعك رغم ذلك." },
+    "tags": ["vpn", "limitations"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 76,
+    "category": "backup",
+    "question": { "en": "What is incremental backup?", "ar": "ما هو النسخ الاحتياطي التزايدي؟" },
+    "answer": { "en": "Incremental backup saves only the data that has changed since the last backup, saving time and storage space.", "ar": "النسخ الاحتياطي التزايدي يحفظ فقط البيانات التي تغيرت منذ آخر نسخة احتياطية، مما يوفر الوقت ومساحة التخزين." },
+    "tags": ["backup", "incremental"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 77,
+    "category": "incident",
+    "question": { "en": "What is the first step in responding to a security incident?", "ar": "ما هي أول خطوة في الاستجابة لحادث أمني؟" },
+    "answer": { "en": "The first step is to contain the incident to prevent further damage.", "ar": "أول خطوة هي احتواء الحادث لمنع المزيد من الضرر." },
+    "tags": ["incident", "response"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 78,
+    "category": "compliance",
+    "question": { "en": "What is PCI DSS?", "ar": "ما هو PCI DSS؟" },
+    "answer": { "en": "PCI DSS is a security standard for organizations that handle credit card information.", "ar": "PCI DSS هو معيار أمني للمؤسسات التي تتعامل مع معلومات بطاقات الائتمان." },
+    "tags": ["compliance", "PCI DSS"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 79,
+    "category": "encryption",
+    "question": { "en": "What is symmetric encryption?", "ar": "ما هو التشفير المتماثل؟" },
+    "answer": { "en": "Symmetric encryption uses the same key for both encryption and decryption.", "ar": "التشفير المتماثل يستخدم نفس المفتاح للتشفير وفك التشفير." },
+    "tags": ["encryption", "symmetric"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 80,
+    "category": "social",
+    "question": { "en": "How can you recognize fake accounts on social media?", "ar": "كيف تتعرف على الحسابات المزيفة على وسائل التواصل الاجتماعي؟" },
+    "answer": { "en": "Look for incomplete profiles, suspicious activity, and requests for personal information.", "ar": "ابحث عن ملفات شخصية غير مكتملة، نشاط مشبوه، وطلبات لمعلومات شخصية." },
+    "tags": ["social", "fake accounts"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 81,
+    "category": "vpn",
+    "question": { "en": "How does a VPN help protect your privacy on public Wi-Fi?", "ar": "كيف يساعد VPN في حماية خصوصيتك على شبكات الواي فاي العامة؟" },
+    "answer": { "en": "A VPN encrypts your internet traffic, making it difficult for hackers to intercept your data on public Wi-Fi.", "ar": "VPN يقوم بتشفير حركة الإنترنت الخاصة بك، مما يصعب على القراصنة اعتراض بياناتك على شبكات الواي فاي العامة." },
+    "tags": ["vpn", "privacy", "public wifi"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 82,
+    "category": "vpn",
+    "question": { "en": "What is a no-log VPN policy?", "ar": "ما هي سياسة VPN بدون سجلات؟" },
+    "answer": { "en": "A no-log VPN policy means the VPN provider does not keep records of your online activities.", "ar": "سياسة VPN بدون سجلات تعني أن مزود الخدمة لا يحتفظ بسجلات لأنشطتك على الإنترنت." },
+    "tags": ["vpn", "privacy", "logs"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 83,
+    "category": "social",
+    "question": { "en": "What are the risks of oversharing on social media?", "ar": "ما هي مخاطر الإفراط في المشاركة على وسائل التواصل الاجتماعي؟" },
+    "answer": { "en": "Oversharing can expose you to identity theft, scams, and targeted attacks.", "ar": "الإفراط في المشاركة قد يعرضك لسرقة الهوية، والاحتيال، والهجمات المستهدفة." },
+    "tags": ["social media", "privacy", "risks"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 84,
+    "category": "social",
+    "question": { "en": "How can you protect your privacy settings on social media?", "ar": "كيف يمكنك حماية إعدادات الخصوصية على وسائل التواصل الاجتماعي؟" },
+    "answer": { "en": "Regularly review and update your privacy settings, limit who can see your posts, and avoid sharing sensitive information.", "ar": "راجع وحدث إعدادات الخصوصية بانتظام، وحدد من يمكنه رؤية منشوراتك، وتجنب مشاركة المعلومات الحساسة." },
+    "tags": ["social media", "privacy", "settings"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 85,
+    "category": "encryption",
+    "question": { "en": "What is public key encryption?", "ar": "ما هو التشفير بالمفتاح العام؟" },
+    "answer": { "en": "Public key encryption uses a pair of keys—public and private—to encrypt and decrypt data.", "ar": "التشفير بالمفتاح العام يستخدم زوجاً من المفاتيح (عام وخاص) لتشفير وفك تشفير البيانات." },
+    "tags": ["encryption", "public key"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 86,
+    "category": "encryption",
+    "question": { "en": "What is the difference between symmetric and asymmetric encryption?", "ar": "ما الفرق بين التشفير المتماثل وغير المتماثل؟" },
+    "answer": { "en": "Symmetric encryption uses one key for both encryption and decryption, while asymmetric uses two keys: public and private.", "ar": "التشفير المتماثل يستخدم مفتاحاً واحداً للتشفير وفك التشفير، بينما غير المتماثل يستخدم مفتاحين: عام وخاص." },
+    "tags": ["encryption", "symmetric", "asymmetric"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 87,
+    "category": "incident",
+    "question": { "en": "Why is it important to report security incidents quickly?", "ar": "لماذا من المهم الإبلاغ عن الحوادث الأمنية بسرعة؟" },
+    "answer": { "en": "Quick reporting helps contain the incident, minimize damage, and start recovery processes sooner.", "ar": "الإبلاغ السريع يساعد في احتواء الحادث وتقليل الأضرار وبدء عمليات الاستعادة بسرعة." },
+    "tags": ["incident", "reporting", "response"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 88,
+    "category": "incident",
+    "question": { "en": "What is a post-incident review?", "ar": "ما هو مراجعة ما بعد الحادث؟" },
+    "answer": { "en": "A post-incident review analyzes what happened, how it was handled, and how to prevent similar incidents in the future.", "ar": "مراجعة ما بعد الحادث تحلل ما حدث، وكيف تم التعامل معه، وكيفية منع تكرار الحوادث مستقبلاً." },
+    "tags": ["incident", "review", "prevention"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 89,
+    "category": "backup",
+    "question": { "en": "What is the difference between full and incremental backup?", "ar": "ما الفرق بين النسخ الاحتياطي الكامل والتزايدي؟" },
+    "answer": { "en": "A full backup copies all data, while incremental backup only copies data changed since the last backup.", "ar": "النسخ الاحتياطي الكامل ينسخ جميع البيانات، بينما التزايدي ينسخ فقط البيانات التي تغيرت منذ آخر نسخة احتياطية." },
+    "tags": ["backup", "full", "incremental"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 90,
+    "category": "backup",
+    "question": { "en": "Why should you test your backups regularly?", "ar": "لماذا يجب عليك اختبار النسخ الاحتياطية بانتظام؟" },
+    "answer": { "en": "Regular testing ensures that backups are working and data can be restored when needed.", "ar": "الاختبار المنتظم يضمن أن النسخ الاحتياطية تعمل ويمكن استعادة البيانات عند الحاجة." },
+    "tags": ["backup", "testing", "recovery"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 91,
+    "category": "compliance",
+    "question": { "en": "What is data retention policy?", "ar": "ما هي سياسة الاحتفاظ بالبيانات؟" },
+    "answer": { "en": "A data retention policy defines how long data is kept and when it should be deleted to comply with regulations.", "ar": "سياسة الاحتفاظ بالبيانات تحدد مدة الاحتفاظ بالبيانات ومتى يجب حذفها للامتثال للوائح." },
+    "tags": ["compliance", "data retention"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 92,
+    "category": "compliance",
+    "question": { "en": "What is the purpose of compliance training?", "ar": "ما هو هدف التدريب على الامتثال؟" },
+    "answer": { "en": "Compliance training educates employees about laws, regulations, and company policies to reduce legal and security risks.", "ar": "التدريب على الامتثال يثقف الموظفين حول القوانين واللوائح وسياسات الشركة لتقليل المخاطر القانونية والأمنية." },
+    "tags": ["compliance", "training"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 93,
+    "category": "vpn",
+    "question": { "en": "Can a VPN bypass geo-restrictions on content?", "ar": "هل يمكن لـ VPN تجاوز القيود الجغرافية على المحتوى؟" },
+    "answer": { "en": "Yes, a VPN can help you access content restricted to certain regions by masking your real location.", "ar": "نعم، يمكن لـ VPN مساعدتك في الوصول إلى محتوى مقيد بمناطق معينة عن طريق إخفاء موقعك الحقيقي." },
+    "tags": ["vpn", "geo-restriction"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 94,
+    "category": "vpn",
+    "question": { "en": "What are the risks of using a free VPN service?", "ar": "ما هي مخاطر استخدام خدمة VPN مجانية؟" },
+    "answer": { "en": "Free VPNs may log your data, show ads, have weak security, or sell your information to third parties.", "ar": "قد تقوم خدمات VPN المجانية بتسجيل بياناتك، عرض إعلانات، ضعف الأمان، أو بيع معلوماتك لأطراف ثالثة." },
+    "tags": ["vpn", "free", "risks"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 95,
+    "category": "social",
+    "question": { "en": "What is two-factor authentication on social media?", "ar": "ما هو التحقق بخطوتين على وسائل التواصل الاجتماعي؟" },
+    "answer": { "en": "Two-factor authentication adds an extra layer of security by requiring a second verification step, such as a code sent to your phone.", "ar": "التحقق بخطوتين يضيف طبقة أمان إضافية من خلال طلب خطوة تحقق ثانية مثل رمز يُرسل إلى هاتفك." },
+    "tags": ["social media", "2FA", "security"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 96,
+    "category": "social",
+    "question": { "en": "How can you spot a scam message on social media?", "ar": "كيف تكتشف رسالة احتيالية على وسائل التواصل الاجتماعي؟" },
+    "answer": { "en": "Look for urgent requests, suspicious links, poor grammar, and offers that seem too good to be true.", "ar": "ابحث عن طلبات عاجلة، روابط مشبوهة، أخطاء لغوية، وعروض تبدو جيدة جداً لدرجة يصعب تصديقها." },
+    "tags": ["social media", "scam", "detection"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 97,
+    "category": "encryption",
+    "question": { "en": "What is hashing and how is it different from encryption?", "ar": "ما هو التجزئة (hashing) وما الفرق بينها وبين التشفير؟" },
+    "answer": { "en": "Hashing converts data into a fixed-size string, usually for verification, and cannot be reversed, unlike encryption which can be decrypted.", "ar": "التجزئة تحول البيانات إلى سلسلة ثابتة الطول عادة للتحقق، ولا يمكن عكسها، على عكس التشفير الذي يمكن فك تشفيره." },
+    "tags": ["encryption", "hashing", "difference"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 98,
+    "category": "encryption",
+    "question": { "en": "Why should you use encrypted messaging apps?", "ar": "لماذا يجب عليك استخدام تطبيقات المراسلة المشفرة؟" },
+    "answer": { "en": "Encrypted messaging apps protect your conversations from being read by anyone except the intended recipient.", "ar": "تطبيقات المراسلة المشفرة تحمي محادثاتك من أن يقرأها أي شخص باستثناء المستلم المقصود." },
+    "tags": ["encryption", "messaging", "privacy"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 99,
+    "category": "incident",
+    "question": { "en": "What is a security incident escalation process?", "ar": "ما هو عملية تصعيد الحوادث الأمنية؟" },
+    "answer": { "en": "It is a procedure for reporting incidents to higher authorities or specialized teams when initial response is insufficient.", "ar": "هي إجراء للإبلاغ عن الحوادث للسلطات العليا أو الفرق المتخصصة عندما لا تكون الاستجابة الأولية كافية." },
+    "tags": ["incident", "escalation", "process"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 100,
+    "category": "backup",
+    "question": { "en": "What is backup encryption and why is it important?", "ar": "ما هو تشفير النسخ الاحتياطي ولماذا هو مهم؟" },
+    "answer": { "en": "Backup encryption protects your backup data from unauthorized access, ensuring privacy even if the backup is stolen.", "ar": "تشفير النسخ الاحتياطي يحمي بيانات النسخ الاحتياطي من الوصول غير المصرح به، مما يضمن الخصوصية حتى إذا تم سرقتها." },
+    "tags": ["backup", "encryption", "privacy"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 101,
+    "category": "compliance",
+    "question": { "en": "What is SOX compliance?", "ar": "ما هو الامتثال لقانون SOX؟" },
+    "answer": { "en": "SOX (Sarbanes-Oxley Act) is a US law that sets requirements for financial reporting and data security for public companies.", "ar": "SOX (قانون ساربينز أوكسلي) هو قانون أمريكي يحدد متطلبات التقارير المالية وأمن البيانات للشركات العامة." },
+    "tags": ["compliance", "SOX", "law"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 102,
+    "category": "compliance",
+    "question": { "en": "What is the role of audits in compliance?", "ar": "ما هو دور التدقيق في الامتثال؟" },
+    "answer": { "en": "Audits review and verify that an organization is following laws, regulations, and internal policies.", "ar": "التدقيق يراجع ويتحقق من أن المؤسسة تلتزم بالقوانين واللوائح والسياسات الداخلية." },
+    "tags": ["compliance", "audit", "verification"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 103,
+    "category": "vpn",
+    "question": { "en": "What is a VPN kill switch?", "ar": "ما هو مفتاح القفل (kill switch) في VPN؟" },
+    "answer": { "en": "A VPN kill switch automatically disconnects your device from the internet if the VPN connection drops, preventing data leaks.", "ar": "مفتاح القفل في VPN يفصل جهازك عن الإنترنت تلقائياً إذا انقطع اتصال VPN، لمنع تسرب البيانات." },
+    "tags": ["vpn", "kill switch", "privacy"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 104,
+    "category": "vpn",
+    "question": { "en": "What is split tunneling in VPNs?", "ar": "ما هو التقسيم النفقي (split tunneling) في VPN؟" },
+    "answer": { "en": "Split tunneling allows you to choose which traffic goes through the VPN and which uses your regular internet connection.", "ar": "التقسيم النفقي يسمح لك باختيار أي حركة بيانات تمر عبر VPN وأيها تستخدم اتصال الإنترنت العادي." },
+    "tags": ["vpn", "split tunneling"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 105,
+    "category": "social",
+    "question": { "en": "What is social media impersonation?", "ar": "ما هو انتحال الهوية على وسائل التواصل الاجتماعي؟" },
+    "answer": { "en": "Impersonation is when someone creates a fake profile pretending to be you or someone else to deceive others.", "ar": "انتحال الهوية هو عندما ينشئ شخص ما ملفاً مزيفاً ويدعي أنه أنت أو شخص آخر لخداع الآخرين." },
+    "tags": ["social media", "impersonation", "fake profile"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 106,
+    "category": "social",
+    "question": { "en": "How can you report abuse or harassment on social media?", "ar": "كيف يمكنك الإبلاغ عن الإساءة أو التحرش على وسائل التواصل الاجتماعي؟" },
+    "answer": { "en": "Most platforms have reporting tools—use them to report abusive content or block the offender.", "ar": "معظم المنصات توفر أدوات للإبلاغ—استخدمها للإبلاغ عن المحتوى المسيء أو حظر الشخص المسيء." },
+    "tags": ["social media", "abuse", "reporting"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 107,
+    "category": "encryption",
+    "question": { "en": "What is a digital certificate?", "ar": "ما هي الشهادة الرقمية؟" },
+    "answer": { "en": "A digital certificate is an electronic document used to prove the ownership of a public key.", "ar": "الشهادة الرقمية هي وثيقة إلكترونية تُستخدم لإثبات ملكية مفتاح عام." },
+    "tags": ["encryption", "certificate", "public key"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 108,
+    "category": "encryption",
+    "question": { "en": "What is SSL/TLS encryption?", "ar": "ما هو تشفير SSL/TLS؟" },
+    "answer": { "en": "SSL/TLS are protocols that encrypt data transmitted between a web server and a browser, ensuring secure communication.", "ar": "SSL/TLS هي بروتوكولات تقوم بتشفير البيانات المنقولة بين خادم الويب والمتصفح لضمان الاتصال الآمن." },
+    "tags": ["encryption", "SSL", "TLS"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 109,
+    "category": "incident",
+    "question": { "en": "What is a security incident log?", "ar": "ما هو سجل الحوادث الأمنية؟" },
+    "answer": { "en": "A security incident log is a record of all detected security events and actions taken, used for analysis and compliance.", "ar": "سجل الحوادث الأمنية هو سجل لجميع الأحداث الأمنية المكتشفة والإجراءات المتخذة، ويُستخدم للتحليل والامتثال." },
+    "tags": ["incident", "log", "compliance"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 110,
+    "category": "backup",
+    "question": { "en": "What is backup versioning?", "ar": "ما هو إصدار النسخ الاحتياطي؟" },
+    "answer": { "en": "Backup versioning keeps multiple versions of your files, allowing you to restore previous versions if needed.", "ar": "إصدار النسخ الاحتياطي يحتفظ بعدة نسخ من ملفاتك، مما يتيح لك استعادة الإصدارات السابقة إذا لزم الأمر." },
+    "tags": ["backup", "versioning"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 111,
+    "category": "compliance",
+    "question": { "en": "What is ISO 27001?", "ar": "ما هو معيار ISO 27001؟" },
+    "answer": { "en": "ISO 27001 is an international standard for information security management systems (ISMS).", "ar": "ISO 27001 هو معيار دولي لنظم إدارة أمن المعلومات (ISMS)." },
+    "tags": ["compliance", "ISO 27001", "standard"],
+    "difficulty": "intermediate"
+  },
+  {
+    "id": 112,
+    "category": "compliance",
+    "question": { "en": "What is the difference between compliance and security?", "ar": "ما الفرق بين الامتثال والأمان؟" },
+    "answer": { "en": "Compliance means following laws and regulations, while security is about protecting data and systems from threats.", "ar": "الامتثال يعني اتباع القوانين واللوائح، بينما الأمان يتعلق بحماية البيانات والأنظمة من التهديدات." },
+    "tags": ["compliance", "security", "difference"],
+    "difficulty": "intermediate"
+  }
+] 

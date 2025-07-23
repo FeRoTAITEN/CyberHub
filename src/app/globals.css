@@ -1772,6 +1772,11 @@
   text-shadow: 0 1px 4px #fff2;
 }
 
+.theme-light label,
+.theme-novel label {
+  color: #000 !important;
+}
+
 /* === Custom Scrollbar for All Themes === */
 /* Default (dark) theme */
 ::-webkit-scrollbar {

@@ -5,51 +5,29 @@ import { UserGroupIcon, ShieldCheckIcon, EnvelopeIcon, PhoneIcon } from '@heroic
 import { useLang } from '../ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';
 import Image from 'next/image';
-import { useState } from 'react';
-
-const staffData = [
-  {
-    id: 1,
-    name: { en: 'Ahmed Al-Salem', ar: 'أحمد السالم' },
-    position: { en: 'Cyber Security Manager', ar: 'مدير الأمن السيبراني' },
-    email: 'ahmed.salem@salam.com',
-    phone: '+966 555 123 456',
-    avatar: '/cyber-hero.svg'
-  },
-  {
-    id: 2,
-    name: { en: 'Sara Al-Qahtani', ar: 'سارة القحطاني' },
-    position: { en: 'Security Analyst', ar: 'محلل أمان' },
-    email: 'sara.qahtani@salam.com',
-    phone: '+966 555 234 567',
-    avatar: '/window.svg'
-  },
-  {
-    id: 3,
-    name: { en: 'Mohammed Al-Harbi', ar: 'محمد الحربي' },
-    position: { en: 'Compliance Specialist', ar: 'مختص الامتثال' },
-    email: 'mohammed.harbi@salam.com',
-    phone: '+966 555 345 678',
-    avatar: '/file.svg'
-  },
-  {
-    id: 4,
-    name: { en: 'Fatimah Al-Dosari', ar: 'فاطمة الدوسري' },
-    position: { en: 'Security Engineer', ar: 'مهندس أمان' },
-    email: 'fatimah.dosari@salam.com',
-    phone: '+966 555 456 789',
-    avatar: '/globe.svg'
-  }
-];
+import { useEffect, useState } from 'react';
 
 export default function StaffPage() {
   const { lang } = useLang();
   const { t } = useTranslation(lang);
   const [search, setSearch] = useState('');
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredStaff = staffData.filter(member => {
-    const name = member.name[lang].toLowerCase();
-    const position = member.position[lang].toLowerCase();
+  useEffect(() => {
+    async function fetchEmployees() {
+      setLoading(true);
+      const res = await fetch(' /api/employees');
+      const data = await res.json();
+      setEmployees(data.employees || []);
+      setLoading(false);
+    }
+    fetchEmployees();
+  }, []);
+
+  const filteredStaff = employees.filter(member => {
+    const name = (lang === 'ar' ? member.name_ar : member.name).toLowerCase();
+    const position = (lang === 'ar' ? member.job_title_ar || member.job_title : member.job_title).toLowerCase();
     const q = search.toLowerCase();
     return name.includes(q) || position.includes(q);
   });
@@ -82,7 +60,11 @@ export default function StaffPage() {
         </div>
         
         {/* Staff Grid */}
-        {filteredStaff.length === 0 ? (
+        {loading ? (
+          <div className="text-center text-slate-400 text-xl py-16 content-animate">
+            {lang === 'ar' ? 'جاري تحميل الموظفين...' : 'Loading staff...'}
+          </div>
+        ) : filteredStaff.length === 0 ? (
           <div className="text-center text-slate-400 text-xl py-16 content-animate">
             {lang === 'ar' ? 'لا يوجد موظف يطابق البحث.' : 'No staff member matches your search.'}
           </div>
@@ -95,10 +77,10 @@ export default function StaffPage() {
                 style={{ animationDelay: `${0.1 * (index + 1)}s` }}
               >
                 <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center mb-5 shadow-lg border-4 border-green-100 group-hover:scale-105 group-hover:shadow-green-400/30 transition-transform overflow-hidden">
-                  <Image src="/icons/noun-hacker.svg" alt={member.name[lang]} width={80} height={80} className="object-contain w-20 h-20" />
+                  <Image src="/icons/noun-hacker.svg" alt={lang === 'ar' ? member.name_ar : member.name} width={80} height={80} className="object-contain w-20 h-20" />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-1 font-display">{member.name[lang]}</h2>
-                <p className="text-green-500 text-lg font-semibold mb-3">{member.position[lang]}</p>
+                <h2 className="text-2xl font-bold text-white mb-1 font-display">{lang === 'ar' ? member.name_ar : member.name}</h2>
+                <p className="text-green-500 text-lg font-semibold mb-3">{lang === 'ar' ? member.job_title_ar || member.job_title : member.job_title}</p>
                 <div className="flex flex-col gap-1 items-center w-full">
                   <div className="flex items-center gap-2 text-slate-400 text-sm">
                     <EnvelopeIcon className="w-5 h-5 text-blue-400" />
