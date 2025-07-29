@@ -44,51 +44,27 @@ export async function POST(req: NextRequest) {
       const answer = answers.find((a: any) => a.question_id.toString() === q.id.toString());
       
       if (q.required) {
-        if (q.question_type === "comments") {
-          // For comments questions, check if either yesno or comment is provided
-          const yesNoAnswer = answers.find((a: any) => a.question_id === `${q.id}_yesno`);
-          const commentAnswer = answers.find((a: any) => a.question_id === `${q.id}_comment`);
-          if (!yesNoAnswer && !commentAnswer) {
-            return NextResponse.json({ success: false, error: `Missing answer for: ${q.label_en}` }, { status: 400 });
-          }
-        } else {
           if (!answer || (answer.answer === undefined || answer.answer === "")) {
             return NextResponse.json({ success: false, error: `Missing answer for: ${q.label_en}` }, { status: 400 });
-          }
         }
       }
 
       // Process different question types
       let processedAnswer = "";
-      if (q.question_type === "comments") {
-        // For comments, combine yes/no with comment
-        const yesNoAnswer = answers.find((a: any) => a.question_id === `${q.id}_yesno`);
-        const commentAnswer = answers.find((a: any) => a.question_id === `${q.id}_comment`);
-        
-        const yesNo = yesNoAnswer?.answer || "";
-        const comment = commentAnswer?.answer || "";
-        
-        if (yesNo && comment) {
-          processedAnswer = `${yesNo}, ${comment}`;
-        } else if (yesNo) {
-          processedAnswer = yesNo;
-        } else if (comment) {
-          processedAnswer = comment;
-        } else {
-          processedAnswer = "";
-        }
-      } else if (answer) {
+      if (answer) {
         processedAnswer = answer.answer;
       }
 
       // Always add the answer, even if empty, to ensure all questions are represented
-      if (q.question_type === "comments" || processedAnswer || answer) {
+      if (processedAnswer || answer) {
         processedAnswers.push({
           question_id: q.id,
           answer: processedAnswer || "" // Use empty string instead of undefined
         });
       }
     }
+    
+
 
     // Sanitize inputs
     const safeName = sanitize(name);

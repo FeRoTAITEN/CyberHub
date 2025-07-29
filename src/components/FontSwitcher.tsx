@@ -114,14 +114,14 @@ export default function FontSwitcher({ dropdownStyle, theme }: FontSwitcherProps
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lang-switch group"
+        className="lang-switch group p-2 rounded-lg hover:bg-white/10 transition-all duration-200"
         aria-label={t('font.switch')}
       >
-        <SparklesIcon className="w-5 h-5" />
+        <SparklesIcon className="w-5 h-5 group-hover:scale-110 transition-transform duration-300 text-white" />
       </button>
       {isOpen && (
         <div className="absolute top-full mt-2 right-0 z-50 min-w-[200px]">
-          <div className={`${theme === 'default' ? 'bg-slate-800' : 'card-glass'} p-2 space-y-1 rounded-xl`}>
+          <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700 p-2 space-y-1 rounded-xl shadow-2xl">
             {FONTS.map(fontOption => (
               <button
                 key={fontOption.code}
@@ -130,7 +130,7 @@ export default function FontSwitcher({ dropdownStyle, theme }: FontSwitcherProps
                   font === fontOption.code ? 'bg-green-600/20 text-green-400 border border-green-500/30' : 'text-slate-300 hover:text-white'
                 }`}
               >
-                <span className="text-lg">{fontOption.icon}</span>
+                <span className="text-lg">🔤</span>
                 <div className="flex-1 text-left">
                   <div className={`${fontOption.code ? `font-${fontOption.code}` : ''} font-medium`}>
                     {lang === 'ar' ? fontOption.nameAr : fontOption.name}

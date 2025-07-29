@@ -1,0 +1,47 @@
+Frontend:
+Next.js 15.3.5 - إطار عمل React مع App Router
+React 19 - مكتبة واجهة المستخدم
+TypeScript - للكتابة الآمنة للكود
+Tailwind CSS - إطار عمل CSS للتصميم
+
+Libraries:
+Framer Motion - للرسوم المتحركة
+React Icons - لأيقونات React
+Headless UI - لمكونات واجهة المستخدم
+Heroicons - لمجموعة الأيقونات
+Recharts - لإنشاء الرسوم البيانية
+React Datepicker - لاختيار التواريخ
+React Circular Progressbar - لشريط التقدم الدائري
+Clsx - لدمج classes في CSS
+File-saver - لحفظ الملفات
+
+Backend:
+Next.js API Routes - للـ API endpoints
+Prisma ORM - لإدارة قاعدة البيانات
+TypeScript - للكتابة الآمنة للكود
+
+Libraries:
+UUID - لإنشاء المعرفات الفريدة
+@prisma/client - عميل Prisma للتعامل مع قاعدة البيانات
+NextRequest/NextResponse - أنواع Next.js للتعامل مع الطلبات والاستجابات
+JSON - لمعالجة البيانات JSON
+
+قاعدة البيانات:
+PostgreSQL - قاعدة البيانات الرئيسية
+Prisma Schema - تعريف نماذج البيانات:
+Survey - الاستطلاعات
+SurveyQuestion - أسئلة الاستطلاع
+SurveyInvite - دعوات الاستطلاع
+SurveyResponse - ردود الاستطلاع
+SurveyAnswer - إجابات الاستطلاع
+Department - الأقسام
+Employee - الموظفين
+Shift - المناوبات
+ShiftAssignment - تعيينات المناوبات
+MemberAvailability - توفر الأعضاء
+
+أدوات التطوير:
+ESLint - لفحص جودة الكود
+PostCSS - لمعالجة CSS
+Autoprefixer - لإضافة prefixes تلقائياً
+TSX - لتشغيل TypeScript مباشرة

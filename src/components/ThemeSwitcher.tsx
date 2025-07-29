@@ -79,15 +79,15 @@ const ThemeSwitcher = ({ onThemeChange, currentTheme }: ThemeSwitcherProps) => {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lang-switch group"
+        className="lang-switch group p-2 rounded-lg hover:bg-white/10 transition-all duration-200"
         aria-label="Toggle theme"
       >
-        <PaintBrushIcon className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+        <PaintBrushIcon className="w-5 h-5 group-hover:scale-110 transition-transform duration-300 text-white" />
       </button>
 
       {isOpen && (
         <div className="absolute top-full mt-2 right-0 z-50 min-w-[200px]">
-          <div className={`${currentTheme === 'default' ? 'bg-slate-800' : 'card-glass'} p-2 space-y-1 rounded-xl`}>
+          <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700 p-2 space-y-1 rounded-xl shadow-2xl">
             {themes.map((theme) => (
               <button
                 key={theme.code}

@@ -7,8 +7,8 @@ const prisma = new PrismaClient();
 export async function POST(req: NextRequest) {
   try {
     const { survey_id, invited_by } = await req.json();
-    if (!survey_id || !invited_by) {
-      return NextResponse.json({ success: false, error: "Missing required fields." }, { status: 400 });
+    if (!survey_id) {
+      return NextResponse.json({ success: false, error: "Missing survey_id." }, { status: 400 });
     }
     const token = uuidv4();
     const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 48); // 48 hours from now
@@ -17,11 +17,12 @@ export async function POST(req: NextRequest) {
         survey_id,
         token,
         expires_at,
-        invited_by
+        invited_by: 1 // Default user ID for system-generated invites
       }
     });
     return NextResponse.json({ success: true, invite });
   } catch (e) {
+    console.error('Error creating invite:', e);
     return NextResponse.json({ success: false, error: "Failed to create invite." }, { status: 500 });
   }
 } 

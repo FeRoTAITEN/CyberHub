@@ -79,3 +79,7 @@ Then open [http://localhost:3000](http://localhost:3000)
 
 ## 🏢 Copyright
 All rights reserved © Salam Cyber-Security Sector
+
+
+8 - 4
+4 - 12

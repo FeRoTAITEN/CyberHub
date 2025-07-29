@@ -17,7 +17,8 @@ import {
   ChevronDownIcon,
   LanguageIcon,
   Cog6ToothIcon,
-  UserIcon
+  UserIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 import { useLang, useTheme } from '@/app/ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';
@@ -64,6 +65,8 @@ const Navigation = () => {
     { name: lang === 'ar' ? 'لوحة' : 'Dash', href: '/dashboard', icon: ChartBarIcon },
     // Add Services page to More dropdown
     { name: lang === 'ar' ? 'الخدمات' : 'Services', href: '/services', icon: ShieldCheckIcon },
+    // Add Shift Management page
+    { name: lang === 'ar' ? 'المناوبات' : 'Shifts', href: '/shifts', icon: ClockIcon },
   ];
 
   // تحديد العناصر المرئية حسب حجم الشاشة

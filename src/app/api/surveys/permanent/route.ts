@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       permanent_token,
-      permanent_link: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/surveys/permanent/${permanent_token}`
+      permanent_link: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/surveys/permanent/${permanent_token}`
     });
   } catch (e) {
     console.error('Error generating permanent link:', e);
