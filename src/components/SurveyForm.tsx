@@ -661,12 +661,25 @@ export default function SurveyForm({
                   <table className="w-full">
                     <thead>
                       <tr className={`${colors.cardBgHover}`}>
-                        <th className={`px-4 md:px-6 py-4 text-left text-sm font-semibold text-white border-b ${colors.borderPrimary} w-1/3 ${colors.primaryBg} bg-opacity-95 shadow-sm`}>
-                          {lang === 'ar' ? 'الاجوبة | Answer' : 'Answer | الاجوبة'}
-                        </th>
-                        <th className={`px-4 md:px-6 py-4 text-left text-sm font-semibold text-white border-b ${colors.borderPrimary} w-2/3 ${colors.primaryBg} bg-opacity-95 shadow-sm`}>
-                          {lang === 'ar' ? 'الاسئلة | Question' : 'Question | الاسئلة'}
-                        </th>
+                        {lang === 'ar' ? (
+                          <>
+                            <th className={`px-4 md:px-6 py-4 text-left text-sm font-semibold text-white border-b ${colors.borderPrimary} w-2/3 ${colors.primaryBg} bg-opacity-95 shadow-sm`}>
+                              الاسئلة | Question
+                            </th>
+                            <th className={`px-4 md:px-6 py-4 text-left text-sm font-semibold text-white border-b ${colors.borderPrimary} w-1/3 ${colors.primaryBg} bg-opacity-95 shadow-sm`}>
+                              الاجوبة | Answer
+                            </th>
+                          </>
+                        ) : (
+                          <>
+                            <th className={`px-4 md:px-6 py-4 text-left text-sm font-semibold text-white border-b ${colors.borderPrimary} w-2/3 ${colors.primaryBg} bg-opacity-95 shadow-sm`}>
+                              Question | الاسئلة
+                            </th>
+                            <th className={`px-4 md:px-6 py-4 text-left text-sm font-semibold text-white border-b ${colors.borderPrimary} w-1/3 ${colors.primaryBg} bg-opacity-95 shadow-sm`}>
+                              Answer | الاجوبة
+                            </th>
+                          </>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -679,8 +692,31 @@ export default function SurveyForm({
                           animate="visible"
                           className={`border-b ${colors.borderPrimary} transition-colors duration-200`}
                         >
-                          <td className="px-4 md:px-6 py-4 md:py-6 align-top">
-                            {/* Answer Column */}
+                          {lang === 'ar' ? (
+                            <>
+                              <td className="px-4 md:px-6 py-4 md:py-6 align-top">
+                                {/* Question Column - Arabic (Left) */}
+                                <div className="space-y-2">
+                                  <h4 className={`text-base font-semibold ${colors.textPrimary} leading-relaxed`}>
+                                    {lang === 'ar' ? q.label_ar : q.label_en}
+                                    {q.required && <span className="text-red-400 ml-1 font-bold">*</span>}
+                                  </h4>
+                                  {q.required && (
+                                    <div className="mt-2">
+                                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-600/20 border border-red-600/50 text-red-300`}>
+                                        {lang === 'ar' ? 'مطلوب' : 'Required'}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {q.question_type === "rating" && (
+                                    <p className={`text-sm ${colors.textTertiary} font-medium`}>
+                                      {lang === 'ar' ? 'يرجى اختيار مستوى واحد من الخيارات أدناه' : 'Please select one level from the options below'}
+                                    </p>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-4 md:px-6 py-4 md:py-6 align-top">
+                                {/* Answer Column - Arabic (Right) */}
                             
                             {/* Text Question */}
                             {q.question_type === "text" && (
@@ -715,7 +751,7 @@ export default function SurveyForm({
                             {q.question_type === "rating" && q.rating_scale && (
                               <div className="space-y-3">
                                 <div className="grid grid-cols-5 gap-1 md:gap-2">
-                                  {[5, 4, 3, 2, 1].map((value) => (
+                                  {[1, 2, 3, 4, 5].map((value) => (
                                     <label key={value} className="flex flex-col items-center cursor-pointer group">
                                       <input
                                         type="radio"
@@ -819,27 +855,192 @@ export default function SurveyForm({
                             )}
                           </td>
                           
-                          <td className="px-4 md:px-6 py-4 md:py-6 align-top">
-                            {/* Question Column */}
-                            <div className="space-y-2">
-                              <h4 className={`text-base font-semibold ${colors.textPrimary} leading-relaxed`}>
-                                {lang === 'ar' ? q.label_ar : q.label_en}
-                                {q.required && <span className="text-red-400 ml-1 font-bold">*</span>}
-                              </h4>
-                              {q.required && (
-                                <div className="mt-2">
-                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-600/20 border border-red-600/50 text-red-300`}>
-                                    {lang === 'ar' ? 'مطلوب' : 'Required'}
-                                  </span>
+
+                            </>
+                          ) : (
+                            <>
+                              <td className="px-4 md:px-6 py-4 md:py-6 align-top">
+                                {/* Question Column - English (Left) */}
+                                <div className="space-y-2">
+                                  <h4 className={`text-base font-semibold ${colors.textPrimary} leading-relaxed`}>
+                                    {lang === 'ar' ? q.label_ar : q.label_en}
+                                    {q.required && <span className="text-red-400 ml-1 font-bold">*</span>}
+                                  </h4>
+                                  {q.required && (
+                                    <div className="mt-2">
+                                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-600/20 border border-red-600/50 text-red-300`}>
+                                        {lang === 'ar' ? 'مطلوب' : 'Required'}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {q.question_type === "rating" && (
+                                    <p className={`text-sm ${colors.textTertiary} font-medium`}>
+                                      {lang === 'ar' ? 'يرجى اختيار مستوى واحد من الخيارات أدناه' : 'Please select one level from the options below'}
+                                    </p>
+                                  )}
                                 </div>
-                              )}
-                              {q.question_type === "rating" && (
-                                <p className={`text-sm ${colors.textTertiary} font-medium`}>
-                                  {lang === 'ar' ? 'يرجى اختيار مستوى واحد من الخيارات أدناه' : 'Please select one level from the options below'}
-                                </p>
-                              )}
-                            </div>
-                          </td>
+                              </td>
+                              <td className="px-4 md:px-6 py-4 md:py-6 align-top">
+                                {/* Answer Column - English (Right) */}
+                                {q.question_type === "text" && (
+                                  <div className="space-y-2">
+                                    <label className={`block text-sm font-medium ${colors.labelText} ${colors.labelBg} px-2 py-1 rounded-md`}>
+                                      {lang === 'ar' ? 'اجابة مفتوحة:' : 'Open Answer:'}
+                                    </label>
+                                    <textarea
+                                      id={q.id}
+                                      name={q.id}
+                                      className={`w-full px-3 py-2 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 ${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} ${colors.inputPlaceholder} resize-none ${errors[q.id] ? 'border-red-500 ring-red-500' : ''}`}
+                                      placeholder={lang === 'ar' ? 'اكتب إجابتك هنا...' : 'Write your answer here...'}
+                                      value={form[q.id] || ""}
+                                      onChange={onFormChange}
+                                      rows={4}
+                                      required={q.required}
+                                    />
+                                    {errors[q.id] && (
+                                      <motion.p 
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="text-red-400 text-sm font-medium flex items-center gap-1"
+                                      >
+                                        <ExclamationTriangleIcon className="w-3 h-3" />
+                                        {errors[q.id]}
+                                      </motion.p>
+                                    )}
+                                  </div>
+                                )}
+
+                                {q.question_type === "rating" && q.rating_scale && (
+                                  <div className="space-y-3">
+                                    <div className="grid grid-cols-5 gap-1 md:gap-2">
+                                      {lang === 'ar' 
+                                        ? [5, 4, 3, 2, 1].map((value) => (
+                                            <label key={value} className="flex flex-col items-center cursor-pointer group">
+                                              <input
+                                                type="radio"
+                                                name={q.id}
+                                                value={value}
+                                                checked={form[q.id] === value.toString()}
+                                                onChange={onFormChange}
+                                                required={q.required}
+                                                className="sr-only"
+                                              />
+                                              <motion.div 
+                                                className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center text-sm font-bold transition-all duration-200 ${form[q.id] === value.toString() ? `${colors.primaryBg} border-green-500 text-white shadow-lg scale-110` : `${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} hover:border-green-400`}`}
+                                                whileTap={{ scale: 0.95 }}
+                                              >
+                                                {value}
+                                              </motion.div>
+                                              <div className={`text-xs text-center mt-1 ${colors.textSecondary} leading-tight font-medium max-w-[60px]`}>
+                                                {getRatingOptionLabel(q.rating_scale, value, lang)}
+                                              </div>
+                                            </label>
+                                          ))
+                                        : [1, 2, 3, 4, 5].map((value) => (
+                                            <label key={value} className="flex flex-col items-center cursor-pointer group">
+                                              <input
+                                                type="radio"
+                                                name={q.id}
+                                                value={value}
+                                                checked={form[q.id] === value.toString()}
+                                                onChange={onFormChange}
+                                                required={q.required}
+                                                className="sr-only"
+                                              />
+                                              <motion.div 
+                                                className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center text-sm font-bold transition-all duration-200 ${form[q.id] === value.toString() ? `${colors.primaryBg} border-green-500 text-white shadow-lg scale-110` : `${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} hover:border-green-400`}`}
+                                                whileTap={{ scale: 0.95 }}
+                                              >
+                                                {value}
+                                              </motion.div>
+                                              <div className={`text-xs text-center mt-1 ${colors.textSecondary} leading-tight font-medium max-w-[60px]`}>
+                                                {getRatingOptionLabel(q.rating_scale, value, lang)}
+                                              </div>
+                                            </label>
+                                          ))
+                                      }
+                                    </div>
+                                    <div className={`text-xs text-center mt-2 ${colors.textTertiary} font-medium`}>
+                                      {lang === 'ar' ? 'ملاحظات العملاء' : 'Customer feedback'}
+                                    </div>
+                                    {errors[q.id] && (
+                                      <motion.p 
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="text-red-400 text-sm font-medium text-center flex items-center justify-center gap-1"
+                                      >
+                                        <ExclamationTriangleIcon className="w-3 h-3" />
+                                        {errors[q.id]}
+                                      </motion.p>
+                                    )}
+                                  </div>
+                                )}
+
+                                {q.question_type === "comments" && (
+                                  <div className="space-y-4">
+                                    <div>
+                                      <label className={`block text-sm font-medium ${colors.labelText} ${colors.labelBg} px-2 py-1 rounded-md mb-2`}>
+                                        {lang === 'ar' ? 'التعليقات | Comments' : 'Comments | التعليقات'}
+                                      </label>
+                                      <div className="flex gap-4">
+                                        <label className="flex items-center cursor-pointer">
+                                          <input
+                                            type="radio"
+                                            name={`${q.id}_yesno`}
+                                            value="yes"
+                                            checked={form[`${q.id}_yesno`] === "yes"}
+                                            onChange={onFormChange}
+                                            required={q.required}
+                                            className={`w-4 h-4 text-green-600 ${colors.inputBg} ${colors.inputBorder} rounded focus:ring-green-500 focus:ring-2`}
+                                          />
+                                          <span className={`ml-2 text-sm font-medium ${colors.textPrimary}`}>
+                                            {lang === 'ar' ? 'نعم' : 'Yes'}
+                                          </span>
+                                        </label>
+                                        <label className="flex items-center cursor-pointer">
+                                          <input
+                                            type="radio"
+                                            name={`${q.id}_yesno`}
+                                            value="no"
+                                            checked={form[`${q.id}_yesno`] === "no"}
+                                            onChange={onFormChange}
+                                            required={q.required}
+                                            className={`w-4 h-4 text-green-600 ${colors.inputBg} ${colors.inputBorder} rounded focus:ring-green-500 focus:ring-2`}
+                                          />
+                                          <span className={`ml-2 text-sm font-medium ${colors.textPrimary}`}>
+                                            {lang === 'ar' ? 'لا' : 'No'}
+                                          </span>
+                                        </label>
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label className={`block text-sm font-medium ${colors.labelText} ${colors.labelBg} px-2 py-1 rounded-md mb-2`}>
+                                        {lang === 'ar' ? 'اجابة مفتوحة:' : 'Open Answer:'}
+                                      </label>
+                                      <textarea
+                                        name={`${q.id}_comment`}
+                                        className={`w-full px-3 py-2 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 ${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} ${colors.inputPlaceholder} resize-none`}
+                                        placeholder={lang === 'ar' ? 'أضف تعليقك هنا...' : 'Add your comment here...'}
+                                        value={form[`${q.id}_comment`] || ""}
+                                        onChange={onFormChange}
+                                        rows={3}
+                                      />
+                                    </div>
+                                    {errors[q.id] && (
+                                      <motion.p 
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="text-red-400 text-sm font-medium flex items-center gap-1"
+                                      >
+                                        <ExclamationTriangleIcon className="w-3 h-3" />
+                                        {errors[q.id]}
+                                      </motion.p>
+                                    )}
+                                  </div>
+                                )}
+                              </td>
+                            </>
+                          )}
                         </motion.tr>
                       ))}
                     </tbody>

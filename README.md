@@ -72,14 +72,5 @@ Then open [http://localhost:3000](http://localhost:3000)
 ---
 
 ## 👨‍💻 Team
-- Salam Cyber-Security Team
 - Professional React/Next.js Developers
 
----
-
-## 🏢 Copyright
-All rights reserved © Salam Cyber-Security Sector
-
-
-8 - 4
-4 - 12

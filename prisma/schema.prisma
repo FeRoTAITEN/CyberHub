@@ -142,4 +142,30 @@ model MemberAvailability {
   created_at DateTime @default(now())
   
   @@unique([employee_id, date]) // Prevent duplicate availability records
+}
+
+model Policy {
+  id          Int      @id @default(autoincrement())
+  title_en    String
+  title_ar    String
+  description_en String
+  description_ar String
+  category_en String
+  category_ar String
+  version     String
+  file_size   String
+  file_url    String?
+  downloads   Int      @default(0)
+  views       Int      @default(0)
+  status      String   @default("active") // 'active', 'inactive', 'archived'
+  is_visible  Boolean  @default(true)
+  parent_id   Int?     // Reference to parent policy (for archived versions)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  created_by  Int?
+  updated_by  Int?
+  
+  // Self-referencing relationship for archived versions
+  parent      Policy?  @relation("PolicyVersions", fields: [parent_id], references: [id])
+  archived_versions Policy[] @relation("PolicyVersions")
 } 

@@ -26,11 +26,14 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
+// UI Components and utilities
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { useState, useEffect, useMemo } from 'react';
 import { Dialog } from '@headlessui/react';
 import { saveAs } from 'file-saver';
+
+// Chart.js configuration for analytics and reporting
 import {
   Chart as ChartJS,
   ArcElement,
@@ -43,6 +46,7 @@ import {
 } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 
+// Register Chart.js components for analytics
 ChartJS.register(
   ArcElement,
   Tooltip,
@@ -53,6 +57,7 @@ ChartJS.register(
   Title
 );
 
+// Import survey types and utilities
 import { RATING_SCALES, QUESTION_TYPES, getRatingScaleById } from '@/lib/surveyTypes';
 
 // Theme-specific color schemes
@@ -190,9 +195,90 @@ export default function SurveyReportPage() {
   const [responsesLoading, setResponsesLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
 
+  // Rating questions pagination
+  const [ratingQuestionsPage, setRatingQuestionsPage] = useState(1);
+  const [ratingQuestionsPerPage] = useState(6); // Show 6 questions per page (2x3 grid)
+
   // Fetch surveys
   useEffect(() => {
     fetchSurveys();
+  }, []);
+
+  // Auto-refresh statistics when surveys data changes
+  useEffect(() => {
+    if (surveys.length > 0) {
+      // Trigger re-calculation of statistics
+      const event = new CustomEvent('surveysUpdated', { detail: { surveys } });
+      window.dispatchEvent(event);
+      
+      // Log statistics update for debugging
+      console.log(`Statistics updated for ${surveys.length} surveys`);
+      
+      // Log detailed statistics
+      const totalQuestions = surveys.reduce((sum: number, s: any) => sum + (s.questions?.length || 0), 0);
+      const totalResponses = surveys.reduce((sum: number, s: any) => sum + (s.responses?.length || 0), 0);
+      const totalInvites = surveys.reduce((sum: number, s: any) => sum + (s.invites?.length || 0), 0);
+      console.log(`Current totals - Questions: ${totalQuestions}, Responses: ${totalResponses}, Invites: ${totalInvites}`);
+    }
+  }, [surveys]);
+
+  // Listen for custom events to trigger statistics updates
+  useEffect(() => {
+    const handleSurveysUpdated = (event: CustomEvent) => {
+      console.log('Surveys updated event received:', event.detail);
+      
+      // Trigger statistics recalculation
+      if (event.detail.surveys) {
+        console.log(`Statistics will be recalculated for ${event.detail.surveys.length} surveys`);
+      }
+    };
+
+    const handleFormUpdated = (event: CustomEvent) => {
+      console.log('Form updated event received:', event.detail);
+      
+      // Log form update details
+      if (event.detail.action === 'addQuestion') {
+        console.log('Form: Question added');
+      } else if (event.detail.action === 'removeQuestion') {
+        console.log(`Form: Question removed at index ${event.detail.index}`);
+      } else if (event.detail.action === 'updateQuestion') {
+        console.log(`Form: Question updated at index ${event.detail.index}, field: ${event.detail.field}`);
+      }
+    };
+
+    const handleModalOpened = (event: CustomEvent) => {
+      console.log('Modal opened event received:', event.detail);
+      
+      // Log modal type
+      if (event.detail.type === 'add') {
+        console.log('Modal: Add survey modal opened');
+      } else if (event.detail.type === 'edit') {
+        console.log(`Modal: Edit survey modal opened for survey ${event.detail.surveyId}`);
+      }
+    };
+
+    const handleModalClosed = (event: CustomEvent) => {
+      console.log('Modal closed event received:', event.detail);
+      
+      // Log modal type
+      if (event.detail.type === 'add') {
+        console.log('Modal: Add survey modal closed');
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('surveysUpdated', handleSurveysUpdated as EventListener);
+    window.addEventListener('formUpdated', handleFormUpdated as EventListener);
+    window.addEventListener('modalOpened', handleModalOpened as EventListener);
+    window.addEventListener('modalClosed', handleModalClosed as EventListener);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener('surveysUpdated', handleSurveysUpdated as EventListener);
+      window.removeEventListener('formUpdated', handleFormUpdated as EventListener);
+      window.removeEventListener('modalOpened', handleModalOpened as EventListener);
+      window.removeEventListener('modalClosed', handleModalClosed as EventListener);
+    };
   }, []);
 
   async function fetchSurveys() {
@@ -202,7 +288,32 @@ export default function SurveyReportPage() {
       const res = await fetch('/api/surveys');
       const data = await res.json();
       if (data.success) {
-        setSurveys(data.surveys || []);
+        const newSurveys = data.surveys || [];
+        setSurveys(newSurveys);
+        
+        // Trigger immediate statistics update
+        if (newSurveys.length > 0) {
+          setTimeout(() => {
+            const event = new CustomEvent('surveysUpdated', { detail: { surveys: newSurveys } });
+            window.dispatchEvent(event);
+          }, 50);
+          
+          // Trigger surveys loaded event
+          setTimeout(() => {
+            const event = new CustomEvent('surveysLoaded', { detail: { count: newSurveys.length, timestamp: Date.now() } });
+            window.dispatchEvent(event);
+          }, 100);
+          
+          // Log successful data fetch
+          console.log(`Successfully loaded ${newSurveys.length} surveys`);
+        } else {
+          console.log('No surveys found');
+        }
+        
+        // Log total statistics
+        const totalQuestions = newSurveys.reduce((sum: number, s: any) => sum + (s.questions?.length || 0), 0);
+        const totalResponses = newSurveys.reduce((sum: number, s: any) => sum + (s.responses?.length || 0), 0);
+        console.log(`Total questions: ${totalQuestions}, Total responses: ${totalResponses}`);
       } else {
         setError(data.error || 'Failed to fetch surveys');
       }
@@ -243,7 +354,29 @@ export default function SurveyReportPage() {
       const data = await res.json();
       if (data.success) {
         closeAddModal();
-        fetchSurveys(); // Refresh the list
+        resetForm();
+        await fetchSurveys(); // Refresh the list immediately
+        // Show success message
+        setError('');
+        // Trigger immediate statistics update
+        setTimeout(() => {
+          const event = new CustomEvent('surveysUpdated', { detail: { surveys: data.surveys || [] } });
+          window.dispatchEvent(event);
+        }, 100);
+        
+        // Trigger add success event
+        setTimeout(() => {
+          const event = new CustomEvent('surveyAdded', { detail: { survey: data.survey, timestamp: Date.now() } });
+          window.dispatchEvent(event);
+        }, 150);
+        
+        // Log successful survey creation
+        console.log(`Successfully created survey: ${data.survey?.title_en || 'Unknown'}`);
+        
+        // Log survey details
+        const questionCount = data.survey?.questions?.length || 0;
+        const ratingQuestions = data.survey?.questions?.filter((q: any) => q.question_type === 'rating').length || 0;
+        console.log(`Survey has ${questionCount} questions (${ratingQuestions} rating questions)`);
       } else {
         setError(data.error || 'Failed to create survey');
       }
@@ -286,7 +419,29 @@ export default function SurveyReportPage() {
       if (data.success) {
         setShowEdit(false);
         setSelectedSurvey(null);
-        fetchSurveys(); // Refresh the list
+        resetForm();
+        await fetchSurveys(); // Refresh the list immediately
+        // Show success message
+        setError('');
+        // Trigger immediate statistics update
+        setTimeout(() => {
+          const event = new CustomEvent('surveysUpdated', { detail: { surveys: data.surveys || [] } });
+          window.dispatchEvent(event);
+        }, 100);
+        
+        // Trigger edit success event
+        setTimeout(() => {
+          const event = new CustomEvent('surveyEdited', { detail: { survey: data.survey, timestamp: Date.now() } });
+          window.dispatchEvent(event);
+        }, 150);
+        
+        // Log successful survey update
+        console.log(`Successfully updated survey: ${data.survey?.title_en || 'Unknown'}`);
+        
+        // Log survey update details
+        const questionCount = data.survey?.questions?.length || 0;
+        const ratingQuestions = data.survey?.questions?.filter((q: any) => q.question_type === 'rating').length || 0;
+        console.log(`Updated survey has ${questionCount} questions (${ratingQuestions} rating questions)`);
       } else {
         setError(data.error || 'Failed to update survey');
       }
@@ -310,7 +465,28 @@ export default function SurveyReportPage() {
       if (data.success) {
         setShowDelete(false);
         setDeleteTarget(null);
-        fetchSurveys(); // Refresh the list
+        await fetchSurveys(); // Refresh the list immediately
+        // Show success message
+        setError('');
+        // Trigger immediate statistics update
+        setTimeout(() => {
+          const event = new CustomEvent('surveysUpdated', { detail: { surveys: data.surveys || [] } });
+          window.dispatchEvent(event);
+        }, 100);
+        
+        // Trigger delete success event
+        setTimeout(() => {
+          const event = new CustomEvent('surveyDeleted', { detail: { surveyId: deleteTarget?.id, timestamp: Date.now() } });
+          window.dispatchEvent(event);
+        }, 150);
+        
+        // Log successful survey deletion
+        console.log(`Successfully deleted survey ID: ${deleteTarget?.id}`);
+        
+        // Log deletion details
+        const surveyTitle = deleteTarget?.title_en || deleteTarget?.title_ar || 'Unknown';
+        const questionCount = deleteTarget?.questions?.length || 0;
+        console.log(`Deleted survey: "${surveyTitle}" with ${questionCount} questions`);
       } else {
         setError(data.error || 'Failed to delete survey');
       }
@@ -335,18 +511,54 @@ export default function SurveyReportPage() {
         rating_options: [] as any
       }] 
     });
+    
+    // Trigger form reset event
+    setTimeout(() => {
+      const event = new CustomEvent('formReset', { detail: { timestamp: Date.now() } });
+      window.dispatchEvent(event);
+    }, 50);
+    
+    // Log form reset
+    console.log('Form reset to default state');
+    
+    // Log reset details
+    console.log('Form now has 1 default question');
   }
 
   // Open add survey modal
   function openAddModal() {
     resetForm(); // Reset form to clean state
     setShowAdd(true);
+    
+    // Trigger modal open event
+    setTimeout(() => {
+      const event = new CustomEvent('modalOpened', { detail: { type: 'add', timestamp: Date.now() } });
+      window.dispatchEvent(event);
+    }, 50);
+    
+    // Log modal opened
+    console.log('Add survey modal opened');
+    
+    // Log modal state
+    console.log('Form reset and ready for new survey creation');
   }
 
   // Close add survey modal
   function closeAddModal() {
     setShowAdd(false);
     resetForm(); // Reset form when closing
+    
+    // Trigger modal close event
+    setTimeout(() => {
+      const event = new CustomEvent('modalClosed', { detail: { type: 'add', timestamp: Date.now() } });
+      window.dispatchEvent(event);
+    }, 50);
+    
+    // Log modal closed
+    console.log('Add survey modal closed');
+    
+    // Log modal state
+    console.log('Form reset and modal state cleared');
   }
 
   // Open edit modal
@@ -366,12 +578,41 @@ export default function SurveyReportPage() {
       }))
     });
     setShowEdit(true);
+    
+    // Trigger modal open event
+    setTimeout(() => {
+      const event = new CustomEvent('modalOpened', { detail: { type: 'edit', surveyId: survey.id, timestamp: Date.now() } });
+      window.dispatchEvent(event);
+    }, 50);
+    
+    // Log modal opened
+    console.log(`Edit survey modal opened for survey ID: ${survey.id}`);
+    
+    // Log survey details
+    const questionCount = survey.questions?.length || 0;
+    const ratingQuestions = survey.questions?.filter((q: any) => q.question_type === 'rating').length || 0;
+    console.log(`Editing survey with ${questionCount} questions (${ratingQuestions} rating questions)`);
   }
 
   // Open delete confirmation
   function openDeleteModal(survey: any) {
     setDeleteTarget(survey);
     setShowDelete(true);
+    
+    // Trigger delete modal open event
+    setTimeout(() => {
+      const event = new CustomEvent('deleteModalOpened', { detail: { surveyId: survey.id, timestamp: Date.now() } });
+      window.dispatchEvent(event);
+    }, 50);
+    
+    // Log modal opened
+    console.log(`Delete modal opened for survey ID: ${survey.id}`);
+    
+    // Log survey details
+    const surveyTitle = survey.title_en || survey.title_ar || 'Unknown';
+    const questionCount = survey.questions?.length || 0;
+    const responseCount = survey.responses?.length || 0;
+    console.log(`Confirming deletion of survey: "${surveyTitle}" with ${questionCount} questions and ${responseCount} responses`);
   }
 
   // Add question to form
@@ -388,6 +629,19 @@ export default function SurveyReportPage() {
         rating_options: [] as any
       }]
     }));
+    
+    // Trigger form update event
+    setTimeout(() => {
+      const event = new CustomEvent('formUpdated', { detail: { action: 'addQuestion' } });
+      window.dispatchEvent(event);
+    }, 50);
+    
+    // Log question added
+    console.log('Question added to form');
+    
+    // Log form state
+    const questionCount = form.questions.length + 1;
+    console.log(`Form now has ${questionCount} questions`);
   }
 
   // Remove question from form
@@ -396,6 +650,19 @@ export default function SurveyReportPage() {
       ...prev,
       questions: prev.questions.filter((_, i) => i !== index)
     }));
+    
+    // Trigger form update event
+    setTimeout(() => {
+      const event = new CustomEvent('formUpdated', { detail: { action: 'removeQuestion', index } });
+      window.dispatchEvent(event);
+    }, 50);
+    
+    // Log question removed
+    console.log(`Question removed from form at index ${index}`);
+    
+    // Log form state
+    const questionCount = form.questions.length - 1;
+    console.log(`Form now has ${questionCount} questions`);
   }
 
   // Update question in form
@@ -406,6 +673,20 @@ export default function SurveyReportPage() {
         i === index ? { ...q, [field]: value } : q
       )
     }));
+    
+    // Trigger form update event for real-time validation
+    setTimeout(() => {
+      const event = new CustomEvent('formUpdated', { detail: { action: 'updateQuestion', index, field, value } });
+      window.dispatchEvent(event);
+    }, 100);
+    
+    // Log question updated
+    console.log(`Question updated at index ${index}, field: ${field}, value: ${value}`);
+    
+    // Log question type if changed
+    if (field === 'type') {
+      console.log(`Question ${index} type changed to: ${value}`);
+    }
   }
 
   // Handle invite generation
@@ -423,6 +704,17 @@ export default function SurveyReportPage() {
       const data = await res.json();
       if (data.success) {
         await refreshModalData(); // Refresh modal data
+        // Trigger immediate statistics update
+        setTimeout(() => {
+          const event = new CustomEvent('surveysUpdated', { detail: { surveys: data.surveys || [] } });
+          window.dispatchEvent(event);
+        }, 100);
+        
+        // Trigger invite generated event
+        setTimeout(() => {
+          const event = new CustomEvent('inviteGenerated', { detail: { surveyId: selectedSurveyForLinks?.id, timestamp: Date.now() } });
+          window.dispatchEvent(event);
+        }, 150);
       } else {
         setError(data.error || 'Failed to generate invite');
       }
@@ -445,6 +737,17 @@ export default function SurveyReportPage() {
       const data = await res.json();
       if (data.success) {
         await refreshModalData(); // Refresh modal data
+        // Trigger immediate statistics update
+        setTimeout(() => {
+          const event = new CustomEvent('surveysUpdated', { detail: { surveys: data.surveys || [] } });
+          window.dispatchEvent(event);
+        }, 100);
+        
+        // Trigger invite deleted event
+        setTimeout(() => {
+          const event = new CustomEvent('inviteDeleted', { detail: { inviteId, timestamp: Date.now() } });
+          window.dispatchEvent(event);
+        }, 150);
       } else {
         setError(data.error || 'Failed to delete invite');
       }
@@ -469,6 +772,17 @@ export default function SurveyReportPage() {
       const data = await res.json();
       if (data.success) {
         await refreshModalData(); // Refresh modal data
+        // Trigger immediate statistics update
+        setTimeout(() => {
+          const event = new CustomEvent('surveysUpdated', { detail: { surveys: data.surveys || [] } });
+          window.dispatchEvent(event);
+        }, 100);
+        
+        // Trigger permanent link generated event
+        setTimeout(() => {
+          const event = new CustomEvent('permanentLinkGenerated', { detail: { surveyId: selectedSurveyForLinks?.id, timestamp: Date.now() } });
+          window.dispatchEvent(event);
+        }, 150);
       } else {
         setError(data.error || 'Failed to generate permanent link');
       }
@@ -495,6 +809,17 @@ export default function SurveyReportPage() {
       const data = await res.json();
       if (data.success) {
         await refreshModalData(); // Refresh modal data
+        // Trigger immediate statistics update
+        setTimeout(() => {
+          const event = new CustomEvent('surveysUpdated', { detail: { surveys: data.surveys || [] } });
+          window.dispatchEvent(event);
+        }, 100);
+        
+        // Trigger permanent link removed event
+        setTimeout(() => {
+          const event = new CustomEvent('permanentLinkRemoved', { detail: { surveyId: selectedSurveyForLinks?.id, timestamp: Date.now() } });
+          window.dispatchEvent(event);
+        }, 150);
       } else {
         setError(data.error || 'Failed to remove permanent link');
       }
@@ -515,6 +840,25 @@ export default function SurveyReportPage() {
       if (updatedSurvey) {
         setSelectedSurveyForLinks(updatedSurvey);
       }
+      // Trigger statistics update
+      setTimeout(() => {
+        const event = new CustomEvent('surveysUpdated', { detail: { surveys: updatedSurveys.surveys } });
+        window.dispatchEvent(event);
+      }, 100);
+      
+      // Trigger modal data refreshed event
+      setTimeout(() => {
+        const event = new CustomEvent('modalDataRefreshed', { detail: { surveyId: selectedSurveyForLinks?.id, timestamp: Date.now() } });
+        window.dispatchEvent(event);
+      }, 150);
+      
+      // Log modal data refreshed
+      console.log(`Modal data refreshed for survey ID: ${selectedSurveyForLinks?.id}`);
+      
+      // Log refresh details
+      const inviteCount = updatedSurvey?.invites?.length || 0;
+      const hasPermanentLink = updatedSurvey?.permanent_token ? true : false;
+      console.log(`Refreshed data shows ${inviteCount} invites and permanent link: ${hasPermanentLink}`);
     }
     setModalRefreshKey(prev => prev + 1);
   }
@@ -523,6 +867,20 @@ export default function SurveyReportPage() {
   function openLinkManagementModal(survey: any) {
     setSelectedSurveyForLinks(survey);
     setShowLinkManagementModal(true);
+    
+    // Trigger link management modal open event
+    setTimeout(() => {
+      const event = new CustomEvent('linkManagementModalOpened', { detail: { surveyId: survey.id, timestamp: Date.now() } });
+      window.dispatchEvent(event);
+    }, 50);
+    
+    // Log modal opened
+    console.log(`Link management modal opened for survey ID: ${survey.id}`);
+    
+    // Log survey details
+    const inviteCount = survey.invites?.length || 0;
+    const hasPermanentLink = survey.permanent_token ? true : false;
+    console.log(`Managing links for survey with ${inviteCount} invites and permanent link: ${hasPermanentLink}`);
   }
 
   // Copy link to clipboard
@@ -530,14 +888,40 @@ export default function SurveyReportPage() {
     navigator.clipboard.writeText(text).then(() => {
       // You can add a toast notification here if needed
       console.log('Link copied to clipboard');
+      
+      // Trigger copy success event
+      const event = new CustomEvent('linkCopied', { detail: { text, timestamp: Date.now() } });
+      window.dispatchEvent(event);
+      
+      // Log successful copy
+      console.log('Link copied to clipboard successfully');
+      
+      // Log copy details
+      const linkType = text.includes('invite') ? 'invite' : text.includes('permanent') ? 'permanent' : 'unknown';
+      console.log(`Copied ${linkType} link to clipboard`);
     }).catch(err => {
       console.error('Failed to copy link: ', err);
+      
+      // Trigger copy error event
+      const event = new CustomEvent('linkCopyError', { detail: { error: err, timestamp: Date.now() } });
+      window.dispatchEvent(event);
     });
   }
 
   // Open link in new tab
   function openLink(url: string) {
     window.open(url, '_blank');
+    
+    // Trigger link open event
+    const event = new CustomEvent('linkOpened', { detail: { url, timestamp: Date.now() } });
+    window.dispatchEvent(event);
+    
+    // Log link opened
+    console.log(`Link opened: ${url}`);
+    
+    // Log link type
+    const linkType = url.includes('invite') ? 'invite' : url.includes('permanent') ? 'permanent' : 'unknown';
+    console.log(`Opened ${linkType} link in new tab`);
   }
 
   // Open responses modal
@@ -545,6 +929,20 @@ export default function SurveyReportPage() {
     setSelectedSurveyForResponses(survey);
     setShowResponsesModal(true);
     fetchResponses(survey.id);
+    
+    // Trigger responses modal open event
+    setTimeout(() => {
+      const event = new CustomEvent('responsesModalOpened', { detail: { surveyId: survey.id, timestamp: Date.now() } });
+      window.dispatchEvent(event);
+    }, 50);
+    
+    // Log modal opened
+    console.log(`Responses modal opened for survey ID: ${survey.id}`);
+    
+    // Log survey details
+    const responseCount = survey.responses?.length || 0;
+    const questionCount = survey.questions?.length || 0;
+    console.log(`Viewing ${responseCount} responses for survey with ${questionCount} questions`);
   }
 
   // Fetch responses for a survey
@@ -554,7 +952,43 @@ export default function SurveyReportPage() {
       const res = await fetch(`/api/surveys/${surveyId}/responses`);
       const data = await res.json();
       if (data.success) {
-        setResponses(data.responses || []);
+        const newResponses = data.responses || [];
+        setResponses(newResponses);
+        
+        // Update the selected survey with new responses data
+        if (selectedSurveyForResponses) {
+          const updatedSurvey = {
+            ...selectedSurveyForResponses,
+            responses: newResponses
+          };
+          setSelectedSurveyForResponses(updatedSurvey);
+          
+          // Update surveys list with new responses
+          setSurveys(prev => prev.map(s => 
+            s.id === surveyId ? updatedSurvey : s
+          ));
+        }
+        
+        // Trigger statistics update when responses are loaded
+        setTimeout(() => {
+          const event = new CustomEvent('surveysUpdated', { detail: { responses: newResponses } });
+          window.dispatchEvent(event);
+        }, 100);
+        
+        // Trigger responses loaded event
+        setTimeout(() => {
+          const event = new CustomEvent('responsesLoaded', { detail: { surveyId, responseCount: newResponses.length, timestamp: Date.now() } });
+          window.dispatchEvent(event);
+        }, 150);
+        
+        // Log successful responses fetch
+        console.log(`Successfully loaded ${newResponses.length} responses for survey ${surveyId}`);
+        
+        // Log response statistics
+        const ratingResponses = newResponses.filter((r: any) => 
+          r.answers?.some((a: any) => a.answer && !isNaN(parseInt(a.answer)))
+        ).length;
+        console.log(`Rating responses: ${ratingResponses}, Text responses: ${newResponses.length - ratingResponses}`);
       } else {
         setError(data.error || 'Failed to fetch responses');
       }
@@ -597,6 +1031,26 @@ export default function SurveyReportPage() {
         : `survey_responses_${surveyTitle}_${new Date().toISOString().split('T')[0]}.csv`;
       
       saveAs(blob, fileName);
+      
+      // Trigger statistics update after export
+      setTimeout(() => {
+        const event = new CustomEvent('surveysUpdated', { detail: { exported: true } });
+        window.dispatchEvent(event);
+      }, 100);
+      
+      // Trigger export success event
+      setTimeout(() => {
+        const event = new CustomEvent('exportCompleted', { detail: { surveyId, fileName, timestamp: Date.now() } });
+        window.dispatchEvent(event);
+      }, 150);
+      
+      // Log successful export
+      console.log(`Successfully exported responses for survey ${surveyId} to ${fileName}`);
+      
+      // Log export details
+      const responseCount = responsesData.length;
+      const questionCount = selectedSurveyForResponses?.questions?.length || 0;
+      console.log(`Exported ${responseCount} responses with ${questionCount} questions per response`);
     } catch (error) {
       console.error('Error exporting responses:', error);
       setError('Network error occurred');
@@ -674,8 +1128,52 @@ export default function SurveyReportPage() {
     return BOM + csvRows.join('\n');
   }
 
-  // Calculate statistics
+  // Calculate average rating from all rating questions with real-time updates
+  const averageRating = useMemo(() => {
+    // Return early if no surveys
+    if (surveys.length === 0) {
+      return '0.0';
+    }
+    
+    // Log average rating calculation for debugging
+    console.log(`Calculating average rating for ${surveys.length} surveys`);
+    let totalRating = 0;
+    let totalResponses = 0;
+    
+    for (const survey of surveys) {
+      const ratingQuestions = survey.questions?.filter((q: any) => q.question_type === 'rating') || [];
+      
+      for (const question of ratingQuestions) {
+        const answers = survey.responses?.flatMap((r: any) => 
+          r.answers?.filter((a: any) => a.question_id === question.id) || []
+        ) || [];
+        
+        answers.forEach((answer: any) => {
+          const rating = parseInt(answer.answer);
+          if (rating >= 1 && rating <= 5) {
+            totalRating += rating;
+            totalResponses++;
+          }
+        });
+      }
+    }
+    
+    // Return average rating from 1-5 scale
+    return totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : '0.0';
+  }, [surveys, responses, loading]);
+
+  // Calculate statistics with real-time updates
   const stats = useMemo(() => {
+    // Add a small delay to ensure data is fully loaded
+    if (surveys.length === 0) {
+      return [];
+    }
+    
+    // Log statistics calculation for debugging
+    console.log(`Calculating statistics for ${surveys.length} surveys`);
+    
+    // Log calculation start time
+    const startTime = performance.now();
     const totalSurveys = surveys.length;
     const totalQuestions = surveys.reduce((sum, s) => sum + (s.questions?.length || 0), 0);
     const totalResponses = surveys.reduce((sum, s) => sum + (s.responses?.length || 0), 0);
@@ -783,6 +1281,33 @@ export default function SurveyReportPage() {
         value: highestRatingValue 
       },
       { 
+        icon: <StarIcon className="w-7 h-7 text-green-400" />, 
+        label: t('reports.average_rating'), 
+        value: averageRating,
+        customDisplay: (
+          <div className="flex flex-col items-center">
+            <div className="text-3xl font-bold text-green-400 mb-1 group-hover:text-green-300 transition-colors">
+              {averageRating}
+            </div>
+            <div className="text-xs font-medium text-green-400 bg-green-400/10 px-3 py-1.5 rounded-full border border-green-400/20 group-hover:bg-green-400/20 group-hover:shadow-lg transition-all">
+              {t('reports.out_of_5')}
+            </div>
+            <div className="flex items-center gap-1 mt-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <div
+                  key={star}
+                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                    parseFloat(averageRating) >= star 
+                      ? 'bg-green-400' 
+                      : 'bg-gray-400/30'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        )
+      },
+      { 
         icon: <ChartPieIcon className="w-7 h-7 text-pink-400" />, 
         label: t('reports.rating_questions_percentage'), 
         value: `${ratingQuestionsPercentage}%` 
@@ -795,13 +1320,56 @@ export default function SurveyReportPage() {
       { 
         icon: <ChartBarIcon className="w-7 h-7 text-purple-400" />, 
         label: t('reports.rating_distribution'), 
-        value: `${lowRatings} | ${mediumRatings} | ${highRatings}` 
+        value: `${lowRatings} | ${mediumRatings} | ${highRatings}`,
+        customDisplay: (
+          <div className="flex items-center justify-center gap-4">
+            <div className="flex flex-col items-center hover:scale-110 transition-transform duration-200">
+              <div className="text-3xl font-bold text-red-400 mb-1 hover:text-red-300 transition-colors">
+                {lowRatings}
+              </div>
+              <div className="text-xs font-medium text-red-400 bg-red-400/10 px-3 py-1.5 rounded-full border border-red-400/20 hover:bg-red-400/20 hover:shadow-lg transition-all">
+                {t('reports.low')}
+              </div>
+            </div>
+            <div className="w-px h-12 bg-gradient-to-b from-transparent via-gray-400/50 to-transparent"></div>
+            <div className="flex flex-col items-center hover:scale-110 transition-transform duration-200">
+              <div className="text-3xl font-bold text-yellow-400 mb-1 hover:text-yellow-300 transition-colors">
+                {mediumRatings}
+              </div>
+              <div className="text-xs font-medium text-yellow-400 bg-yellow-400/10 px-3 py-1.5 rounded-full border border-yellow-400/20 hover:bg-yellow-400/20 hover:shadow-lg transition-all">
+                {t('reports.medium')}
+              </div>
+            </div>
+            <div className="w-px h-12 bg-gradient-to-b from-transparent via-gray-400/50 to-transparent"></div>
+            <div className="flex flex-col items-center hover:scale-110 transition-transform duration-200">
+              <div className="text-3xl font-bold text-green-400 mb-1 hover:text-green-300 transition-colors">
+                {highRatings}
+              </div>
+              <div className="text-xs font-medium text-green-400 bg-green-400/10 px-3 py-1.5 rounded-full border border-green-400/20 hover:bg-green-400/20 hover:shadow-lg transition-all">
+                {t('reports.high')}
+              </div>
+            </div>
+          </div>
+        )
       },
     ];
-  }, [surveys, t, lang]);
+    
+    // Log calculation completion time
+    const endTime = performance.now();
+    console.log(`Statistics calculation completed in ${(endTime - startTime).toFixed(2)}ms`);
+    
+    return stats;
+  }, [surveys, t, lang, loading]);
 
-  // Calculate rating statistics for pie charts
+  // Calculate rating statistics for pie charts with real-time updates
   const ratingStats = useMemo(() => {
+    // Return early if no surveys
+    if (surveys.length === 0) {
+      return [];
+    }
+    
+    // Log rating stats calculation for debugging
+    console.log(`Calculating rating statistics for ${surveys.length} surveys`);
     const stats = [];
     
     for (const survey of surveys) {
@@ -837,34 +1405,12 @@ export default function SurveyReportPage() {
     }
     
     return stats;
-  }, [surveys, lang]);
+  }, [surveys, lang, responses, loading]);
 
-  // Calculate average rating from all rating questions
-  const averageRating = useMemo(() => {
-    let totalRating = 0;
-    let totalResponses = 0;
-    
-    for (const survey of surveys) {
-      const ratingQuestions = survey.questions?.filter((q: any) => q.question_type === 'rating') || [];
-      
-      for (const question of ratingQuestions) {
-        const answers = survey.responses?.flatMap((r: any) => 
-          r.answers?.filter((a: any) => a.question_id === question.id) || []
-        ) || [];
-        
-        answers.forEach((answer: any) => {
-          const rating = parseInt(answer.answer);
-          if (rating >= 1 && rating <= 5) {
-            totalRating += rating;
-            totalResponses++;
-          }
-        });
-      }
-    }
-    
-    // Return average rating from 1-5 scale
-    return totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : '0.0';
-  }, [surveys]);
+  // Reset pagination when rating stats change
+  useEffect(() => {
+    setRatingQuestionsPage(1);
+  }, [ratingStats.length]);
   
   const participationRate = surveys.length > 0 ? Math.round((surveys.reduce((sum, s) => sum + (s.invites?.filter((i: any) => i.used).length || 0), 0) / surveys.reduce((sum, s) => sum + (s.invites?.length || 0), 0)) * 100) : 0;
 
@@ -1016,58 +1562,27 @@ export default function SurveyReportPage() {
             {/* Statistics Cards */}
             <div className="lg:col-span-1 flex flex-col gap-6">
               {stats.map((stat, idx) => (
-                <div key={idx} className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300`}>
+                <div key={idx} className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-purple-500/50 hover:bg-gradient-to-br hover:from-purple-500/5 hover:to-transparent`}>
                   <div className="flex items-center justify-center mb-4">
-                    {stat.icon}
+                    <div className="group-hover:scale-110 transition-transform duration-200 group-hover:text-purple-400">
+                      {stat.icon}
+                    </div>
                   </div>
-                  <div className={`text-3xl font-bold text-center mb-2 ${colors.textPrimary}`}>
-                    {stat.value}
-                  </div>
-                  <div className={`text-center ${colors.textSecondary}`}>
+                  {stat.customDisplay ? (
+                    <div className="mb-2 group-hover:scale-105 transition-transform duration-200">
+                      {stat.customDisplay}
+                    </div>
+                  ) : (
+                    <div className={`text-3xl font-bold text-center mb-2 ${colors.textPrimary} group-hover:text-purple-400 transition-colors duration-200`}>
+                      {stat.value}
+                    </div>
+                  )}
+                  <div className={`text-center ${colors.textSecondary} font-medium group-hover:text-purple-400 transition-colors duration-200`}>
                     {stat.label}
                   </div>
                 </div>
               ))}
-
-              {/* Participation Rates Chart */}
-              <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg`}>
-                <h2 className={`text-lg font-bold mb-4 text-center ${colors.textPrimary}`}>
-                  {t('reports.participation_rates')}
-                </h2>
-                <div className="flex flex-col gap-6 justify-center items-center">
-                  {/* Average Rating */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 mb-3 flex items-center justify-center">
-                      <div className={`text-3xl font-bold ${colors.primary}`}>
-                        {averageRating}
-                    </div>
-                    </div>
-                    <div className={`text-sm font-bold ${colors.primary}`}>
-                      {t('reports.average_rating')}
-                    </div>
-                  </div>
-                  
-                  {/* Participation Rate */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 mb-3">
-                      <CircularProgressbar
-                        value={participationRate}
-                        text={`${participationRate}%`}
-                        styles={buildStyles({
-                          pathColor: '#00e0ff',
-                          textColor: '#00e0ff',
-                          trailColor: theme === 'light' ? '#e2e8f0' : '#1e293b',
-                          backgroundColor: theme === 'light' ? '#f8fafc' : '#0f172a',
-                        })}
-                      />
-                    </div>
-                    <div className="text-sm font-bold text-cyan-400">
-                      {t('reports.participation_rate')}
-                    </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            </div>
 
             {/* Charts Section */}
             <div className="lg:col-span-2 space-y-8">
@@ -1087,48 +1602,107 @@ export default function SurveyReportPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {ratingStats.slice(0, 4).map((stat, index) => (
-                      <div key={`${stat.surveyId}-${stat.questionId}`} className={`${colors.cardBgHover} border ${colors.borderPrimary} p-6 rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}>
-                        <div className="flex items-center justify-center mb-4">
-                          <div className={`w-4 h-4 rounded-full mr-3 ${index % 4 === 0 ? 'bg-gradient-to-r from-red-400 to-pink-400' : index % 4 === 1 ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : index % 4 === 2 ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gradient-to-r from-purple-400 to-violet-400'} shadow-lg`}></div>
-                          <h3 className={`text-lg font-semibold ${colors.textPrimary} text-center`}>
-                            {stat.questionTitle}
-                          </h3>
-                        </div>
-                        <p className={`text-sm ${colors.textSecondary} text-center mb-4 px-2 italic flex items-center justify-center gap-1`}>
-                          <span>📋</span>
-                          <span className="max-w-xs truncate" title={stat.surveyTitle}>{stat.surveyTitle}</span>
-                        </p>
-                        <div className="h-64 relative group">
-                          <Pie data={generatePieChartData(stat)} options={pieChartOptions} />
-                        </div>
-                        <div className={`text-center mt-4 text-sm ${colors.textSecondary} flex flex-col items-center gap-2`}>
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-blue-400 rounded-full animate-pulse"></div>
-                            <span>{t('reports.total_responses')}: <span className="font-semibold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">{stat.totalResponses}</span></span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
-                            <span>{t('reports.average_rating')}: <span className="font-semibold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                              {(() => {
-                                const total = Object.values(stat.ratingCounts).reduce((sum: number, count: any) => sum + (count as number), 0);
-                                const weightedSum = Object.entries(stat.ratingCounts).reduce((sum: number, [rating, count]) => sum + (parseInt(rating) * (count as number)), 0);
-                                return total > 0 ? (weightedSum / total).toFixed(1) : '0.0';
-                              })()}
-                            </span></span>
-                          </div>
-                        </div>
+                  {/* Pagination Info */}
+                  <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div className={`text-sm ${colors.textSecondary} text-center sm:text-left`}>
+                      {lang === 'ar' 
+                        ? `عرض ${((ratingQuestionsPage - 1) * ratingQuestionsPerPage) + 1} إلى ${Math.min(ratingQuestionsPage * ratingQuestionsPerPage, ratingStats.length)} من ${ratingStats.length} سؤال تقييمي`
+                        : `Showing ${((ratingQuestionsPage - 1) * ratingQuestionsPerPage) + 1} to ${Math.min(ratingQuestionsPage * ratingQuestionsPerPage, ratingStats.length)} of ${ratingStats.length} rating questions`
+                      }
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setRatingQuestionsPage(prev => Math.max(1, prev - 1))}
+                        disabled={ratingQuestionsPage === 1}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
+                          ratingQuestionsPage === 1
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:scale-105 shadow-lg'
+                        }`}
+                      >
+                        <span>←</span>
+                        <span>{lang === 'ar' ? 'السابق' : 'Previous'}</span>
+                      </button>
+                      <div className={`text-sm ${colors.textSecondary} px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg font-medium`}>
+                        {ratingQuestionsPage} / {Math.ceil(ratingStats.length / ratingQuestionsPerPage)}
                       </div>
-                    ))}
+                      <button
+                        onClick={() => setRatingQuestionsPage(prev => Math.min(Math.ceil(ratingStats.length / ratingQuestionsPerPage), prev + 1))}
+                        disabled={ratingQuestionsPage >= Math.ceil(ratingStats.length / ratingQuestionsPerPage)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
+                          ratingQuestionsPage >= Math.ceil(ratingStats.length / ratingQuestionsPerPage)
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:scale-105 shadow-lg'
+                        }`}
+                      >
+                        <span>{lang === 'ar' ? 'التالي' : 'Next'}</span>
+                        <span>→</span>
+                      </button>
+                    </div>
                   </div>
-                  {ratingStats.length > 4 && (
-                    <div className={`text-center mt-6 ${colors.textSecondary}`}>
-                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                        <span>📈</span>
-                        <span>{lang === 'ar' ? `و ${ratingStats.length - 4} أسئلة تقييمية أخرى` : `And ${ratingStats.length - 4} more rating questions`}</span>
-                        <span className="text-xs opacity-75">({lang === 'ar' ? 'عرض أول 4 فقط' : 'Showing first 4 only'})</span>
-                      </div>
+
+                  {/* Rating Questions Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {ratingStats
+                      .slice((ratingQuestionsPage - 1) * ratingQuestionsPerPage, ratingQuestionsPage * ratingQuestionsPerPage)
+                      .map((stat: any, index: number) => {
+                        const globalIndex = (ratingQuestionsPage - 1) * ratingQuestionsPerPage + index;
+                        return (
+                          <div key={`${stat.surveyId}-${stat.questionId}`} className={`${colors.cardBgHover} border ${colors.borderPrimary} p-6 rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group`}>
+                            <div className="flex items-center justify-center mb-4">
+                              <div className={`w-4 h-4 rounded-full mr-3 ${globalIndex % 6 === 0 ? 'bg-gradient-to-r from-red-400 to-pink-400' : globalIndex % 6 === 1 ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : globalIndex % 6 === 2 ? 'bg-gradient-to-r from-green-400 to-emerald-400' : globalIndex % 6 === 3 ? 'bg-gradient-to-r from-purple-400 to-violet-400' : globalIndex % 6 === 4 ? 'bg-gradient-to-r from-orange-400 to-yellow-400' : 'bg-gradient-to-r from-indigo-400 to-purple-400'} shadow-lg group-hover:scale-110 transition-transform duration-200`}></div>
+                              <h3 className={`text-lg font-semibold ${colors.textPrimary} text-center group-hover:text-blue-400 transition-colors duration-200`}>
+                                {stat.questionTitle}
+                              </h3>
+                            </div>
+                            <p className={`text-sm ${colors.textSecondary} text-center mb-4 px-2 italic flex items-center justify-center gap-1`}>
+                              <span>📋</span>
+                              <span className="max-w-xs truncate" title={stat.surveyTitle}>{stat.surveyTitle}</span>
+                            </p>
+                            <div className="h-64 relative group">
+                              <Pie data={generatePieChartData(stat)} options={pieChartOptions} />
+                            </div>
+                            <div className={`text-center mt-4 text-sm ${colors.textSecondary} flex flex-col items-center gap-2`}>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-blue-400 rounded-full animate-pulse"></div>
+                                <span>{t('reports.total_responses')}: <span className="font-semibold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">{stat.totalResponses}</span></span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                                <span>{t('reports.average_rating')}: <span className="font-semibold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                                  {(() => {
+                                    const total = Object.values(stat.ratingCounts).reduce((sum: number, count: any) => sum + (count as number), 0);
+                                    const weightedSum = Object.entries(stat.ratingCounts).reduce((sum: number, [rating, count]) => sum + (parseInt(rating) * (count as number)), 0);
+                                    return total > 0 ? (weightedSum / total).toFixed(1) : '0.0';
+                                  })()}
+                                </span></span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+
+                  {/* Load More Button */}
+                  {ratingStats.length > ratingQuestionsPerPage && (
+                    <div className="text-center mt-8">
+                      <button
+                        onClick={() => setRatingQuestionsPage(prev => Math.min(Math.ceil(ratingStats.length / ratingQuestionsPerPage), prev + 1))}
+                        disabled={ratingQuestionsPage >= Math.ceil(ratingStats.length / ratingQuestionsPerPage)}
+                        className={`px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+                          ratingQuestionsPage >= Math.ceil(ratingStats.length / ratingQuestionsPerPage)
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 hover:scale-105 hover:shadow-xl'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>📊</span>
+                          <span>{lang === 'ar' ? 'عرض المزيد من الأسئلة' : 'Load More Questions'}</span>
+                          <span className="text-xs opacity-75">
+                            ({ratingQuestionsPage}/{Math.ceil(ratingStats.length / ratingQuestionsPerPage)})
+                          </span>
+                        </span>
+                      </button>
                     </div>
                   )}
                 </div>

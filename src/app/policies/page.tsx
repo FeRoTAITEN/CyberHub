@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import {
   DocumentTextIcon,
@@ -10,119 +11,96 @@ import {
 import { useLang } from "../ClientLayout";
 import { useTranslation } from "@/lib/useTranslation";
 
-const policiesData = [
-  {
-    id: 1,
-    title: {
-      en: "Password Policy",
-      ar: "سياسة كلمات المرور",
-    },
-    summary: {
-      en: "Defines requirements for password complexity, rotation, and management.",
-      ar: "تحدد متطلبات تعقيد كلمات المرور وتغييرها وإدارتها.",
-    },
-    category: {
-      en: "Access Control",
-      ar: "التحكم في الوصول",
-    },
-    version: "3.2",
-    updated: "2024-05-15",
-    fileSize: "245 KB",
-    downloads: 156,
-  },
-  {
-    id: 2,
-    title: {
-      en: "Acceptable Use Policy",
-      ar: "سياسة الاستخدام المقبول",
-    },
-    summary: {
-      en: "Outlines acceptable and prohibited uses of company IT resources.",
-      ar: "توضح الاستخدامات المقبولة والممنوعة لموارد تقنية المعلومات بالشركة.",
-    },
-    category: {
-      en: "Resource Management",
-      ar: "إدارة الموارد",
-    },
-    version: "4.0",
-    updated: "2024-04-28",
-    fileSize: "890 KB",
-    downloads: 234,
-  },
-  {
-    id: 3,
-    title: {
-      en: "Incident Response Policy",
-      ar: "سياسة الاستجابة للحوادث",
-    },
-    summary: {
-      en: "Describes procedures for responding to cybersecurity incidents.",
-      ar: "تصف إجراءات الاستجابة للحوادث السيبرانية.",
-    },
-    category: {
-      en: "Incident Management",
-      ar: "إدارة الحوادث",
-    },
-    version: "2.1",
-    updated: "2024-03-10",
-    fileSize: "1.2 MB",
-    downloads: 89,
-  },
-  {
-    id: 4,
-    title: {
-      en: "Data Protection Policy",
-      ar: "سياسة حماية البيانات",
-    },
-    summary: {
-      en: "Guidelines for protecting sensitive company and customer data.",
-      ar: "إرشادات لحماية البيانات الحساسة للشركة والعملاء.",
-    },
-    category: {
-      en: "Data Security",
-      ar: "أمان البيانات",
-    },
-    version: "1.8",
-    updated: "2024-02-20",
-    fileSize: "756 KB",
-    downloads: 178,
-  },
-  {
-    id: 5,
-    title: {
-      en: "Network Security Policy",
-      ar: "سياسة أمان الشبكات",
-    },
-    summary: {
-      en: "Standards and procedures for network security and infrastructure.",
-      ar: "معايير وإجراءات أمان الشبكات والبنية التحتية.",
-    },
-    category: {
-      en: "Network Security",
-      ar: "أمان الشبكات",
-    },
-    version: "3.1",
-    updated: "2024-01-15",
-    fileSize: "1.5 MB",
-    downloads: 95,
-  },
-];
+interface Policy {
+  id: number;
+  title_en: string;
+  title_ar: string;
+  description_en: string;
+  description_ar: string;
+  category_en: string;
+  category_ar: string;
+  version: string;
+  file_size: string;
+  file_url?: string;
+  downloads: number;
+  views: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function PoliciesPage() {
   const { lang } = useLang();
   const { t } = useTranslation(lang);
+  const [policies, setPolicies] = useState<Policy[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleDownload = (policy: any) => {
-    const link = document.createElement('a');
-    link.href = policy.file_url;
-    link.download = policy.title[lang];
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Fetch policies from API
+  useEffect(() => {
+    const fetchPolicies = async () => {
+      try {
+        const response = await fetch('/api/policies');
+        if (response.ok) {
+          const data = await response.json();
+          setPolicies(data);
+        } else {
+          console.error('Failed to fetch policies');
+        }
+      } catch (error) {
+        console.error('Error fetching policies:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPolicies();
+  }, []);
+
+  const handleDownload = async (policy: Policy) => {
+    try {
+      // Update download count via API
+      await fetch(`/api/policies/${policy.id}/download`, {
+        method: 'POST',
+      });
+
+      // Simulate download
+      const link = document.createElement('a');
+      link.href = policy.file_url || "#";
+      link.download = `${lang === 'ar' ? policy.title_ar : policy.title_en}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Update local state
+      setPolicies(
+        policies.map((p) =>
+          p.id === policy.id ? { ...p, downloads: p.downloads + 1 } : p
+        )
+      );
+    } catch (error) {
+      console.error('Error downloading policy:', error);
+    }
   };
 
-  const handleView = (policy: any) => {
-    window.open(policy.file_url, '_blank');
+  const handleView = async (policy: Policy) => {
+    try {
+      // Update view count via API
+      await fetch(`/api/policies/${policy.id}/view`, {
+        method: 'POST',
+      });
+
+      // Update local state
+      setPolicies(
+        policies.map((p) =>
+          p.id === policy.id ? { ...p, views: p.views + 1 } : p
+        )
+      );
+      
+      // Open policy in new tab
+      window.open(policy.file_url || "#", '_blank');
+    } catch (error) {
+      console.error('Error viewing policy:', error);
+    }
   };
 
   return (
@@ -141,28 +119,52 @@ export default function PoliciesPage() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 content-animate">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 content-animate">
           <div className="card text-center p-8 stagger-animate">
             <div className="text-3xl font-bold text-green-400 mb-3">
-              {policiesData.length}
+              {policies.length}
             </div>
             <div className="text-slate-300 text-sm font-medium">
-              {lang === "ar" ? "إجمالي السياسات" : "Total Policies"}
+              {t("grc.total_policies")}
             </div>
           </div>
           <div className="card text-center p-8 stagger-animate">
             <div className="text-3xl font-bold text-blue-400 mb-3">
-              {policiesData.reduce((acc, policy) => acc + policy.downloads, 0)}
+              {policies.reduce((acc: number, policy: Policy) => acc + policy.downloads, 0)}
             </div>
             <div className="text-slate-300 text-sm font-medium">
-              {lang === "ar" ? "إجمالي التحميلات" : "Total Downloads"}
+              {t("grc.total_downloads")}
+            </div>
+          </div>
+          <div className="card text-center p-8 stagger-animate">
+            <div className="text-3xl font-bold text-purple-400 mb-3">
+              {policies.reduce((acc: number, policy: Policy) => acc + policy.views, 0)}
+            </div>
+            <div className="text-slate-300 text-sm font-medium">
+              {t("grc.total_views")}
             </div>
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-12">
+            <div className="text-slate-400">{t("grc.loading")}</div>
+          </div>
+        )}
+
         {/* Policies Grid */}
+        {!isLoading && policies.length === 0 && (
+          <div className="text-center py-12">
+            <DocumentTextIcon className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+            <div className="text-slate-400 text-lg">
+              {t("grc.no_policies")}
+            </div>
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 content-animate">
-          {policiesData.map((policy, index) => (
+          {policies.map((policy: Policy, index: number) => (
             <div
               key={policy.id}
               className="card-hover group p-8 stagger-animate"
@@ -180,7 +182,7 @@ export default function PoliciesPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-2">
-                      {policy.title[lang]}
+                      {lang === 'ar' ? policy.title_ar : policy.title_en}
                     </h3>
                     <div
                       className={`flex items-center text-sm text-slate-400 ${
@@ -190,7 +192,7 @@ export default function PoliciesPage() {
                       }`}
                     >
                       <span className="font-medium">
-                        {policy.category[lang]}
+                        {lang === 'ar' ? policy.category_ar : policy.category_en}
                       </span>
                       <span className="text-slate-500">•</span>
                       <span>v{policy.version}</span>
@@ -210,7 +212,7 @@ export default function PoliciesPage() {
 
               {/* Description */}
               <p className="text-slate-300 mb-8 leading-relaxed text-base">
-                {policy.summary[lang]}
+                {lang === 'ar' ? policy.description_ar : policy.description_en}
               </p>
 
               {/* Metadata */}
@@ -222,7 +224,7 @@ export default function PoliciesPage() {
                 >
                   <CalendarIcon className="w-5 h-5 text-slate-500" />
                   <span className="font-medium">
-                    {new Date(policy.updated).toLocaleDateString(
+                    {new Date(policy.updated_at).toLocaleDateString(
                       lang === "ar" ? "ar-EG" : "en-US",
                       { year: "numeric", month: "short", day: "numeric" }
                     )}
@@ -232,7 +234,7 @@ export default function PoliciesPage() {
                   <span className="font-medium">
                     {lang === "ar" ? "الحجم" : "Size"}:
                   </span>{" "}
-                  {policy.fileSize}
+                  {policy.file_size}
                 </div>
               </div>
 
@@ -250,7 +252,17 @@ export default function PoliciesPage() {
                   >
                     <ArrowDownTrayIcon className="w-4 h-4 text-slate-500" />
                     <span className="font-medium">
-                      {policy.downloads} {lang === "ar" ? "تحميل" : "downloads"}
+                      {policy.downloads} {t("grc.downloads")}
+                    </span>
+                  </div>
+                  <div
+                    className={`flex items-center ${
+                      lang === "ar" ? "space-x-reverse space-x-2" : "space-x-2"
+                    }`}
+                  >
+                    <EyeIcon className="w-4 h-4 text-slate-500" />
+                    <span className="font-medium">
+                      {policy.views} {t("grc.views")}
                     </span>
                   </div>
                 </div>
