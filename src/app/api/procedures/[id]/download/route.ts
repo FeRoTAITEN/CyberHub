@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// POST /api/policies/[id]/download - Increment download count
+// POST /api/procedures/[id]/download - Increment download count
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,12 +14,12 @@ export async function POST(
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid policy ID' },
+        { error: 'Invalid procedure ID' },
         { status: 400 }
       );
     }
 
-    const policy = await prisma.policy.update({
+    const procedure = await prisma.procedure.update({
       where: { id },
       data: {
         downloads: {
@@ -28,7 +28,7 @@ export async function POST(
       }
     });
 
-    return NextResponse.json(policy);
+    return NextResponse.json(procedure);
   } catch (error) {
     console.error('Error updating download count:', error);
     return NextResponse.json(

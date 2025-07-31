@@ -70,7 +70,7 @@ export default function HomePage() {
     {
       title: t("nav.policies"),
       description:
-        lang === "ar" ? "السياسات والإجراءات" : "Policies & Procedures",
+        lang === "ar" ? "السياسات والمعايير والإجراءات" : "Policies, Standards & Procedures",
       icon: DocumentTextIcon,
       href: "/policies",
       color: "bg-slate-700",

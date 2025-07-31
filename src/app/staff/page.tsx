@@ -17,17 +17,23 @@ export default function StaffPage() {
   useEffect(() => {
     async function fetchEmployees() {
       setLoading(true);
-      const res = await fetch(' /api/employees');
-      const data = await res.json();
-      setEmployees(data.employees || []);
-      setLoading(false);
+      try {
+        const res = await fetch('/api/employees');
+        const data = await res.json();
+        setEmployees(data.employees || []);
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+        setEmployees([]);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchEmployees();
   }, []);
 
   const filteredStaff = employees.filter(member => {
-    const name = (lang === 'ar' ? member.name_ar : member.name).toLowerCase();
-    const position = (lang === 'ar' ? member.job_title_ar || member.job_title : member.job_title).toLowerCase();
+    const name = (lang === 'ar' ? member.name_ar || member.name : member.name || '').toLowerCase();
+    const position = (lang === 'ar' ? member.job_title_ar || member.job_title : member.job_title || '').toLowerCase();
     const q = search.toLowerCase();
     return name.includes(q) || position.includes(q);
   });
@@ -77,9 +83,9 @@ export default function StaffPage() {
                 style={{ animationDelay: `${0.1 * (index + 1)}s` }}
               >
                 <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center mb-5 shadow-lg border-4 border-green-100 group-hover:scale-105 group-hover:shadow-green-400/30 transition-transform overflow-hidden">
-                  <Image src="/icons/noun-hacker.svg" alt={lang === 'ar' ? member.name_ar : member.name} width={80} height={80} className="object-contain w-20 h-20" />
+                  <Image src="/icons/noun-hacker.svg" alt={lang === 'ar' ? member.name_ar || member.name : member.name} width={80} height={80} className="object-contain w-20 h-20" />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-1 font-display">{lang === 'ar' ? member.name_ar : member.name}</h2>
+                <h2 className="text-2xl font-bold text-white mb-1 font-display">{lang === 'ar' ? member.name_ar || member.name : member.name}</h2>
                 <p className="text-green-500 text-lg font-semibold mb-3">{lang === 'ar' ? member.job_title_ar || member.job_title : member.job_title}</p>
                 <div className="flex flex-col gap-1 items-center w-full">
                   <div className="flex items-center gap-2 text-slate-400 text-sm">

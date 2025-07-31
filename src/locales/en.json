@@ -18,15 +18,20 @@
     "staff": "Staff Directory",
     "qa": "Q&A",
     "games": "Educational Games",
-    "policies": "Cybersecurity Policies",
+    "policies": "Policies & Standards",
     "grc": "GRC",
     "projects": "Project Management",
     "more": "More"
   },
   "policies": {
-    "title": "Cybersecurity Policies",
-    "intro": "Comprehensive security policies and procedures for Salam Company",
-    "lastUpdated": "Last Updated"
+    "title": "Cybersecurity Policies, Standards & Procedures",
+    "intro": "Comprehensive management of cybersecurity policies, standards, and procedures at Salam Company",
+    "lastUpdated": "Last Updated",
+    "policies_tab": "Policies",
+    "standards_tab": "Standards",
+    "procedures_tab": "Procedures",
+    "total_items": "Total Items",
+    "no_items": "No items available"
   },
   "grc": {
     "title": "GRC Management",
@@ -35,7 +40,7 @@
     "upload_policy": "Upload Policy",
     "policy_title": "Policy Title",
     "policy_description": "Policy Description",
-    "policy_category": "Category",
+
     "policy_file": "Policy File",
     "policy_version": "Version",
     "create_date": "Creation Date",

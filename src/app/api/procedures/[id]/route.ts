@@ -5,7 +5,7 @@ import path from 'path';
 
 const prisma = new PrismaClient();
 
-// GET /api/policies/[id] - Get a specific policy
+// GET /api/procedures/[id] - Get a specific procedure
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -16,33 +16,40 @@ export async function GET(
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid policy ID' },
+        { error: 'Invalid procedure ID' },
         { status: 400 }
       );
     }
 
-    const policy = await prisma.policy.findUnique({
-      where: { id }
+    const procedure = await prisma.procedure.findUnique({
+      where: { id },
+      include: {
+        archived_versions: {
+          orderBy: {
+            created_at: 'desc'
+          }
+        }
+      }
     });
 
-    if (!policy) {
+    if (!procedure) {
       return NextResponse.json(
-        { error: 'Policy not found' },
+        { error: 'Procedure not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(policy);
+    return NextResponse.json(procedure);
   } catch (error) {
-    console.error('Error fetching policy:', error);
+    console.error('Error fetching procedure:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch policy' },
+      { error: 'Failed to fetch procedure' },
       { status: 500 }
     );
   }
 }
 
-// PUT /api/policies/[id] - Update a policy
+// PUT /api/procedures/[id] - Update a procedure
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -53,7 +60,7 @@ export async function PUT(
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid policy ID' },
+        { error: 'Invalid procedure ID' },
         { status: 400 }
       );
     }
@@ -78,39 +85,39 @@ export async function PUT(
         );
       }
 
-      // Get current policy to check if we need to update version
-      const currentPolicy = await prisma.policy.findUnique({
+      // Get current procedure to check if we need to update version
+      const currentProcedure = await prisma.procedure.findUnique({
         where: { id }
       });
 
-      if (!currentPolicy) {
+      if (!currentProcedure) {
         return NextResponse.json(
-          { error: 'Policy not found' },
+          { error: 'Procedure not found' },
           { status: 404 }
         );
       }
 
       // Handle file upload if provided
-      let fileUrl = currentPolicy.file_url;
-      let fileSize = currentPolicy.file_size;
-      let version = currentPolicy.version;
+      let fileUrl = currentProcedure.file_url;
+      let fileSize = currentProcedure.file_size;
+      let version = currentProcedure.version;
       
-            // Always archive the current version when updating (whether file or data)
-      await prisma.policy.create({
+      // Always archive the current version when updating (whether file or data)
+      await prisma.procedure.create({
         data: {
-          title_en: currentPolicy.title_en,
-          title_ar: currentPolicy.title_ar,
-          description_en: currentPolicy.description_en,
-          description_ar: currentPolicy.description_ar,
-          version: currentPolicy.version,
-          file_size: currentPolicy.file_size,
-          file_url: currentPolicy.file_url,
-          downloads: currentPolicy.downloads,
-          views: currentPolicy.views,
+          title_en: currentProcedure.title_en,
+          title_ar: currentProcedure.title_ar,
+          description_en: currentProcedure.description_en,
+          description_ar: currentProcedure.description_ar,
+          version: currentProcedure.version,
+          file_size: currentProcedure.file_size,
+          file_url: currentProcedure.file_url,
+          downloads: currentProcedure.downloads,
+          views: currentProcedure.views,
           status: 'archived',
           is_visible: false,
-          parent_id: currentPolicy.id,
-          created_by: currentPolicy.created_by,
+          parent_id: currentProcedure.id,
+          created_by: currentProcedure.created_by,
         }
       });
       
@@ -141,10 +148,10 @@ export async function PUT(
           // Generate unique filename
           const timestamp = Date.now();
           const fileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-          const filePath = `public/uploads/policies/${fileName}`;
+          const filePath = `public/uploads/procedures/${fileName}`;
           
           // Ensure directory exists
-          const uploadDir = path.join(process.cwd(), 'public/uploads/policies');
+          const uploadDir = path.join(process.cwd(), 'public/uploads/procedures');
           if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
           }
@@ -152,7 +159,7 @@ export async function PUT(
           fs.writeFileSync(path.join(process.cwd(), filePath), buffer);
           
           fileSize = `${Math.round(file.size / 1024)} KB`;
-          fileUrl = `/uploads/policies/${fileName}`;
+          fileUrl = `/uploads/procedures/${fileName}`;
           
           // Increment version by 0.1 if file is updated
           const versionMatch = version.match(/v(\d+)\.(\d+)/);
@@ -176,7 +183,7 @@ export async function PUT(
         }
       }
 
-      const policy = await prisma.policy.update({
+      const procedure = await prisma.procedure.update({
         where: { id },
         data: {
           title_en: titleEn,
@@ -190,7 +197,7 @@ export async function PUT(
         }
       });
 
-      return NextResponse.json(policy);
+      return NextResponse.json(procedure);
     } else {
       // Handle JSON update (no file upload)
       const body = await request.json();
@@ -204,7 +211,7 @@ export async function PUT(
         );
       }
 
-      const policy = await prisma.policy.update({
+      const procedure = await prisma.procedure.update({
         where: { id },
         data: {
           title_en: titleEn,
@@ -215,18 +222,18 @@ export async function PUT(
         }
       });
 
-      return NextResponse.json(policy);
+      return NextResponse.json(procedure);
     }
   } catch (error) {
-    console.error('Error updating policy:', error);
+    console.error('Error updating procedure:', error);
     return NextResponse.json(
-      { error: 'Failed to update policy' },
+      { error: 'Failed to update procedure' },
       { status: 500 }
     );
   }
 }
 
-// DELETE /api/policies/[id] - Delete a policy
+// DELETE /api/procedures/[id] - Delete a procedure
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -237,20 +244,20 @@ export async function DELETE(
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid policy ID' },
+        { error: 'Invalid procedure ID' },
         { status: 400 }
       );
     }
 
-    await prisma.policy.delete({
+    await prisma.procedure.delete({
       where: { id }
     });
 
-    return NextResponse.json({ message: 'Policy deleted successfully' });
+    return NextResponse.json({ message: 'Procedure deleted successfully' });
   } catch (error) {
-    console.error('Error deleting policy:', error);
+    console.error('Error deleting procedure:', error);
     return NextResponse.json(
-      { error: 'Failed to delete policy' },
+      { error: 'Failed to delete procedure' },
       { status: 500 }
     );
   }

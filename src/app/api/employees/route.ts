@@ -4,60 +4,39 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // GET /api/employees - Get all employees
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const departmentId = searchParams.get('department_id');
-    const status = searchParams.get('status');
-    const gender = searchParams.get('gender');
-    const isActive = searchParams.get('is_active');
-    const search = searchParams.get('search');
+    const { searchParams } = new URL(request.url);
+    const includeInactive = searchParams.get('includeInactive') === 'true';
+    const departmentId = searchParams.get('departmentId');
 
-    let whereClause: any = {};
-
-    // Filter by department
+    const whereClause: any = {};
+    
+    if (!includeInactive) {
+      whereClause.is_active = true;
+    }
+    
     if (departmentId) {
       whereClause.department_id = parseInt(departmentId);
-    }
-
-    // Filter by status
-    if (status) {
-      whereClause.status = status;
-    }
-
-    // Filter by gender
-    if (gender) {
-      whereClause.gender = gender;
-    }
-
-    // Filter by active status
-    if (isActive !== null) {
-      whereClause.is_active = isActive === 'true';
-    }
-
-    // Search functionality
-    if (search) {
-      whereClause.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { name_ar: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-        { job_title: { contains: search, mode: 'insensitive' } },
-        { job_title_ar: { contains: search, mode: 'insensitive' } }
-      ];
     }
 
     const employees = await prisma.employee.findMany({
       where: whereClause,
       include: {
-        department: true
+        department: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        }
       },
-      orderBy: [
-        { is_active: 'desc' },
-        { name: 'asc' }
-      ]
+      orderBy: {
+        name: 'asc'
+      }
     });
 
-    return NextResponse.json(employees);
+    return NextResponse.json({ employees });
   } catch (error) {
     console.error('Error fetching employees:', error);
     return NextResponse.json(
@@ -68,9 +47,10 @@ export async function GET(req: NextRequest) {
 }
 
 // POST /api/employees - Create a new employee
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await request.json();
+    
     const {
       name,
       name_ar,
@@ -79,15 +59,12 @@ export async function POST(req: NextRequest) {
       job_title,
       job_title_ar,
       department_id,
-      avatar,
       location,
       hire_date,
       status,
-      gender,
-      is_active
+      gender
     } = body;
 
-    // Validate required fields
     if (!name || !email || !department_id) {
       return NextResponse.json(
         { error: 'Missing required fields: name, email, department_id' },
@@ -103,44 +80,37 @@ export async function POST(req: NextRequest) {
     if (existingEmployee) {
       return NextResponse.json(
         { error: 'Employee with this email already exists' },
-        { status: 400 }
-      );
-    }
-
-    // Check if department exists
-    const department = await prisma.department.findUnique({
-      where: { id: department_id }
-    });
-
-    if (!department) {
-      return NextResponse.json(
-        { error: 'Department not found' },
-        { status: 404 }
+        { status: 409 }
       );
     }
 
     const employee = await prisma.employee.create({
       data: {
         name,
-        name_ar: name_ar || name,
+        name_ar,
         email,
         phone,
         job_title,
-        job_title_ar: job_title_ar || job_title,
+        job_title_ar,
         department_id: parseInt(department_id),
-        avatar,
         location,
         hire_date: hire_date ? new Date(hire_date) : null,
-        status: status || 'active',
-        gender: gender || 'male',
-        is_active: is_active !== undefined ? is_active : true
+        status,
+        gender,
+        is_active: true
       },
       include: {
-        department: true
+        department: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        }
       }
     });
 
-    return NextResponse.json(employee, { status: 201 });
+    return NextResponse.json({ employee }, { status: 201 });
   } catch (error) {
     console.error('Error creating employee:', error);
     return NextResponse.json(

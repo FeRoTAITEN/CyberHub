@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// GET /api/policies/[id]/versions - Get archived versions of a policy
+// GET /api/standards/[id]/versions - Get archived versions of a standard
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,12 +14,12 @@ export async function GET(
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid policy ID' },
+        { error: 'Invalid standard ID' },
         { status: 400 }
       );
     }
 
-    const policy = await prisma.policy.findUnique({
+    const standard = await prisma.standard.findUnique({
       where: { id },
       include: {
         archived_versions: {
@@ -30,18 +30,18 @@ export async function GET(
       }
     });
 
-    if (!policy) {
+    if (!standard) {
       return NextResponse.json(
-        { error: 'Policy not found' },
+        { error: 'Standard not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(policy.archived_versions);
+    return NextResponse.json(standard.archived_versions);
   } catch (error) {
-    console.error('Error fetching policy versions:', error);
+    console.error('Error fetching standard versions:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch policy versions' },
+      { error: 'Failed to fetch standard versions' },
       { status: 500 }
     );
   }

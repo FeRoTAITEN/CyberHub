@@ -60,7 +60,7 @@ const Navigation = () => {
     { name: t('nav.staff'), href: '/staff', icon: UserGroupIcon },
     { name: t('nav.qa'), href: '/qa', icon: QuestionMarkCircleIcon },
     { name: t('nav.games'), href: '/games', icon: PlayIcon },
-    { name: t('nav.policies'), href: '/policies', icon: DocumentTextIcon },
+    { name: lang === 'ar' ? 'السياسات والمعايير' : 'Policies & Standards', href: '/policies', icon: DocumentTextIcon },
     { name: t('nav.projects'), href: '/projects', icon: ChartBarIcon },
     // تصغير اسم لوحة التحكم
     { name: lang === 'ar' ? 'لوحة' : 'Dash', href: '/dashboard', icon: ChartBarIcon },

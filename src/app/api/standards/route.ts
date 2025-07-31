@@ -5,13 +5,12 @@ import path from 'path';
 
 const prisma = new PrismaClient();
 
-// GET /api/policies - Get all policies
+// GET /api/standards - Get all standards
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const includeArchived = searchParams.get('includeArchived') === 'true';
     const onlyVisible = searchParams.get('onlyVisible') !== 'false';
-    const type = searchParams.get('type'); // New parameter for filtering by type
 
     const whereClause: any = {};
     
@@ -23,9 +22,7 @@ export async function GET(request: NextRequest) {
       whereClause.is_visible = true;
     }
 
-
-
-    const policies = await prisma.policy.findMany({
+    const standards = await prisma.standard.findMany({
       where: whereClause,
       orderBy: {
         created_at: 'desc'
@@ -39,17 +36,17 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json(policies);
+    return NextResponse.json(standards);
   } catch (error) {
-    console.error('Error fetching policies:', error);
+    console.error('Error fetching standards:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch policies' },
+      { error: 'Failed to fetch standards' },
       { status: 500 }
     );
   }
 }
 
-// POST /api/policies - Create a new policy
+// POST /api/standards - Create a new standard
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -67,7 +64,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate version - always start with 1.0 for new policies
+    // Generate version - always start with 1.0 for new standards
     const version = 'v1.0';
 
     // Handle file upload
@@ -101,45 +98,46 @@ export async function POST(request: NextRequest) {
         // Generate unique filename
         const timestamp = Date.now();
         const fileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-        const filePath = `public/uploads/policies/${fileName}`;
+        const filePath = `public/uploads/standards/${fileName}`;
         
         // Ensure directory exists
-        const uploadDir = path.join(process.cwd(), 'public/uploads/policies');
+        const uploadDir = path.join(process.cwd(), 'public/uploads/standards');
         if (!fs.existsSync(uploadDir)) {
           fs.mkdirSync(uploadDir, { recursive: true });
         }
         
         fs.writeFileSync(path.join(process.cwd(), filePath), buffer);
         
+        fileUrl = `/uploads/standards/${fileName}`;
         fileSize = `${Math.round(file.size / 1024)} KB`;
-        fileUrl = `/uploads/policies/${fileName}`;
-      } catch (fileError) {
-        console.error('Error saving file:', fileError);
+      } catch (uploadError) {
+        console.error('File upload error:', uploadError);
         return NextResponse.json(
-          { error: 'Failed to save file' },
+          { error: 'Failed to upload file' },
           { status: 500 }
         );
       }
     }
 
-    const policy = await prisma.policy.create({
+    const standard = await prisma.standard.create({
       data: {
         title_en: titleEn,
         title_ar: titleAr,
         description_en: descriptionEn,
         description_ar: descriptionAr,
-        version,
+        version: version,
         file_size: fileSize,
         file_url: fileUrl,
-        created_by: 1, // TODO: Get from auth
+        created_by: 1, // Default admin user
+        updated_by: 1
       }
     });
 
-    return NextResponse.json(policy, { status: 201 });
+    return NextResponse.json(standard);
   } catch (error) {
-    console.error('Error creating policy:', error);
+    console.error('Error creating standard:', error);
     return NextResponse.json(
-      { error: 'Failed to create policy' },
+      { error: 'Failed to create standard' },
       { status: 500 }
     );
   }

@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// POST /api/policies/[id]/visibility - Toggle policy visibility
+// POST /api/procedures/[id]/visibility - Toggle procedure visibility
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,7 +14,7 @@ export async function POST(
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid policy ID' },
+        { error: 'Invalid procedure ID' },
         { status: 400 }
       );
     }
@@ -29,18 +29,18 @@ export async function POST(
       );
     }
 
-    const policy = await prisma.policy.update({
+    const procedure = await prisma.procedure.update({
       where: { id },
       data: {
         is_visible: isVisible,
       }
     });
 
-    return NextResponse.json(policy);
+    return NextResponse.json(procedure);
   } catch (error) {
-    console.error('Error updating policy visibility:', error);
+    console.error('Error updating procedure visibility:', error);
     return NextResponse.json(
-      { error: 'Failed to update policy visibility' },
+      { error: 'Failed to update procedure visibility' },
       { status: 500 }
     );
   }

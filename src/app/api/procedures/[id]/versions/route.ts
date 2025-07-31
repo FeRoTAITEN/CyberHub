@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// GET /api/policies/[id]/versions - Get archived versions of a policy
+// GET /api/procedures/[id]/versions - Get archived versions of a procedure
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,12 +14,12 @@ export async function GET(
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid policy ID' },
+        { error: 'Invalid procedure ID' },
         { status: 400 }
       );
     }
 
-    const policy = await prisma.policy.findUnique({
+    const procedure = await prisma.procedure.findUnique({
       where: { id },
       include: {
         archived_versions: {
@@ -30,18 +30,18 @@ export async function GET(
       }
     });
 
-    if (!policy) {
+    if (!procedure) {
       return NextResponse.json(
-        { error: 'Policy not found' },
+        { error: 'Procedure not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(policy.archived_versions);
+    return NextResponse.json(procedure.archived_versions);
   } catch (error) {
-    console.error('Error fetching policy versions:', error);
+    console.error('Error fetching procedure versions:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch policy versions' },
+      { error: 'Failed to fetch procedure versions' },
       { status: 500 }
     );
   }
