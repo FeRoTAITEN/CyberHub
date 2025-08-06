@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Project xmlns="http://schemas.microsoft.com/project">
+  <Name>Sample Cyber Security Project</Name>
+  <StartDate>2024-01-15T00:00:00</StartDate>
+  <FinishDate>2024-06-30T00:00:00</FinishDate>
+  <PercentComplete>25</PercentComplete>
+  
+  <Tasks>
+    <Task>
+      <UID>1</UID>
+      <Name>Phase 1: Planning and Analysis</Name>
+      <OutlineLevel>1</OutlineLevel>
+      <Start>2024-01-15T00:00:00</Start>
+      <Finish>2024-02-15T00:00:00</Finish>
+      <PercentComplete>50</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>2</UID>
+      <Name>Requirement Analysis</Name>
+      <OutlineLevel>2</OutlineLevel>
+      <Start>2024-01-15T00:00:00</Start>
+      <Finish>2024-01-30T00:00:00</Finish>
+      <PercentComplete>75</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>3</UID>
+      <Name>Interview Stakeholders</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-01-15T00:00:00</Start>
+      <Finish>2024-01-25T00:00:00</Finish>
+      <PercentComplete>100</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>4</UID>
+      <Name>Document Requirements</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-01-26T00:00:00</Start>
+      <Finish>2024-01-30T00:00:00</Finish>
+      <PercentComplete>50</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>5</UID>
+      <Name>Risk Assessment</Name>
+      <OutlineLevel>2</OutlineLevel>
+      <Start>2024-02-01T00:00:00</Start>
+      <Finish>2024-02-15T00:00:00</Finish>
+      <PercentComplete>25</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>6</UID>
+      <Name>Identify Vulnerabilities</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-02-01T00:00:00</Start>
+      <Finish>2024-02-10T00:00:00</Finish>
+      <PercentComplete>30</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>7</UID>
+      <Name>Assess Impact</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-02-11T00:00:00</Start>
+      <Finish>2024-02-15T00:00:00</Finish>
+      <PercentComplete>20</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>8</UID>
+      <Name>Phase 2: Implementation</Name>
+      <OutlineLevel>1</OutlineLevel>
+      <Start>2024-02-16T00:00:00</Start>
+      <Finish>2024-05-15T00:00:00</Finish>
+      <PercentComplete>10</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>9</UID>
+      <Name>Security Infrastructure Setup</Name>
+      <OutlineLevel>2</OutlineLevel>
+      <Start>2024-02-16T00:00:00</Start>
+      <Finish>2024-03-15T00:00:00</Finish>
+      <PercentComplete>15</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>10</UID>
+      <Name>Install Firewall</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-02-16T00:00:00</Start>
+      <Finish>2024-02-28T00:00:00</Finish>
+      <PercentComplete>25</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>11</UID>
+      <Name>Configure IDS/IPS</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-03-01T00:00:00</Start>
+      <Finish>2024-03-15T00:00:00</Finish>
+      <PercentComplete>5</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>12</UID>
+      <Name>Application Security</Name>
+      <OutlineLevel>2</OutlineLevel>
+      <Start>2024-03-16T00:00:00</Start>
+      <Finish>2024-05-15T00:00:00</Finish>
+      <PercentComplete>5</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>13</UID>
+      <Name>Code Review</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-03-16T00:00:00</Start>
+      <Finish>2024-04-15T00:00:00</Finish>
+      <PercentComplete>10</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>14</UID>
+      <Name>Penetration Testing</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-04-16T00:00:00</Start>
+      <Finish>2024-05-15T00:00:00</Finish>
+      <PercentComplete>0</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>15</UID>
+      <Name>Phase 3: Testing and Validation</Name>
+      <OutlineLevel>1</OutlineLevel>
+      <Start>2024-05-16T00:00:00</Start>
+      <Finish>2024-06-30T00:00:00</Finish>
+      <PercentComplete>0</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>16</UID>
+      <Name>Security Testing</Name>
+      <OutlineLevel>2</OutlineLevel>
+      <Start>2024-05-16T00:00:00</Start>
+      <Finish>2024-06-15T00:00:00</Finish>
+      <PercentComplete>0</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>17</UID>
+      <Name>Vulnerability Scanning</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-05-16T00:00:00</Start>
+      <Finish>2024-06-01T00:00:00</Finish>
+      <PercentComplete>0</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>18</UID>
+      <Name>Security Audit</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-06-02T00:00:00</Start>
+      <Finish>2024-06-15T00:00:00</Finish>
+      <PercentComplete>0</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>19</UID>
+      <Name>Documentation</Name>
+      <OutlineLevel>2</OutlineLevel>
+      <Start>2024-06-16T00:00:00</Start>
+      <Finish>2024-06-30T00:00:00</Finish>
+      <PercentComplete>0</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>20</UID>
+      <Name>Create Security Policies</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-06-16T00:00:00</Start>
+      <Finish>2024-06-25T00:00:00</Finish>
+      <PercentComplete>0</PercentComplete>
+    </Task>
+    
+    <Task>
+      <UID>21</UID>
+      <Name>User Training Materials</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <Start>2024-06-26T00:00:00</Start>
+      <Finish>2024-06-30T00:00:00</Finish>
+      <PercentComplete>0</PercentComplete>
+    </Task>
+  </Tasks>
+  
+  <Resources>
+    <Resource>
+      <UID>1</UID>
+      <Name>Ahmed Al-Rashid</Name>
+      <Email>ahmed.alrashid@company.com</Email>
+      <Title>Security Manager</Title>
+    </Resource>
+    
+    <Resource>
+      <UID>2</UID>
+      <Name>Sarah Johnson</Name>
+      <Email>sarah.johnson@company.com</Email>
+      <Title>Security Analyst</Title>
+    </Resource>
+    
+    <Resource>
+      <UID>3</UID>
+      <Name>Mohammed Hassan</Name>
+      <Email>mohammed.hassan@company.com</Email>
+      <Title>Network Engineer</Title>
+    </Resource>
+    
+    <Resource>
+      <UID>4</UID>
+      <Name>Fatima Al-Zahra</Name>
+      <Email>fatima.alzahra@company.com</Email>
+      <Title>Application Developer</Title>
+    </Resource>
+    
+    <Resource>
+      <UID>5</UID>
+      <Name>David Chen</Name>
+      <Email>david.chen@company.com</Email>
+      <Title>Penetration Tester</Title>
+    </Resource>
+  </Resources>
+  
+  <Assignments>
+    <Assignment>
+      <TaskUID>3</TaskUID>
+      <ResourceUID>1</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>4</TaskUID>
+      <ResourceUID>2</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>6</TaskUID>
+      <ResourceUID>2</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>7</TaskUID>
+      <ResourceUID>1</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>10</TaskUID>
+      <ResourceUID>3</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>11</TaskUID>
+      <ResourceUID>3</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>13</TaskUID>
+      <ResourceUID>4</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>14</TaskUID>
+      <ResourceUID>5</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>17</TaskUID>
+      <ResourceUID>2</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>18</TaskUID>
+      <ResourceUID>1</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>20</TaskUID>
+      <ResourceUID>1</ResourceUID>
+    </Assignment>
+    
+    <Assignment>
+      <TaskUID>21</TaskUID>
+      <ResourceUID>2</ResourceUID>
+    </Assignment>
+  </Assignments>
+</Project> 

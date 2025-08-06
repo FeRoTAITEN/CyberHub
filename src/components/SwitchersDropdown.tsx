@@ -5,8 +5,8 @@ import LanguageSwitcher from './LanguageSwitcher';
 import FontSwitcher from './FontSwitcher';
 
 interface SwitchersDropdownProps {
-  theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber';
-  setTheme: (t: 'default' | 'light' | 'midnight' | 'novel' | 'cyber') => void;
+  theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam';
+  setTheme: (t: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam') => void;
   lang: 'en' | 'ar';
   setLang: (l: 'en' | 'ar') => void;
 }

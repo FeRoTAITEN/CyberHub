@@ -9,7 +9,7 @@ import {
   ChatBubbleLeftIcon,
   ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
-import { useLang } from '../ClientLayout';
+import { useLang, useTheme } from '../ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
@@ -59,8 +59,12 @@ const internalNewsData = [
 
 export default function NewsPage() {
   const { lang } = useLang();
+  const { theme } = useTheme();
   const { t } = useTranslation(lang);
   const twitterRef = useRef<HTMLDivElement>(null);
+
+  // تحديد ما إذا كان الثيم Salam أم لا
+  const isSalam = theme === 'salam';
 
   // تضمين سكربت تويتر مرة واحدة فقط
   useEffect(() => {
@@ -91,10 +95,10 @@ export default function NewsPage() {
         {/* Header */}
         <div className="page-header">
           <div className="page-header-icon icon-animate">
-            <NewspaperIcon className="w-12 h-12 text-white" />
+            <NewspaperIcon className={`w-12 h-12 ${isSalam ? 'text-[#36C639]' : 'text-white'}`} />
           </div>
-          <h1 className="page-title title-animate">{t('news.title')}</h1>
-          <p className="page-subtitle subtitle-animate">
+          <h1 className={`page-title title-animate ${isSalam ? 'text-[#003931]' : ''}`}>{t('news.title')}</h1>
+          <p className={`page-subtitle subtitle-animate ${isSalam ? 'text-[#005147]' : ''}`}>
             {t('news.intro')}
           </p>
         </div>

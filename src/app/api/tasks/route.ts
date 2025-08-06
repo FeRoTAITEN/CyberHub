@@ -1,0 +1,252 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+// POST /api/tasks - Create a new task
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    
+    const {
+      name,
+      description,
+      start_date,
+      end_date,
+      priority,
+      status,
+      duration,
+      work,
+      cost,
+      project_id,
+      phase_id,
+      parent_task_id
+    } = body;
+
+    // Validate required fields
+    if (!name || !start_date || !end_date) {
+      return NextResponse.json(
+        { error: 'Missing required fields: Name, Start Date, and End Date are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate date format
+    const startDate = new Date(start_date);
+    const endDate = new Date(end_date);
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return NextResponse.json(
+        { error: 'Invalid date format. Please use YYYY-MM-DD format' },
+        { status: 400 }
+      );
+    }
+
+    if (endDate < startDate) {
+      return NextResponse.json(
+        { error: 'End date cannot be before start date' },
+        { status: 400 }
+      );
+    }
+
+    // Validate priority and status
+    const validPriorities = ['low', 'medium', 'high', 'critical'];
+    const validStatuses = ['active', 'completed', 'on_hold', 'cancelled'];
+    
+    if (priority && !validPriorities.includes(priority)) {
+      return NextResponse.json(
+        { error: 'Invalid priority. Must be one of: low, medium, high, critical' },
+        { status: 400 }
+      );
+    }
+    
+    if (status && !validStatuses.includes(status)) {
+      return NextResponse.json(
+        { error: 'Invalid status. Must be one of: active, completed, on_hold, cancelled' },
+        { status: 400 }
+      );
+    }
+
+    // Validate numeric fields
+    const durationValue = duration ? parseFloat(duration) : 0;
+    const workValue = work ? parseFloat(work) : 0;
+    const costValue = cost ? parseFloat(cost) : 0;
+
+    if (isNaN(durationValue) || isNaN(workValue) || isNaN(costValue)) {
+      return NextResponse.json(
+        { error: 'Invalid numeric values for duration, work, or cost' },
+        { status: 400 }
+      );
+    }
+
+    // Create the task
+    const taskData: any = {
+      name: name,
+      description,
+      start_date: startDate,
+      end_date: endDate,
+      priority,
+      status,
+      progress: 0,
+      duration: durationValue,
+      work: workValue,
+      cost: costValue,
+      order: 0,
+      outline_level: parent_task_id ? 1 : 0,
+    };
+
+    // Validate and set foreign key references
+    if (project_id) {
+      const projectId = parseInt(project_id);
+      if (isNaN(projectId)) {
+        return NextResponse.json(
+          { error: 'Invalid project ID' },
+          { status: 400 }
+        );
+      }
+      taskData.project_id = projectId;
+    } else if (!parent_task_id) {
+      // If no project_id and no parent_task_id, this is an invalid task
+      return NextResponse.json(
+        { error: 'Task must be associated with either a project or a parent task' },
+        { status: 400 }
+      );
+    }
+    
+    if (phase_id) {
+      const phaseId = parseInt(phase_id);
+      if (isNaN(phaseId)) {
+        return NextResponse.json(
+          { error: 'Invalid phase ID' },
+          { status: 400 }
+        );
+      }
+      taskData.phase_id = phaseId;
+      
+      // If phase_id is provided, project_id should also be provided
+      if (!project_id) {
+        return NextResponse.json(
+          { error: 'Phase must be associated with a project' },
+          { status: 400 }
+        );
+      }
+      
+      // If parent_task_id is provided, phase_id should not be provided
+      if (parent_task_id) {
+        return NextResponse.json(
+          { error: 'Subtask cannot be directly associated with a phase' },
+          { status: 400 }
+        );
+      }
+    }
+    
+    if (parent_task_id) {
+      const parentTaskId = parseInt(parent_task_id);
+      if (isNaN(parentTaskId)) {
+        return NextResponse.json(
+          { error: 'Invalid parent task ID' },
+          { status: 400 }
+        );
+      }
+      taskData.parent_task_id = parentTaskId;
+      
+      // If parent_task_id is provided, project_id should also be provided
+      if (!project_id) {
+        return NextResponse.json(
+          { error: 'Subtask must be associated with a project' },
+          { status: 400 }
+        );
+      }
+      
+      // If phase_id is provided, parent_task_id should not be provided
+      if (phase_id) {
+        return NextResponse.json(
+          { error: 'Task cannot be associated with both phase and parent task' },
+          { status: 400 }
+        );
+      }
+    }
+
+    const task = await prisma.task.create({
+      data: taskData,
+      include: {
+        project: true,
+        phase: true,
+        parent_task: true,
+        subtasks: true,
+        assignments: {
+          include: {
+            employee: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(task);
+  } catch (error) {
+    console.error('Error creating task:', error);
+    
+    // Handle specific Prisma errors
+    if (error instanceof Error) {
+      if (error.message.includes('Unique constraint')) {
+        return NextResponse.json(
+          { error: 'Task with this name already exists' },
+          { status: 400 }
+        );
+      }
+      if (error.message.includes('Foreign key constraint')) {
+        return NextResponse.json(
+          { error: 'Invalid project, phase, or parent task reference' },
+          { status: 400 }
+        );
+      }
+    }
+    
+    return NextResponse.json(
+      { error: 'Failed to create task. Please try again.' },
+      { status: 500 }
+    );
+  }
+}
+
+// GET /api/tasks - Get all tasks (optional)
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const projectId = searchParams.get('project_id');
+    const phaseId = searchParams.get('phase_id');
+    const parentTaskId = searchParams.get('parent_task_id');
+
+    const where: any = {};
+    
+    if (projectId) where.project_id = parseInt(projectId);
+    if (phaseId) where.phase_id = parseInt(phaseId);
+    if (parentTaskId) where.parent_task_id = parseInt(parentTaskId);
+
+    const tasks = await prisma.task.findMany({
+      where,
+      include: {
+        project: true,
+        phase: true,
+        parent_task: true,
+        subtasks: true,
+        assignments: {
+          include: {
+            employee: true,
+          },
+        },
+      },
+      orderBy: {
+        order: 'asc',
+      },
+    });
+
+    return NextResponse.json(tasks);
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch tasks' },
+      { status: 500 }
+    );
+  }
+} 

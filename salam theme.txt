@@ -1,0 +1,69 @@
+🎨 قائمة ألوان سلام
+الألوان الأساسية (Primary Colours)
+Cloud White
+
+Hex: #FFFFFF
+
+RGB: 255, 255, 255
+
+Reliable Green
+
+Hex: #003931
+
+RGB: 0, 57, 49
+
+Dark Saudi Green
+
+Hex: #005147
+
+RGB: 0, 81, 71
+
+Vibrant Green
+
+Hex: #00F000
+
+RGB: 0, 240, 0
+
+الألوان الثانوية (Secondary Colours)
+Light Mint Green
+
+Hex: #EEFDEC
+
+RGB: 238, 253, 236
+
+Soft Green
+
+Hex: #C8FCC0
+
+RGB: 200, 252, 192
+
+Fresh Green
+
+Hex: #A0FB8E
+
+RGB: 160, 251, 142
+
+Bright Green
+
+Hex: #73F64B
+
+RGB: 115, 246, 75
+
+Strong Green
+
+Hex: #36C639
+
+RGB: 54, 198, 57
+
+Deep Green
+
+Hex: #149931
+
+RGB: 20, 153, 49
+
+Black
+
+Hex: #000000
+
+RGB: 0, 0, 0
+

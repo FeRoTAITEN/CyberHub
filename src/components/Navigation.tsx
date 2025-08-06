@@ -70,6 +70,8 @@ const Navigation = () => {
     { name: lang === 'ar' ? 'المناوبات' : 'Shifts', href: '/shifts', icon: ClockIcon },
     // Add GRC Management page
     { name: t('nav.grc'), href: '/grc', icon: DocumentTextIcon },
+    // Add Excellent page
+    { name: lang === 'ar' ? 'التميز' : 'Excellent', href: '/excellent', icon: ShieldCheckIcon },
     // Add Survey Reports page to More dropdown
     { name: lang === 'ar' ? 'التقارير' : 'Reports', href: '/surveys/report', icon: ClipboardDocumentCheckIcon },
   ];
@@ -141,7 +143,7 @@ const Navigation = () => {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const username = 'محمد أحمد'; // اجعلها ديناميكية لاحقًا إذا أردت
+  const username = 'Turki Alshehri'; // اجعلها ديناميكية لاحقًا إذا أردت
 
   return (
     <nav className={`bg-slate-900/80 backdrop-blur-md border-b border-slate-700 sticky top-0 z-50 transition-all duration-300 ${isMobileMenuOpen || isMoreDropdownOpen ? 'shadow-2xl' : ''}`}>
@@ -152,11 +154,11 @@ const Navigation = () => {
           <div className={`flex items-center gap-4 ${lang === 'ar' ? 'ml-12' : 'mr-12'}`}> 
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Image 
-              src="/images/logo.png" 
-              alt="Cyber Hub Logo" 
-                width={32} 
-                height={32} 
-                className="rounded-lg"
+              src="/images/salam logo.png" 
+              alt="Salam Logo" 
+                width={60} 
+                height={60} 
+                className=""
             />
               <span className="text-xl font-bold text-white leading-tight">Cyber Hub</span>
             </Link>

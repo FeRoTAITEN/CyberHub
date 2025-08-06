@@ -17,13 +17,46 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useLang } from "./ClientLayout";
+import { useLang, useTheme } from "./ClientLayout";
 import { useTranslation } from "@/lib/useTranslation";
 import Image from "next/image";
 
 export default function HomePage() {
   const { lang } = useLang();
+  const { theme } = useTheme();
   const { t } = useTranslation(lang);
+
+  // تحديد ما إذا كان الثيم Salam أم لا
+  const isSalam = theme === 'salam';
+  
+  // نظام الألوان الجديد لثيم Salam
+  const salamColors = {
+    // النصوص
+    primaryText: '#000000',      // أسود - للنصوص الرئيسية
+    secondaryText: '#003931',    // Reliable Green - للعناوين الفرعية
+    whiteText: '#FFFFFF',        // Cloud White - للنصوص على خلفيات داكنة
+    highlightText: '#00F000',    // Vibrant Green - للنصوص المميزة
+    
+    // الأزرار
+    primaryButton: '#00F000',    // Vibrant Green
+    primaryButtonText: '#005147', // Dark Saudi Green
+    secondaryButton: '#FFFFFF',   // Cloud White
+    secondaryButtonText: '#003931', // Reliable Green
+    secondaryButtonBorder: '#00F000', // Vibrant Green
+    
+    // البطاقات
+    cardBackground: '#FFFFFF',    // Cloud White مع opacity
+    cardBorder: '#003931',       // Reliable Green
+    
+    // التنبيهات
+    successAlert: '#00F000',     // Vibrant Green
+    infoAlert: '#EEFDEC',        // Light Mint Green
+    warningAlert: '#A0FB8E',     // Fresh Green
+    
+    // الأيقونات
+    activeIcon: '#00F000',       // Vibrant Green
+    inactiveIcon: '#005147',     // Dark Saudi Green
+  };
 
   const [alerts, setAlerts] = useState([
     {
@@ -179,11 +212,11 @@ export default function HomePage() {
         <div className="page-header content-animate">
           <div className="page-header-icon icon-animate">
             <Image
-              src="/images/logo.png"
-              alt="Cyber Hub Logo"
-              width={80}
+              src="/images/250411_Salam_Logo_En_RGB_White_Wordmark.png"
+              alt="Salam Logo"
+              width={200}
               height={80}
-              className="rounded-full"
+              className=""
             />
           </div>
           <h1 className="page-title title-animate">
@@ -197,38 +230,50 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 content-animate">
           {/* Alerts Section */}
           <div className="card p-6 content-animate">
-            <h2 className="heading-2 mb-4 flex items-center gap-2">
-              <ExclamationTriangleIcon className="w-5 h-5 text-yellow-500" />
+            <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+              isSalam ? 'text-[#003931]' : ''
+            }`}>
+              <ExclamationTriangleIcon className={`w-5 h-5 ${
+                isSalam ? `text-[${salamColors.activeIcon}]` : 'text-yellow-500'
+              }`} />
               {t("home.important_alerts")}
             </h2>
             <div className="space-y-3">
               {alerts.map((alert, index) => (
                 <div
                   key={alert.id}
-                  className="flex items-center justify-between p-3 bg-slate-800 rounded-lg stagger-animate"
+                  className={`flex items-center justify-between p-3 rounded-lg stagger-animate ${
+                    isSalam ? `bg-[${salamColors.cardBackground}]/90 border border-[${salamColors.cardBorder}] shadow-sm` : 'bg-slate-800'
+                  }`}
                   style={{ animationDelay: `${0.1 * (index + 1)}s` }}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-3 h-3 rounded-full flex-shrink-0 ${
                         alert.type === "critical"
-                          ? "bg-red-500"
+                          ? isSalam ? `bg-[${salamColors.successAlert}]` : "bg-red-500"
                           : alert.type === "warning"
-                          ? "bg-yellow-500"
-                          : "bg-blue-500"
+                          ? isSalam ? `bg-[${salamColors.warningAlert}]` : "bg-yellow-500"
+                          : isSalam ? `bg-[${salamColors.infoAlert}]` : "bg-blue-500"
                       }`}
                     ></div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-white font-medium text-sm">
+                      <p className={`font-medium text-sm ${
+                        isSalam ? 'text-black' : 'text-white'
+                      }`}>
                         {alert.title}
                       </p>
-                      <p className="text-slate-400 text-xs truncate">
+                      <p className={`text-xs truncate ${
+                        isSalam ? 'text-black' : 'text-slate-400'
+                      }`}>
                         {alert.message}
                       </p>
                     </div>
                   </div>
                   <button
-                    className="btn-icon"
+                    className={`btn-icon ${
+                      isSalam ? `text-[${salamColors.secondaryText}] hover:text-[${salamColors.activeIcon}]` : ''
+                    }`}
                     onClick={() => handleDismissAlert(alert.id)}
                     aria-label={
                       lang === "ar" ? "إغلاق التنبيه" : "Dismiss alert"
@@ -243,7 +288,9 @@ export default function HomePage() {
 
           {/* Stats Section */}
           <div className="card p-6 content-animate">
-            <h2 className="heading-2 mb-4 flex items-center gap-2">
+            <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+              isSalam ? 'text-[#003931]' : ''
+            }`}>
               <span className="text-2xl">📊</span>
               <span>{lang === "ar" ? "الإحصائيات" : "Statistics"}</span>
             </h2>
@@ -251,21 +298,27 @@ export default function HomePage() {
               {stats.map((stat, index) => (
                 <div
                   key={index}
-                  className="text-center p-3 bg-slate-800 rounded-lg stagger-animate"
+                  className={`text-center p-3 rounded-lg stagger-animate ${
+                    isSalam ? `bg-[${salamColors.cardBackground}]/90 border border-[${salamColors.cardBorder}] shadow-sm` : 'bg-slate-800'
+                  }`}
                   style={{ animationDelay: `${0.1 * (index + 1)}s` }}
                 >
                   <div className="text-2xl mb-2">{stat.icon}</div>
-                  <div className="text-xl font-bold text-green-400 mb-1">
+                  <div className={`text-xl font-bold mb-1 ${
+                    isSalam ? `text-[${salamColors.highlightText}]` : 'text-green-400'
+                  }`}>
                     {stat.value}
                   </div>
-                  <div className="text-slate-300 text-xs mb-2">
+                  <div className={`text-xs mb-2 ${
+                    isSalam ? 'text-black' : 'text-slate-300'
+                  }`}>
                     {stat.label}
                   </div>
                   <div
                     className={`text-xs font-semibold ${
                       stat.change.startsWith("+")
-                        ? "text-green-400"
-                        : "text-red-400"
+                        ? isSalam ? `text-[${salamColors.successAlert}]` : "text-green-400"
+                        : isSalam ? "text-red-600" : "text-red-400"
                     }`}
                   >
                     {stat.change}
@@ -279,7 +332,9 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 content-animate">
           {/* Quick Links */}
           <div className="card p-6 content-animate">
-            <h2 className="heading-2 mb-4 flex items-center gap-2">
+            <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+              isSalam ? 'text-[#003931]' : ''
+            }`}>
               <span className="text-2xl">🔗</span>
               <span>{lang === "ar" ? "الروابط السريعة" : "Quick Links"}</span>
             </h2>
@@ -288,16 +343,26 @@ export default function HomePage() {
                 const Icon = link.icon;
                 return (
                   <Link key={index} href={link.href}>
-                    <div className="card-hover group cursor-pointer p-4 text-center stagger-animate" style={{ animationDelay: `${0.1 * (index + 1)}s` }}>
+                    <div className={`card-hover group cursor-pointer p-4 text-center stagger-animate ${
+                      isSalam ? 'hover:scale-105' : ''
+                    }`} style={{ animationDelay: `${0.1 * (index + 1)}s` }}>
                       <div
-                        className={`w-10 h-10 ${link.color} rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}
+                        className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 ${
+                          isSalam ? `bg-[${salamColors.primaryButton}]` : link.color
+                        }`}
                       >
-                        <Icon className="w-5 h-5 text-white" />
+                        <Icon className={`w-6 h-6 ${
+                          isSalam ? `text-[${salamColors.primaryButtonText}]` : 'text-white'
+                        }`} />
                       </div>
-                      <h3 className="text-sm font-bold text-white mb-2">
+                      <h3 className={`text-sm font-bold mb-2 ${
+                        isSalam ? 'text-black' : 'text-white'
+                      }`}>
                         {link.title}
                       </h3>
-                      <p className="text-slate-400 text-xs">
+                      <p className={`text-xs ${
+                        isSalam ? 'text-black' : 'text-slate-400'
+                      }`}>
                         {link.description}
                       </p>
                     </div>
@@ -309,7 +374,9 @@ export default function HomePage() {
 
           {/* Recent Activity */}
           <div className="card p-6 content-animate">
-            <h2 className="heading-2 mb-4 flex items-center gap-2">
+            <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+              isSalam ? 'text-[#003931]' : ''
+            }`}>
               <span className="text-2xl">🕒</span>
               <span>{lang === "ar" ? "النشاط الأخير" : "Recent Activity"}</span>
             </h2>
@@ -317,15 +384,21 @@ export default function HomePage() {
               {recentActivity.map((activity, index) => (
                 <div
                   key={activity.id}
-                  className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg stagger-animate"
+                  className={`flex items-center gap-3 p-3 rounded-lg stagger-animate ${
+                    isSalam ? `bg-[${salamColors.cardBackground}]/90 border border-[${salamColors.cardBorder}] shadow-sm` : 'bg-slate-800'
+                  }`}
                   style={{ animationDelay: `${0.1 * (index + 1)}s` }}
                 >
                   <span className="text-lg flex-shrink-0">{activity.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium text-sm">
+                    <p className={`font-medium text-sm ${
+                      isSalam ? 'text-black' : 'text-white'
+                    }`}>
                       {activity.title}
                     </p>
-                    <p className="text-slate-400 text-xs">{activity.time}</p>
+                    <p className={`text-xs ${
+                      isSalam ? 'text-black' : 'text-slate-400'
+                    }`}>{activity.time}</p>
                   </div>
                 </div>
               ))}
@@ -335,15 +408,21 @@ export default function HomePage() {
 
         {/* Cyber Tip of the Day */}
         <div className="card p-6 mb-6 content-animate">
-          <h2 className="heading-2 mb-4 flex items-center gap-2">
-            <LightBulbIcon className="w-5 h-5 text-yellow-500" />
+          <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+            isSalam ? 'text-[#003931]' : ''
+          }`}>
+            <LightBulbIcon className={`w-5 h-5 ${
+              isSalam ? `text-[${salamColors.activeIcon}]` : 'text-yellow-500'
+            }`} />
             <span>
               {lang === "ar"
                 ? "نصيحة الأمن السيبراني اليوم"
                 : "Cyber Tip of the Day"}
             </span>
           </h2>
-          <p className="text-slate-300 text-lg">
+          <p className={`text-lg ${
+            isSalam ? 'text-black' : 'text-slate-300'
+          }`}>
             {lang === "ar"
               ? '"لا تفتح مرفقات البريد من مصادر مجهولة."'
               : '"Do not open email attachments from unknown sources."'}
@@ -352,21 +431,31 @@ export default function HomePage() {
 
         {/* Upcoming Events */}
         <div className="card p-6 mb-6 content-animate">
-          <h2 className="heading-2 mb-4 flex items-center gap-2">
-            <CalendarIcon className="w-5 h-5 text-blue-500" />
+          <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+            isSalam ? 'text-[#003931]' : ''
+          }`}>
+            <CalendarIcon className={`w-5 h-5 ${
+              isSalam ? `text-[${salamColors.activeIcon}]` : 'text-blue-500'
+            }`} />
             <span>{lang === "ar" ? "الأحداث القادمة" : "Upcoming Events"}</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {upcomingEvents.map((event, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg stagger-animate"
+                className={`flex items-center gap-3 p-3 rounded-lg stagger-animate ${
+                  isSalam ? `bg-[${salamColors.cardBackground}]/90 border border-[${salamColors.cardBorder}] shadow-sm` : 'bg-slate-800'
+                }`}
                 style={{ animationDelay: `${0.1 * (index + 1)}s` }}
               >
-                <div className="text-blue-400 font-bold flex-shrink-0">
+                <div className={`font-bold flex-shrink-0 ${
+                  isSalam ? `text-[${salamColors.highlightText}]` : 'text-blue-400'
+                }`}>
                   {event.date}
                 </div>
-                <div className="text-white font-medium">{event.title}</div>
+                <div className={`font-medium ${
+                  isSalam ? 'text-black' : 'text-white'
+                }`}>{event.title}</div>
               </div>
             ))}
           </div>
@@ -374,21 +463,31 @@ export default function HomePage() {
 
         {/* Latest Reports */}
         <div className="card p-6 mb-6 content-animate">
-          <h2 className="heading-2 mb-4 flex items-center gap-2">
-            <DocumentTextIcon className="w-5 h-5 text-green-500" />
+          <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+            isSalam ? 'text-[#003931]' : ''
+          }`}>
+            <DocumentTextIcon className={`w-5 h-5 ${
+              isSalam ? `text-[${salamColors.activeIcon}]` : 'text-green-500'
+            }`} />
             <span>{lang === "ar" ? "أحدث التقارير" : "Latest Reports"}</span>
           </h2>
           <div className="space-y-3">
             {latestReports.map((report, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg stagger-animate"
+                className={`flex items-center gap-3 p-3 rounded-lg stagger-animate ${
+                  isSalam ? `bg-[${salamColors.cardBackground}]/90 border border-[${salamColors.cardBorder}] shadow-sm` : 'bg-slate-800'
+                }`}
                 style={{ animationDelay: `${0.1 * (index + 1)}s` }}
               >
-                <div className="text-green-400 font-bold flex-shrink-0">
+                <div className={`font-bold flex-shrink-0 ${
+                  isSalam ? `text-[${salamColors.highlightText}]` : 'text-green-400'
+                }`}>
                   {report.date}
                 </div>
-                <div className="text-white font-medium">{report.title}</div>
+                <div className={`font-medium ${
+                  isSalam ? 'text-black' : 'text-white'
+                }`}>{report.title}</div>
               </div>
             ))}
           </div>
@@ -396,8 +495,12 @@ export default function HomePage() {
 
         {/* Global Threat Feed */}
         <div className="card p-6 content-animate">
-          <h2 className="heading-2 mb-4 flex items-center gap-2">
-            <GlobeAltIcon className="w-5 h-5 text-red-500" />
+          <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+            isSalam ? 'text-[#003931]' : ''
+          }`}>
+            <GlobeAltIcon className={`w-5 h-5 ${
+              isSalam ? `text-[${salamColors.activeIcon}]` : 'text-red-500'
+            }`} />
             <span>
               {lang === "ar"
                 ? "تغذية التهديدات العالمية"
@@ -408,19 +511,23 @@ export default function HomePage() {
             {globalThreats.map((threat, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg stagger-animate"
+                className={`flex items-center gap-3 p-3 rounded-lg stagger-animate ${
+                  isSalam ? `bg-[${salamColors.cardBackground}]/90 border border-[${salamColors.cardBorder}] shadow-sm` : 'bg-slate-800'
+                }`}
                 style={{ animationDelay: `${0.1 * (index + 1)}s` }}
               >
                 <div
                   className={`px-2 py-1 rounded text-xs font-bold flex-shrink-0 ${
                     threat.severity === "high"
-                      ? "bg-red-600 text-white"
-                      : "bg-yellow-600 text-white"
+                      ? isSalam ? `bg-[${salamColors.successAlert}] text-[${salamColors.whiteText}]` : "bg-red-600 text-white"
+                      : isSalam ? `bg-[${salamColors.warningAlert}] text-[${salamColors.primaryText}]` : "bg-yellow-600 text-white"
                   }`}
                 >
                   {threat.source}
                 </div>
-                <div className="text-white font-medium">{threat.threat}</div>
+                <div className={`font-medium ${
+                  isSalam ? 'text-black' : 'text-white'
+                }`}>{threat.threat}</div>
               </div>
             ))}
           </div>

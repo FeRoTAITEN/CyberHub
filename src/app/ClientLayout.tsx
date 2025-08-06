@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, createContext, useContext, useEffect } from 'react';
+import { useTranslation } from '@/lib/useTranslation';
 
 export const LangContext = createContext<{ lang: 'en' | 'ar'; setLang: (l: 'en' | 'ar') => void }>({ lang: 'en', setLang: () => {} });
-export const ThemeContext = createContext<{ theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber'; setTheme: (t: 'default' | 'light' | 'midnight' | 'novel' | 'cyber') => void }>({ theme: 'default', setTheme: () => {} });
-export const FontContext = createContext<{ font: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | ''; setFont: (f: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | '') => void }>({ font: '', setFont: () => {} });
+export const ThemeContext = createContext<{ theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam'; setTheme: (t: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam') => void }>({ theme: 'default', setTheme: () => {} });
+export const FontContext = createContext<{ font: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | 'kufi' | ''; setFont: (f: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | 'kufi' | '') => void }>({ font: '', setFont: () => {} });
 
 export function useLang() {
   return useContext(LangContext);
@@ -46,12 +47,12 @@ const saveToStorage = (key: string, value: string) => {
 };
 
 // دالة لتطبيق الخط على body
-const applyFontToBody = (font: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | '') => {
+const applyFontToBody = (font: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | 'kufi' | '') => {
   if (typeof window === 'undefined') return;
   
   const body = document.body;
   // إزالة جميع فئات الخطوط
-  body.classList.remove('font-cairo', 'font-tajawal', 'font-noto', 'font-amiri', 'font-frutiger', 'font-icomoon');
+  body.classList.remove('font-cairo', 'font-tajawal', 'font-noto', 'font-amiri', 'font-frutiger', 'font-icomoon', 'font-kufi');
   // إضافة فئة الخط المحدد إذا كان محدداً
   if (font) {
     body.classList.add(`font-${font}`);
@@ -61,17 +62,11 @@ const applyFontToBody = (font: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutige
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   // تحميل القيم المحفوظة من localStorage
-  const [lang, setLangState] = useState<'en' | 'ar'>(() => 
-    loadFromStorage(LANG_STORAGE_KEY, 'en') as 'en' | 'ar'
-  );
+  const [lang, setLangState] = useState<'en' | 'ar'>('en');
   
-  const [theme, setThemeState] = useState<'default' | 'light' | 'midnight' | 'novel' | 'cyber'>(() => 
-    loadFromStorage(THEME_STORAGE_KEY, 'default') as 'default' | 'light' | 'midnight' | 'novel' | 'cyber'
-  );
+  const [theme, setThemeState] = useState<'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam'>('default');
 
-  const [font, setFontState] = useState<'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | ''>(() => 
-    loadFromStorage(FONT_STORAGE_KEY, '') as 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | ''
-  );
+  const [font, setFontState] = useState<'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | 'kufi' | ''>('');
 
   // حالة loading لضمان عدم حدوث مشاكل في SSR
   const [isLoaded, setIsLoaded] = useState(false);
@@ -85,13 +80,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   };
 
   // دالة لتحديث الثيم مع الحفظ
-  const setTheme = (newTheme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber') => {
+  const setTheme = (newTheme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam') => {
     setThemeState(newTheme);
     saveToStorage(THEME_STORAGE_KEY, newTheme);
   };
 
   // دالة لتحديث الخط مع الحفظ والتطبيق
-  const setFont = (newFont: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | '') => {
+  const setFont = (newFont: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | 'kufi' | '') => {
     setFontState(newFont);
     saveToStorage(FONT_STORAGE_KEY, newFont);
     applyFontToBody(newFont);
@@ -101,7 +96,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     const body = document.body;
     // إزالة جميع فئات الثيم
-    body.classList.remove('theme-light', 'theme-midnight', 'theme-novel', 'theme-cyber');
+    body.classList.remove('theme-light', 'theme-midnight', 'theme-novel', 'theme-cyber', 'theme-salam');
     
     // إضافة فئة الثيم الحالي
     if (theme !== 'default') {
@@ -118,7 +113,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     // تحميل القيم المحفوظة مرة واحدة فقط عند بدء التطبيق
     const savedLang = loadFromStorage(LANG_STORAGE_KEY, 'en') as 'en' | 'ar';
-    const savedTheme = loadFromStorage(THEME_STORAGE_KEY, 'default') as 'default' | 'light' | 'midnight' | 'novel' | 'cyber';
+    const savedTheme = loadFromStorage(THEME_STORAGE_KEY, 'default') as 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam';
     const savedFont = loadFromStorage(FONT_STORAGE_KEY, 'cairo') as 'cairo' | 'tajawal' | 'noto';
     
     // تحديث الحالة فقط إذا كانت القيم مختلفة
@@ -144,11 +139,15 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <div className="min-h-screen gradient-bg flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-300">جاري التحميل...</p>
+          <p className="text-slate-300">
+            {lang === 'ar' ? 'جاري تحميل البوابة...' : 'Loading Portal...'}
+          </p>
         </div>
       </div>
     );
   }
+
+  const { t } = useTranslation(lang);
 
   return (
     <LangContext.Provider value={{ lang, setLang }}>

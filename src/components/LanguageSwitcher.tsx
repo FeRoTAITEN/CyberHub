@@ -9,7 +9,7 @@ interface LanguageSwitcherProps {
   onLanguageChange: (lang: 'en' | 'ar') => void;
   currentLanguage: 'en' | 'ar';
   dropdownStyle?: boolean;
-  theme?: 'default' | 'light' | 'midnight' | 'novel' | 'cyber';
+  theme?: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam';
 }
 
 const LanguageSwitcher = ({ onLanguageChange, currentLanguage, dropdownStyle, theme }: LanguageSwitcherProps) => {

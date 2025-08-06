@@ -102,6 +102,9 @@ model Employee {
   // Shift Management relations
   shiftAssignments ShiftAssignment[]
   availability     MemberAvailability[]
+  // Project Management relations
+  projectAssignments TaskAssignment[]
+  managedProjects  Project[] @relation("ProjectManager")
 }
 
 // Shift Management Models
@@ -196,22 +199,120 @@ model Procedure {
   id          Int      @id @default(autoincrement())
   title_en    String
   title_ar    String
-  description_en String
-  description_ar String
-  version     String
-  file_size   String
-  file_url    String?
+  description String?
+  file_path   String
+  version     String   @default("1.0")
+  is_visible  Boolean  @default(true)
+  is_archived Boolean  @default(false)
   downloads   Int      @default(0)
   views       Int      @default(0)
-  status      String   @default("active") // 'active', 'inactive', 'archived'
-  is_visible  Boolean  @default(true)
-  parent_id   Int?     // Reference to parent procedure (for archived versions)
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
-  created_by  Int?
-  updated_by  Int?
-  
-  // Self-referencing relationship for archived versions
-  parent      Procedure?  @relation("ProcedureVersions", fields: [parent_id], references: [id])
-  archived_versions Procedure[] @relation("ProcedureVersions")
+  versions    ProcedureVersion[]
+}
+
+model ProcedureVersion {
+  id          Int       @id @default(autoincrement())
+  procedure   Procedure @relation(fields: [procedure_id], references: [id], onDelete: Cascade)
+  procedure_id Int
+  version     String
+  file_path   String
+  created_at  DateTime  @default(now())
+}
+
+// Project Management Models
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  start_date  DateTime
+  end_date    DateTime
+  status      String   @default("active") // active, completed, on_hold, cancelled
+  priority    String   @default("medium") // low, medium, high, critical
+  progress    Float    @default(0) // 0-100 percentage
+  manager_id  Int?
+  manager     Employee? @relation("ProjectManager", fields: [manager_id], references: [id])
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  phases      Phase[]
+  tasks       Task[]
+  imported_from_xml Boolean @default(false)
+  xml_file_path String?
+}
+
+model Phase {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  start_date  DateTime
+  end_date    DateTime
+  status      String   @default("active") // active, completed, on_hold
+  progress    Float    @default(0) // 0-100 percentage
+  order       Int      @default(0)
+  project     Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  project_id  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  tasks       Task[]
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  start_date  DateTime
+  end_date    DateTime
+  status      String   @default("active") // active, completed, on_hold, cancelled
+  priority    String   @default("medium") // low, medium, high, critical
+  progress    Float    @default(0) // 0-100 percentage
+  order       Int      @default(0)
+  project     Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  project_id  Int
+  phase       Phase?   @relation(fields: [phase_id], references: [id], onDelete: SetNull)
+  phase_id    Int?
+  parent_task Task?    @relation("TaskSubtasks", fields: [parent_task_id], references: [id], onDelete: SetNull)
+  parent_task_id Int?
+  subtasks    Task[]   @relation("TaskSubtasks")
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  assignments TaskAssignment[]
+  // Additional fields for Microsoft Project import
+  duration    Float    @default(0) // Duration in hours
+  work        Float    @default(0) // Work effort in hours
+  cost        Float    @default(0) // Cost in currency
+  xml_uid     String?  // Original UID from XML file for dependency mapping
+  outline_level Int    @default(1) // Microsoft Project outline level
+  // Dependencies
+  predecessor_dependencies TaskDependency[] @relation("PredecessorTask")
+  successor_dependencies   TaskDependency[] @relation("SuccessorTask")
+}
+
+model TaskAssignment {
+  id          Int      @id @default(autoincrement())
+  task        Task     @relation(fields: [task_id], references: [id], onDelete: Cascade)
+  task_id     Int
+  employee    Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  employee_id Int
+  role        String   @default("member") // owner, member, reviewer
+  assigned_at DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  // Additional fields for Microsoft Project import
+  units       Float    @default(100) // Assignment units percentage
+  work        Float    @default(0)   // Work effort in hours
+
+  @@unique([task_id, employee_id])
+}
+
+// New model for task dependencies
+model TaskDependency {
+  id                    Int      @id @default(autoincrement())
+  predecessor_task      Task     @relation("PredecessorTask", fields: [predecessor_task_id], references: [id], onDelete: Cascade)
+  predecessor_task_id   Int
+  successor_task        Task     @relation("SuccessorTask", fields: [successor_task_id], references: [id], onDelete: Cascade)
+  successor_task_id     Int
+  dependency_type       String   @default("finish_to_start") // finish_to_start, start_to_start, finish_to_finish, start_to_finish
+  lag                   Float    @default(0) // Lag time in hours
+  created_at            DateTime @default(now())
+
+  @@unique([predecessor_task_id, successor_task_id])
 } 

@@ -5,8 +5,8 @@ import { PaintBrushIcon } from '@heroicons/react/24/outline';
 import { useLang } from '@/app/ClientLayout';
 
 interface ThemeSwitcherProps {
-  onThemeChange: (theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber') => void;
-  currentTheme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber';
+  onThemeChange: (theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam') => void;
+  currentTheme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam';
 }
 
 const ThemeSwitcher = ({ onThemeChange, currentTheme }: ThemeSwitcherProps) => {
@@ -54,10 +54,18 @@ const ThemeSwitcher = ({ onThemeChange, currentTheme }: ThemeSwitcherProps) => {
       icon: '⚡',
       description: 'Matrix Style',
       descriptionAr: 'نمط المصفوفة'
+    },
+    { 
+      code: 'salam', 
+      name: 'Salam', 
+      nameAr: 'سلام',
+      icon: '🟢',
+      description: 'Salam Company Brand',
+      descriptionAr: 'علامة شركة سلام'
     }
   ];
 
-  const handleThemeChange = (theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber') => {
+  const handleThemeChange = (theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam') => {
     onThemeChange(theme);
     setIsOpen(false);
   };
@@ -91,7 +99,7 @@ const ThemeSwitcher = ({ onThemeChange, currentTheme }: ThemeSwitcherProps) => {
             {themes.map((theme) => (
               <button
                 key={theme.code}
-                onClick={() => handleThemeChange(theme.code as 'default' | 'light' | 'midnight' | 'novel' | 'cyber')}
+                onClick={() => handleThemeChange(theme.code as 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/10 ${
                   currentTheme === theme.code
                     ? 'bg-green-600/20 text-green-400 border border-green-500/30'

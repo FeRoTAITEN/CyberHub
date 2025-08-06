@@ -53,11 +53,18 @@ const FONTS = [
     description: 'Icon Font',
     descriptionAr: 'خط الأيقونات'
   },
+  { 
+    code: 'kufi', 
+    name: 'Noto Kufi Arabic', 
+    nameAr: 'نوتو كوفي',
+    description: 'Salam Font',
+    descriptionAr: 'خط سلام'
+  },
 ];
 
 interface FontSwitcherProps {
   dropdownStyle?: boolean;
-  theme?: 'default' | 'light' | 'midnight' | 'novel' | 'cyber';
+  theme?: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam';
 }
 
 export default function FontSwitcher({ dropdownStyle, theme }: FontSwitcherProps) {
@@ -78,7 +85,7 @@ export default function FontSwitcher({ dropdownStyle, theme }: FontSwitcherProps
     return () => document.removeEventListener('mousedown', handleClick);
   }, [isOpen]);
 
-  const handleFontChange = (newFont: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | '') => {
+  const handleFontChange = (newFont: 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | 'kufi' | '') => {
     setFont(newFont);
     setIsOpen(false);
   };
@@ -89,7 +96,7 @@ export default function FontSwitcher({ dropdownStyle, theme }: FontSwitcherProps
         {FONTS.map(fontOption => (
           <button
             key={fontOption.code}
-            onClick={() => handleFontChange(fontOption.code as 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | '')}
+            onClick={() => handleFontChange(fontOption.code as 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | 'kufi' | '')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10 ${
               font === fontOption.code ? 'bg-green-600/20 text-green-400 border border-green-500/30' : 'text-slate-300 hover:text-white'
             }`}
@@ -125,7 +132,7 @@ export default function FontSwitcher({ dropdownStyle, theme }: FontSwitcherProps
             {FONTS.map(fontOption => (
               <button
                 key={fontOption.code}
-                onClick={() => handleFontChange(fontOption.code as 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | '')}
+                onClick={() => handleFontChange(fontOption.code as 'cairo' | 'tajawal' | 'noto' | 'amiri' | 'frutiger' | 'icomoon' | 'kufi' | '')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10 ${
                   font === fontOption.code ? 'bg-green-600/20 text-green-400 border border-green-500/30' : 'text-slate-300 hover:text-white'
                 }`}
