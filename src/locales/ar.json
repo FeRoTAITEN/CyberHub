@@ -469,6 +469,9 @@
     "no_projects": "لا توجد مشاريع متاحة",
     "title": "إدارة التميز",
     "intro": "إدارة المشاريع والمراحل والمهام والتعيينات بتميز",
+    "edit_project": "تعديل المشروع",
+    "add_phase": "إضافة مرحلة",
+    "select_manager": "اختر المدير",
     "tabs": {
       "project_management": "إدارة المشاريع",
       "quality_assurance": "ضمان الجودة",

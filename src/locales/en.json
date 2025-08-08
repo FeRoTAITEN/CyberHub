@@ -98,6 +98,9 @@
     "no_projects": "No projects available",
     "title": "Excellent Management",
     "intro": "Manage projects, phases, tasks, and assignments with excellence",
+    "edit_project": "Edit Project",
+    "add_phase": "Add Phase",
+    "select_manager": "Select Manager",
     "tabs": {
       "project_management": "Project Management",
       "quality_assurance": "Quality Assurance",

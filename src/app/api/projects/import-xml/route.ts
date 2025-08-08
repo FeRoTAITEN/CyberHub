@@ -31,32 +31,7 @@ function parseDuration(durationStr: string): number {
   return hours / 8;
 }
 
-// Function to parse work from XML format (PT864H0M0S -> 864 hours -> 108 days)
-function parseWork(workStr: string): number {
-  if (!workStr) return 0;
-  
-  let hours = 0;
-  
-  // Handle PT format (Period Time)
-  if (workStr.startsWith('PT')) {
-    const hoursMatch = workStr.match(/(\d+)H/);
-    const minutesMatch = workStr.match(/(\d+)M/);
-    const secondsMatch = workStr.match(/(\d+)S/);
-    
-    const hoursFromMatch = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-    const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 0;
-    
-    hours = hoursFromMatch + (minutes / 60) + (seconds / 3600);
-  } else {
-    // Handle simple number format
-    const parsed = parseFloat(workStr);
-    hours = isNaN(parsed) ? 0 : parsed;
-  }
-  
-  // Convert hours to days (8 working hours per day)
-  return hours / 8;
-}
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -117,8 +92,12 @@ export async function POST(request: NextRequest) {
       const taskEndDate = task.Finish ? new Date(task.Finish) : endDate;
       const taskProgress = task.PercentComplete ? parseFloat(task.PercentComplete) : 0;
       const taskDuration = parseDuration(task.Duration);
-      const taskWork = parseWork(task.Work);
-      const taskCost = isNaN(parseFloat(task.Cost)) ? 0 : parseFloat(task.Cost);
+      
+      // Parse baseline and actual dates
+      const baselineStart = task.Baseline?.Start ? new Date(task.Baseline.Start) : null;
+      const baselineFinish = task.Baseline?.Finish ? new Date(task.Baseline.Finish) : null;
+      const actualStart = task.ActualStart ? new Date(task.ActualStart) : null;
+      const actualFinish = task.ActualFinish ? new Date(task.ActualFinish) : null;
 
       let phaseId = null;
       let parentTaskId = null;
@@ -139,8 +118,8 @@ export async function POST(request: NextRequest) {
         phaseId = phase.id;
       } else if (outlineLevel === 2) {
         // This is a task
-        const createdTask = await prisma.task.create({
-    data: {
+                const createdTask = await prisma.task.create({
+          data: {
             name: taskName,
             start_date: taskStartDate,
             end_date: taskEndDate,
@@ -150,10 +129,12 @@ export async function POST(request: NextRequest) {
               connect: { id: project.id }
             },
             duration: taskDuration,
-            work: taskWork,
-            cost: taskCost,
             xml_uid: taskUID,
             outline_level: outlineLevel,
+            baseline_start: baselineStart,
+            baseline_finish: baselineFinish,
+            actual_start: actualStart,
+            actual_finish: actualFinish,
           },
         });
         taskMap.set(taskUID, createdTask.id);
@@ -171,10 +152,12 @@ export async function POST(request: NextRequest) {
               connect: { id: project.id }
             },
             duration: taskDuration,
-            work: taskWork,
-            cost: taskCost,
             xml_uid: taskUID,
             outline_level: outlineLevel,
+            baseline_start: baselineStart,
+            baseline_finish: baselineFinish,
+            actual_start: actualStart,
+            actual_finish: actualFinish,
           },
         });
         taskMap.set(taskUID, createdTask.id);
@@ -215,6 +198,18 @@ export async function POST(request: NextRequest) {
     for (const resource of Array.isArray(resources) ? resources : [resources]) {
       if (resource.Name && resource.UID !== '0') {
         const email = `${resource.Name.toLowerCase().replace(/\s+/g, '.')}@salam.com`;
+        
+        // Ensure default department exists
+        const defaultDepartment = await prisma.department.upsert({
+          where: { id: 1 },
+          update: {},
+          create: {
+            id: 1,
+            name: 'Information Technology',
+            description: 'IT Department responsible for all technical infrastructure and systems'
+          }
+        });
+
         const employee = await prisma.employee.upsert({
           where: { email: email },
           update: {},
@@ -225,7 +220,7 @@ export async function POST(request: NextRequest) {
             job_title: 'Project Team Member',
             job_title_ar: 'عضو فريق المشروع',
             department: {
-              connect: { id: 1 } // Default department
+              connect: { id: defaultDepartment.id }
             },
           },
         });
@@ -242,7 +237,6 @@ export async function POST(request: NextRequest) {
       
       if (taskMap.has(taskUID) && resourceMap.has(resourceUID)) {
         const units = isNaN(parseFloat(assignment.Units)) ? 100 : parseFloat(assignment.Units);
-        const work = isNaN(parseFloat(assignment.Work)) ? 0 : parseFloat(assignment.Work);
 
         await prisma.taskAssignment.create({
           data: {
@@ -253,7 +247,6 @@ export async function POST(request: NextRequest) {
               connect: { id: resourceMap.get(resourceUID) }
             },
             units: units,
-            work: work,
             role: 'member',
           },
         });

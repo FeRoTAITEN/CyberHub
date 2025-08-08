@@ -1,7 +1,4 @@
-// Prisma schema for Cyber Hub Survey System
-// All comments in English only
-
-  generator client {
+generator client {
   provider = "prisma-client-js"
 }
 
@@ -11,308 +8,294 @@ datasource db {
 }
 
 model Survey {
-  id          Int               @id @default(autoincrement())
-  title_en    String
-  title_ar    String
-  created_by  Int
-  created_at  DateTime          @default(now())
-  updated_at  DateTime          @updatedAt
-  permanent_token String?       @unique // Permanent link token that never expires
-  questions   SurveyQuestion[]
-  invites     SurveyInvite[]
-  responses   SurveyResponse[]
+  id              Int              @id @default(autoincrement())
+  title_en        String
+  title_ar        String
+  created_by      Int
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  permanent_token String?          @unique
+  invites         SurveyInvite[]
+  questions       SurveyQuestion[]
+  responses       SurveyResponse[]
 }
 
 model SurveyQuestion {
-  id         Int      @id @default(autoincrement())
-  survey     Survey   @relation(fields: [survey_id], references: [id], onDelete: Cascade)
-  survey_id  Int
-  question_type String // 'text', 'rating', 'choice', 'comments'
-  label_en   String
-  label_ar   String
-  required   Boolean  @default(false)
-  order      Int      @default(0)
-  // Rating scale configuration
-  rating_scale String? // 'satisfaction', 'expectations', 'reliability', 'clarity', 'agreement'
-  rating_options Json? // Store rating options as JSON
-  answers    SurveyAnswer[]
+  id             Int            @id @default(autoincrement())
+  survey_id      Int
+  question_type  String
+  label_en       String
+  label_ar       String
+  required       Boolean        @default(false)
+  order          Int            @default(0)
+  rating_options Json?
+  rating_scale   String?
+  answers        SurveyAnswer[]
+  survey         Survey         @relation(fields: [survey_id], references: [id], onDelete: Cascade)
 }
 
 model SurveyInvite {
-  id         Int      @id @default(autoincrement())
-  survey     Survey   @relation(fields: [survey_id], references: [id], onDelete: Cascade)
+  id         Int              @id @default(autoincrement())
   survey_id  Int
-  token      String   @unique
+  token      String           @unique
   expires_at DateTime
-  used       Boolean  @default(false)
+  used       Boolean          @default(false)
   invited_by Int
-  created_at DateTime @default(now())
+  created_at DateTime         @default(now())
   used_at    DateTime?
+  survey     Survey           @relation(fields: [survey_id], references: [id], onDelete: Cascade)
   responses  SurveyResponse[]
 }
 
 model SurveyResponse {
-  id                  Int            @id @default(autoincrement())
-  invite              SurveyInvite?  @relation(fields: [invite_id], references: [id], onDelete: Cascade)
-  invite_id           Int?
-  survey              Survey         @relation(fields: [survey_id], references: [id], onDelete: Cascade)
-  survey_id           Int
-  responder_name      String
+  id                   Int            @id @default(autoincrement())
+  invite_id            Int?
+  survey_id            Int
+  responder_name       String
   responder_department String
-  submitted_at        DateTime       @default(now())
-  answers             SurveyAnswer[]
+  submitted_at         DateTime       @default(now())
+  answers              SurveyAnswer[]
+  invite               SurveyInvite?  @relation(fields: [invite_id], references: [id], onDelete: Cascade)
+  survey               Survey         @relation(fields: [survey_id], references: [id], onDelete: Cascade)
 }
 
 model SurveyAnswer {
-  id           Int            @id @default(autoincrement())
-  response     SurveyResponse @relation(fields: [response_id], references: [id], onDelete: Cascade)
-  response_id  Int
-  question     SurveyQuestion @relation(fields: [question_id], references: [id], onDelete: Cascade)
-  question_id  Int
-  answer       String?
-  question_label String? // Store question text for better display
+  id             Int            @id @default(autoincrement())
+  response_id    Int
+  question_id    Int
+  answer         String?
+  question_label String?
+  question       SurveyQuestion @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  response       SurveyResponse @relation(fields: [response_id], references: [id], onDelete: Cascade)
 }
 
 model Department {
   id          Int        @id @default(autoincrement())
   name        String
   description String?
-  manager     Employee?  @relation("DepartmentManager", fields: [manager_id], references: [id])
   manager_id  Int?
+  manager     Employee?  @relation("DepartmentManager", fields: [manager_id], references: [id])
   employees   Employee[]
 }
 
 model Employee {
-  id           Int         @id @default(autoincrement())
-  name         String
-  name_ar      String?
-  email        String     @unique
-  phone        String?
-  job_title    String?
-  job_title_ar String?
-  department   Department @relation(fields: [department_id], references: [id])
-  department_id Int
-  avatar       String?
-  location     String?
-  hire_date    DateTime?
-  status       String?
-  gender       String?    @default("male") // 'male', 'female'
-  is_active    Boolean    @default(true)
-  manages      Department[] @relation("DepartmentManager")
-  // Shift Management relations
-  shiftAssignments ShiftAssignment[]
-  availability     MemberAvailability[]
-  // Project Management relations
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  email              String               @unique
+  phone              String?
+  job_title          String?
+  department_id      Int
+  avatar             String?
+  location           String?
+  hire_date          DateTime?
+  status             String?
+  job_title_ar       String?
+  name_ar            String?
+  gender             String?              @default("male")
+  is_active          Boolean              @default(true)
+  manages            Department[]         @relation("DepartmentManager")
+  department         Department           @relation(fields: [department_id], references: [id])
+  availability       MemberAvailability[]
+  managedProjects    Project[]            @relation("ProjectManager")
+  shiftAssignments   ShiftAssignment[]
   projectAssignments TaskAssignment[]
-  managedProjects  Project[] @relation("ProjectManager")
 }
 
-// Shift Management Models
 model Shift {
-  id          Int              @id @default(autoincrement())
-  name        String           // 'morning', 'evening', 'night'
-  name_ar     String           // 'صباح', 'مساء', 'ليل'
-  start_time  String           // '08:00', '16:00', '00:00'
-  end_time    String           // '16:00', '00:00', '08:00'
-  min_members Int              @default(3)
-  max_members Int              @default(5)
+  id          Int               @id @default(autoincrement())
+  name        String
+  name_ar     String
+  start_time  String
+  end_time    String
+  min_members Int               @default(3)
+  max_members Int               @default(5)
   assignments ShiftAssignment[]
 }
 
 model ShiftAssignment {
-  id         Int      @id @default(autoincrement())
-  date       DateTime // Date of the shift
-  shift      Shift    @relation(fields: [shift_id], references: [id], onDelete: Cascade)
-  shift_id   Int
-  employee   Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  shift_id    Int
   employee_id Int
-  assigned_by Int     // Admin who assigned the shift
+  assigned_by Int
   assigned_at DateTime @default(now())
-  status     String   @default("assigned") // 'assigned', 'completed', 'cancelled'
-  
-  @@unique([date, shift_id, employee_id]) // Prevent duplicate assignments
+  status      String   @default("assigned")
+  employee    Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  shift       Shift    @relation(fields: [shift_id], references: [id], onDelete: Cascade)
+
+  @@unique([date, shift_id, employee_id])
 }
 
 model MemberAvailability {
-  id         Int      @id @default(autoincrement())
-  employee   Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  id          Int      @id @default(autoincrement())
   employee_id Int
-  date       DateTime // Date of unavailability
-  reason     String   // 'sick_leave', 'vacation', 'personal', 'other'
-  reason_ar  String   // Arabic reason
-  notes      String?  // Additional notes
-  created_by Int      // Admin who marked as unavailable
-  created_at DateTime @default(now())
-  
-  @@unique([employee_id, date]) // Prevent duplicate availability records
+  date        DateTime
+  reason      String
+  reason_ar   String
+  notes       String?
+  created_by  Int
+  created_at  DateTime @default(now())
+  employee    Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+
+  @@unique([employee_id, date])
 }
 
 model Policy {
-  id          Int      @id @default(autoincrement())
-  title_en    String
-  title_ar    String
-  description_en String
-  description_ar String
-  version     String
-  file_size   String
-  file_url    String?
-  downloads   Int      @default(0)
-  views       Int      @default(0)
-  status      String   @default("active") // 'active', 'inactive', 'archived'
-  is_visible  Boolean  @default(true)
-  parent_id   Int?     // Reference to parent policy (for archived versions)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  created_by  Int?
-  updated_by  Int?
-  
-  // Self-referencing relationship for archived versions
-  parent      Policy?  @relation("PolicyVersions", fields: [parent_id], references: [id])
+  id                Int      @id @default(autoincrement())
+  title_en          String
+  title_ar          String
+  description_en    String
+  description_ar    String
+  version           String
+  file_size         String
+  file_url          String?
+  downloads         Int      @default(0)
+  views             Int      @default(0)
+  status            String   @default("active")
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  created_by        Int?
+  updated_by        Int?
+  is_visible        Boolean  @default(true)
+  parent_id         Int?
+  parent            Policy?  @relation("PolicyVersions", fields: [parent_id], references: [id])
   archived_versions Policy[] @relation("PolicyVersions")
 }
 
 model Standard {
-  id          Int      @id @default(autoincrement())
-  title_en    String
-  title_ar    String
-  description_en String
-  description_ar String
-  version     String
-  file_size   String
-  file_url    String?
-  downloads   Int      @default(0)
-  views       Int      @default(0)
-  status      String   @default("active") // 'active', 'inactive', 'archived'
-  is_visible  Boolean  @default(true)
-  parent_id   Int?     // Reference to parent standard (for archived versions)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  created_by  Int?
-  updated_by  Int?
-  
-  // Self-referencing relationship for archived versions
-  parent      Standard?  @relation("StandardVersions", fields: [parent_id], references: [id])
+  id                Int        @id @default(autoincrement())
+  title_en          String
+  title_ar          String
+  description_en    String
+  description_ar    String
+  version           String
+  file_size         String
+  file_url          String?
+  downloads         Int        @default(0)
+  views             Int        @default(0)
+  status            String     @default("active")
+  is_visible        Boolean    @default(true)
+  parent_id         Int?
+  created_at        DateTime   @default(now())
+  updated_at        DateTime   @updatedAt
+  created_by        Int?
+  updated_by        Int?
+  parent            Standard?  @relation("StandardVersions", fields: [parent_id], references: [id])
   archived_versions Standard[] @relation("StandardVersions")
 }
 
 model Procedure {
-  id          Int      @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   title_en    String
   title_ar    String
+  version     String             @default("1.0")
+  downloads   Int                @default(0)
+  views       Int                @default(0)
+  is_visible  Boolean            @default(true)
+  created_at  DateTime           @default(now())
+  updated_at  DateTime           @updatedAt
   description String?
   file_path   String
-  version     String   @default("1.0")
-  is_visible  Boolean  @default(true)
-  is_archived Boolean  @default(false)
-  downloads   Int      @default(0)
-  views       Int      @default(0)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  is_archived Boolean            @default(false)
   versions    ProcedureVersion[]
 }
 
 model ProcedureVersion {
-  id          Int       @id @default(autoincrement())
-  procedure   Procedure @relation(fields: [procedure_id], references: [id], onDelete: Cascade)
+  id           Int       @id @default(autoincrement())
   procedure_id Int
-  version     String
-  file_path   String
-  created_at  DateTime  @default(now())
+  version      String
+  file_path    String
+  created_at   DateTime  @default(now())
+  procedure    Procedure @relation(fields: [procedure_id], references: [id], onDelete: Cascade)
 }
 
-// Project Management Models
 model Project {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  start_date  DateTime
-  end_date    DateTime
-  status      String   @default("active") // active, completed, on_hold, cancelled
-  priority    String   @default("medium") // low, medium, high, critical
-  progress    Float    @default(0) // 0-100 percentage
-  manager_id  Int?
-  manager     Employee? @relation("ProjectManager", fields: [manager_id], references: [id])
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  phases      Phase[]
-  tasks       Task[]
-  imported_from_xml Boolean @default(false)
-  xml_file_path String?
+  id                Int       @id @default(autoincrement())
+  description       String?
+  start_date        DateTime?
+  end_date          DateTime?
+  status            String    @default("active")
+  progress          Float     @default(0)
+  manager_id        Int?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  imported_from_xml Boolean   @default(false)
+  xml_file_path     String?
+  name              String
+  phases            Phase[]
+  manager           Employee? @relation("ProjectManager", fields: [manager_id], references: [id])
+  tasks             Task[]
 }
 
 model Phase {
   id          Int      @id @default(autoincrement())
-  name        String
   description String?
-  start_date  DateTime
-  end_date    DateTime
-  status      String   @default("active") // active, completed, on_hold
-  progress    Float    @default(0) // 0-100 percentage
+  start_date  DateTime?
+  end_date    DateTime?
+  status      String   @default("active")
+  progress    Float    @default(0)
   order       Int      @default(0)
-  project     Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
   project_id  Int
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
+  name        String
+  project     Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
   tasks       Task[]
 }
 
 model Task {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  start_date  DateTime
-  end_date    DateTime
-  status      String   @default("active") // active, completed, on_hold, cancelled
-  priority    String   @default("medium") // low, medium, high, critical
-  progress    Float    @default(0) // 0-100 percentage
-  order       Int      @default(0)
-  project     Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  project_id  Int
-  phase       Phase?   @relation(fields: [phase_id], references: [id], onDelete: SetNull)
-  phase_id    Int?
-  parent_task Task?    @relation("TaskSubtasks", fields: [parent_task_id], references: [id], onDelete: SetNull)
-  parent_task_id Int?
-  subtasks    Task[]   @relation("TaskSubtasks")
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  assignments TaskAssignment[]
-  // Additional fields for Microsoft Project import
-  duration    Float    @default(0) // Duration in hours
-  work        Float    @default(0) // Work effort in hours
-  cost        Float    @default(0) // Cost in currency
-  xml_uid     String?  // Original UID from XML file for dependency mapping
-  outline_level Int    @default(1) // Microsoft Project outline level
-  // Dependencies
+  id                       Int              @id @default(autoincrement())
+  description              String?
+  start_date               DateTime?
+  end_date                 DateTime?
+  status                   String           @default("active")
+  progress                 Float            @default(0)
+  order                    Int              @default(0)
+  project_id               Int
+  phase_id                 Int?
+  parent_task_id           Int?
+  created_at               DateTime         @default(now())
+  updated_at               DateTime         @updatedAt
+  duration                 Float            @default(0)
+  xml_uid                  String?
+  outline_level            Int              @default(1)
+  name                     String
+  baseline_start           DateTime?
+  baseline_finish          DateTime?
+  actual_start             DateTime?
+  actual_finish            DateTime?
+  parent_task              Task?            @relation("TaskSubtasks", fields: [parent_task_id], references: [id])
+  subtasks                 Task[]           @relation("TaskSubtasks")
+  phase                    Phase?           @relation(fields: [phase_id], references: [id])
+  project                  Project          @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  assignments              TaskAssignment[]
   predecessor_dependencies TaskDependency[] @relation("PredecessorTask")
   successor_dependencies   TaskDependency[] @relation("SuccessorTask")
 }
 
 model TaskAssignment {
   id          Int      @id @default(autoincrement())
-  task        Task     @relation(fields: [task_id], references: [id], onDelete: Cascade)
   task_id     Int
-  employee    Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
   employee_id Int
-  role        String   @default("member") // owner, member, reviewer
+  role        String   @default("member")
   assigned_at DateTime @default(now())
   updated_at  DateTime @updatedAt
-  // Additional fields for Microsoft Project import
-  units       Float    @default(100) // Assignment units percentage
-  work        Float    @default(0)   // Work effort in hours
+  units       Float    @default(100)
+  employee    Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  task        Task     @relation(fields: [task_id], references: [id], onDelete: Cascade)
 
   @@unique([task_id, employee_id])
 }
 
-// New model for task dependencies
 model TaskDependency {
-  id                    Int      @id @default(autoincrement())
-  predecessor_task      Task     @relation("PredecessorTask", fields: [predecessor_task_id], references: [id], onDelete: Cascade)
-  predecessor_task_id   Int
-  successor_task        Task     @relation("SuccessorTask", fields: [successor_task_id], references: [id], onDelete: Cascade)
-  successor_task_id     Int
-  dependency_type       String   @default("finish_to_start") // finish_to_start, start_to_start, finish_to_finish, start_to_finish
-  lag                   Float    @default(0) // Lag time in hours
-  created_at            DateTime @default(now())
+  id                  Int      @id @default(autoincrement())
+  predecessor_task_id Int
+  successor_task_id   Int
+  dependency_type     String   @default("finish_to_start")
+  lag                 Float    @default(0)
+  created_at          DateTime @default(now())
+  predecessor_task    Task     @relation("PredecessorTask", fields: [predecessor_task_id], references: [id], onDelete: Cascade)
+  successor_task      Task     @relation("SuccessorTask", fields: [successor_task_id], references: [id], onDelete: Cascade)
 
   @@unique([predecessor_task_id, successor_task_id])
-} 
+}

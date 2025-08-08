@@ -8,17 +8,12 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
-    const priority = searchParams.get('priority');
     const search = searchParams.get('search');
 
     const where: any = {};
     
     if (status && status !== 'all') {
       where.status = status;
-    }
-    
-    if (priority && priority !== 'all') {
-      where.priority = priority;
     }
     
     if (search) {
@@ -147,9 +142,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const { name, description, start_date, end_date, manager_id, priority } = body;
+    const { name, description, manager_id } = body;
 
-    if (!name || !start_date || !end_date) {
+    if (!name) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -157,10 +152,7 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description,
-        start_date: new Date(start_date),
-        end_date: new Date(end_date),
         manager_id: manager_id ? parseInt(manager_id) : null,
-        priority: priority || 'medium',
         progress: 0,
       },
       include: {

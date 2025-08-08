@@ -30,10 +30,7 @@ interface Project {
   id: number;
   name: string;
   description?: string;
-  start_date: string;
-  end_date: string;
   status: string;
-  priority: string;
   progress: number;
   manager?: {
     id: number;
@@ -51,8 +48,6 @@ interface Phase {
   id: number;
   name: string;
   description?: string;
-  start_date: string;
-  end_date: string;
   status: string;
   progress: number;
   order: number;
@@ -63,19 +58,18 @@ interface Task {
   id: number;
   name: string;
   description?: string;
-  start_date: string;
-  end_date: string;
   status: string;
-  priority: string;
   progress: number;
   order: number;
   outline_level: number;
   duration: number;
-  work: number;
-  cost: number;
   xml_uid?: string;
   phase_id?: number;
   parent_task_id?: number;
+  baseline_start?: string;
+  baseline_finish?: string;
+  actual_start?: string;
+  actual_finish?: string;
   subtasks: Task[];
   assignments: TaskAssignment[];
 }
@@ -86,7 +80,6 @@ interface TaskAssignment {
   employee_id: number;
   role: string;
   units: number;
-  work: number;
   assigned_at: string;
   employee: {
     id: number;
@@ -118,7 +111,6 @@ export default function ExcellentPage() {
   const [importing, setImporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [showImportModal, setShowImportModal] = useState(false);
@@ -132,13 +124,12 @@ export default function ExcellentPage() {
   const [editingTask, setEditingTask] = useState({
     name: '',
     description: '',
-    start_date: '',
-    end_date: '',
-    priority: 'medium',
     status: 'active',
     duration: 0,
-    work: 0,
-    cost: 0
+    baseline_start: '',
+    baseline_finish: '',
+    actual_start: '',
+    actual_finish: ''
   });
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [showAddSubtaskModal, setShowAddSubtaskModal] = useState(false);
@@ -148,22 +139,37 @@ export default function ExcellentPage() {
   const [newTask, setNewTask] = useState({
     name: '',
     description: '',
-    start_date: '',
-    end_date: '',
-    priority: 'medium',
     status: 'active',
     duration: 0,
-    work: 0,
-    cost: 0
+    baseline_start: '',
+    baseline_finish: '',
+    actual_start: '',
+    actual_finish: ''
   });
   const [selectedProjectForTask, setSelectedProjectForTask] = useState<number | null>(null);
   const [newProject, setNewProject] = useState({
     name: '',
     description: '',
-    start_date: '',
-    end_date: '',
-    priority: 'medium',
     manager_id: ''
+  });
+
+  // Edit Project Modal State
+  const [showEditProjectModal, setShowEditProjectModal] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
+  const [editingProject, setEditingProject] = useState({
+    name: '',
+    description: '',
+    status: 'active',
+    manager_id: ''
+  });
+
+  // Add Phase Modal State
+  const [showAddPhaseModal, setShowAddPhaseModal] = useState(false);
+  const [selectedProjectForPhase, setSelectedProjectForPhase] = useState<Project | null>(null);
+  const [newPhase, setNewPhase] = useState({
+    name: '',
+    description: '',
+    status: 'active'
   });
 
   // Load projects and employees on component mount
@@ -175,14 +181,13 @@ export default function ExcellentPage() {
   // Reload projects when filters change
   useEffect(() => {
     loadProjects();
-  }, [statusFilter, priorityFilter, searchTerm]);
+  }, [statusFilter, searchTerm]);
 
   const loadProjects = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.append('status', statusFilter);
-      if (priorityFilter !== 'all') params.append('priority', priorityFilter);
       if (searchTerm) params.append('search', searchTerm);
       
       const response = await fetch(`/api/projects?${params}`);
@@ -268,9 +273,6 @@ export default function ExcellentPage() {
         setNewProject({
           name: '',
           description: '',
-          start_date: '',
-          end_date: '',
-          priority: 'medium',
           manager_id: '',
         });
         loadProjects();
@@ -308,6 +310,84 @@ export default function ExcellentPage() {
   const confirmDeleteProject = (project: Project) => {
     setProjectToDelete(project);
     setShowDeleteConfirmModal(true);
+  };
+
+  const handleEditProject = (project: Project) => {
+    setProjectToEdit(project);
+    setEditingProject({
+      name: project.name,
+      description: project.description || '',
+      status: project.status,
+      manager_id: project.manager?.id?.toString() || ''
+    });
+    setShowEditProjectModal(true);
+  };
+
+  const handleUpdateProject = async () => {
+    if (!projectToEdit) return;
+
+    try {
+      const response = await fetch(`/api/projects/${projectToEdit.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: editingProject.name,
+          description: editingProject.description,
+          status: editingProject.status,
+          manager_id: editingProject.manager_id ? parseInt(editingProject.manager_id) : null
+        }),
+      });
+
+      if (response.ok) {
+        setShowEditProjectModal(false);
+        setProjectToEdit(null);
+        loadProjects();
+      }
+    } catch (error) {
+      console.error('Error updating project:', error);
+    }
+  };
+
+  const handleCreatePhase = async () => {
+    if (!selectedProjectForPhase) {
+      alert('Please select a project for the new phase');
+      return;
+    }
+
+    if (!newPhase.name) {
+      alert('Please fill in all required fields: Name');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/phases', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newPhase.name,
+          description: newPhase.description,
+          status: newPhase.status,
+          project_id: selectedProjectForPhase.id
+        }),
+      });
+
+      if (response.ok) {
+        setShowAddPhaseModal(false);
+        setSelectedProjectForPhase(null);
+        setNewPhase({
+          name: '',
+          description: '',
+          status: 'active'
+        });
+        loadProjects();
+      }
+    } catch (error) {
+      console.error('Error creating phase:', error);
+    }
   };
 
   const handleUpdateTaskProgress = async (taskId: number, progress: number) => {
@@ -356,13 +436,12 @@ export default function ExcellentPage() {
     setEditingTask({
       name: task.name,
       description: task.description || '',
-      start_date: task.start_date.split('T')[0],
-      end_date: task.end_date.split('T')[0],
-      priority: task.priority,
       status: task.status,
       duration: task.duration,
-      work: task.work,
-      cost: task.cost
+      baseline_start: task.baseline_start ? task.baseline_start.split('T')[0] : '',
+      baseline_finish: task.baseline_finish ? task.baseline_finish.split('T')[0] : '',
+      actual_start: task.actual_start ? task.actual_start.split('T')[0] : '',
+      actual_finish: task.actual_finish ? task.actual_finish.split('T')[0] : ''
     });
     setShowEditTaskModal(true);
   };
@@ -380,13 +459,12 @@ export default function ExcellentPage() {
           name_en: editingTask.name,
           name_ar: editingTask.name, // Use same name for both
           description: editingTask.description,
-          start_date: editingTask.start_date,
-          end_date: editingTask.end_date,
-          priority: editingTask.priority,
           status: editingTask.status,
           duration: editingTask.duration,
-          work: editingTask.work,
-          cost: editingTask.cost
+          baseline_start: editingTask.baseline_start || null,
+          baseline_finish: editingTask.baseline_finish || null,
+          actual_start: editingTask.actual_start || null,
+          actual_finish: editingTask.actual_finish || null
         }),
       });
 
@@ -402,8 +480,8 @@ export default function ExcellentPage() {
 
     const handleCreateTask = async () => {
     // Validate required fields
-    if (!newTask.name || !newTask.start_date || !newTask.end_date) {
-      alert('Please fill in all required fields: Name, Start Date, and End Date');
+    if (!newTask.name) {
+      alert('Please fill in all required fields: Name');
       return;
     }
 
@@ -417,43 +495,75 @@ export default function ExcellentPage() {
       const taskData: any = {
           name: newTask.name,
           description: newTask.description,
-          start_date: newTask.start_date,
-          end_date: newTask.end_date,
-          priority: newTask.priority,
           status: newTask.status,
           duration: newTask.duration,
-          work: newTask.work,
-          cost: newTask.cost
+          baseline_start: newTask.baseline_start || null,
+          baseline_finish: newTask.baseline_finish || null,
+          actual_start: newTask.actual_start || null,
+          actual_finish: newTask.actual_finish || null
       };
 
       // Add parent references
       if (parentTask) {
         taskData.parent_task_id = parentTask.id;
-        // For subtasks, we need to get project_id and phase_id from context
-        if (parentProject) {
-          taskData.project_id = parentProject.id;
-        }
-        if (parentPhase) {
-          taskData.phase_id = parentPhase.id;
-        }
-      } else if (parentPhase) {
+        // For subtasks, we need to get project_id from the parent task's project
+        // Find the project that contains this parent task
+        for (const project of projects) {
+          const foundTask = findTaskInProject(project, parentTask.id);
+          if (foundTask) {
+            taskData.project_id = project.id;
+                    // Set outline_level for subtasks
+        taskData.outline_level = foundTask.outline_level + 1;
+        // Set order for subtasks (next available order)
+        const maxOrder = Math.max(...foundTask.subtasks.map(st => st.order), 0);
+        taskData.order = maxOrder + 1;
+        break;
+      }
+    }
+        } else if (parentPhase) {
         taskData.phase_id = parentPhase.id;
-        if (parentProject) {
-          taskData.project_id = parentProject.id;
+        // Find the project that contains this phase
+        for (const project of projects) {
+          const foundPhase = project.phases.find(phase => phase.id === parentPhase.id);
+          if (foundPhase) {
+            taskData.project_id = project.id;
+            // Set order for phase tasks (next available order)
+            const maxOrder = Math.max(...foundPhase.tasks.map(t => t.order), 0);
+            taskData.order = maxOrder + 1;
+            break;
+          }
         }
       } else if (parentProject) {
         taskData.project_id = parentProject.id;
+        // Set order for project tasks (next available order)
+        const maxOrder = Math.max(...parentProject.tasks.map(t => t.order), 0);
+        taskData.order = maxOrder + 1;
       } else {
         // If no parent is set, use the selected project
         if (selectedProjectForTask) {
           taskData.project_id = selectedProjectForTask;
+          // Find the project and set order
+          const project = projects.find(p => p.id === selectedProjectForTask);
+          if (project) {
+            const maxOrder = Math.max(...project.tasks.map(t => t.order), 0);
+            taskData.order = maxOrder + 1;
+          }
         } else if (projects.length > 0) {
           // Fallback to first project if none selected
           taskData.project_id = projects[0].id;
+          const maxOrder = Math.max(...projects[0].tasks.map(t => t.order), 0);
+          taskData.order = maxOrder + 1;
         }
       }
 
       console.log('Creating task with data:', taskData);
+      
+      // Ensure we have a project_id
+      if (!taskData.project_id) {
+        alert('Could not determine project for the task. Please try again.');
+        return;
+      }
+      
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: {
@@ -474,13 +584,12 @@ export default function ExcellentPage() {
         setNewTask({
           name: '',
           description: '',
-          start_date: '',
-          end_date: '',
-          priority: 'medium',
           status: 'active',
           duration: 0,
-          work: 0,
-          cost: 0
+          baseline_start: '',
+          baseline_finish: '',
+          actual_start: '',
+          actual_finish: ''
         });
         loadProjects();
       } else {
@@ -520,15 +629,7 @@ export default function ExcellentPage() {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'text-red-400';
-      case 'high': return 'text-orange-400';
-      case 'medium': return 'text-yellow-400';
-      case 'low': return 'text-green-400';
-      default: return 'text-slate-400';
-    }
-  };
+
 
   const isOverdue = (endDate: string) => {
     return new Date(endDate) < new Date();
@@ -540,6 +641,37 @@ export default function ExcellentPage() {
     const diffTime = end.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+  };
+
+  // Helper function to find a task in a project (including subtasks)
+  const findTaskInProject = (project: Project, taskId: number): Task | null => {
+    // Search in project tasks
+    for (const task of project.tasks) {
+      if (task.id === taskId) {
+        return task;
+      }
+      // Search in subtasks
+      for (const subtask of task.subtasks) {
+        if (subtask.id === taskId) {
+          return subtask;
+        }
+      }
+    }
+    // Search in phases
+    for (const phase of project.phases) {
+      for (const task of phase.tasks) {
+        if (task.id === taskId) {
+          return task;
+        }
+        // Search in subtasks
+        for (const subtask of task.subtasks) {
+          if (subtask.id === taskId) {
+            return subtask;
+          }
+        }
+      }
+    }
+    return null;
   };
 
   const renderProgressBar = (progress: number, size: 'sm' | 'md' | 'lg' = 'md') => {
@@ -563,12 +695,11 @@ export default function ExcellentPage() {
     const isExpanded = expandedItems.has(`task-${task.id}`);
     const hasSubtasks = task.subtasks && task.subtasks.length > 0;
     const assignedEmployee = task.assignments && task.assignments[0]?.employee;
-    const isLate = isOverdue(task.end_date);
-    const daysLeft = getDaysLeft(task.end_date);
+    // Removed end_date references
 
     return (
       <div key={task.id} className="border-l-2 border-slate-700 ml-4">
-        <div className={`p-3 bg-slate-800/50 rounded-lg mb-2 ${isLate ? 'border-l-red-500' : ''}`}>
+        <div className="p-3 bg-slate-800/50 rounded-lg mb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 flex-1">
               {hasSubtasks && (
@@ -589,51 +720,61 @@ export default function ExcellentPage() {
                   <h4 className="font-medium text-white">
                     {task.name}
                   </h4>
-                  <span className={`text-xs px-2 py-1 rounded ${getPriorityColor(task.priority)}`}>
-                    {task.priority}
-                  </span>
                   {task.progress === 100 && (
                     <CheckCircleIcon className="w-4 h-4 text-green-400" />
                   )}
-                  {isLate && (
-                    <ExclamationTriangleIcon className="w-4 h-4 text-red-400" />
+                  {hasSubtasks && (
+                    <div className="flex items-center space-x-1 text-xs text-slate-400">
+                      <span>({task.subtasks.length} subtasks)</span>
+                    </div>
                   )}
                 </div>
                 
                 <div className="flex items-center space-x-4 mt-2 text-sm text-slate-400">
-                  <div className="flex items-center space-x-1">
-                    <CalendarIcon className="w-4 h-4" />
-                    <span>{new Date(task.end_date).toLocaleDateString()}</span>
-                  </div>
                   {task.duration > 0 && (
                     <div className="flex items-center space-x-1">
                       <ClockIcon className="w-4 h-4" />
                       <span>{Math.round(task.duration)}{t('excellent.duration_hours')}</span>
                     </div>
                   )}
-                  {task.work > 0 && (
-                    <div className="flex items-center space-x-1">
-                      <CogIcon className="w-4 h-4" />
-                      <span>{Math.round(task.work)}{t('excellent.duration_hours')} {t('excellent.work_hours')}</span>
-                    </div>
-                  )}
+
                   {assignedEmployee && (
                     <div className="flex items-center space-x-1">
                       <UserGroupIcon className="w-4 h-4" />
                       <span>{lang === 'ar' ? assignedEmployee.name_ar : assignedEmployee.name}</span>
                     </div>
                   )}
-                  {isLate && (
-                    <div className="text-red-400">
-                      {Math.abs(daysLeft)} {t('excellent.days')} {t('excellent.overdue')}
-                    </div>
-                  )}
-                  {!isLate && daysLeft <= 7 && daysLeft > 0 && (
-                    <div className="text-yellow-400">
-                      {daysLeft} {t('excellent.days')} {t('excellent.left')}
-                    </div>
-                  )}
                 </div>
+
+                {/* Baseline and Actual Dates */}
+                {(task.baseline_start || task.baseline_finish || task.actual_start || task.actual_finish) && (
+                  <div className="flex items-center space-x-4 mt-2 text-xs text-slate-500">
+                    {task.baseline_start && (
+                      <div className="flex items-center space-x-1">
+                    <CalendarIcon className="w-3 h-3" />
+                    <span>Baseline Start: {new Date(task.baseline_start).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {task.baseline_finish && (
+                  <div className="flex items-center space-x-1">
+                    <CalendarIcon className="w-3 h-3" />
+                    <span>Baseline Finish: {new Date(task.baseline_finish).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {task.actual_start && (
+                  <div className="flex items-center space-x-1">
+                    <CalendarIcon className="w-3 h-3" />
+                    <span>Actual Start: {new Date(task.actual_start).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {task.actual_finish && (
+                  <div className="flex items-center space-x-1">
+                    <CalendarIcon className="w-3 h-3" />
+                    <span>Actual Finish: {new Date(task.actual_finish).toLocaleDateString()}</span>
+                  </div>
+                )}
+              </div>
+            )}
               </div>
             </div>
 
@@ -738,9 +879,6 @@ export default function ExcellentPage() {
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <div className="text-sm text-slate-400">
-                  {new Date(phase.start_date).toLocaleDateString()} - {new Date(phase.end_date).toLocaleDateString()}
-                </div>
-                <div className="text-sm text-slate-400">
                   {phase.tasks?.length || 0} {t('excellent.tasks_in_phase')}
                 </div>
               </div>
@@ -821,9 +959,6 @@ export default function ExcellentPage() {
 
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <div className="text-sm text-slate-400">
-                  {new Date(project.start_date).toLocaleDateString()} - {new Date(project.end_date).toLocaleDateString()}
-                </div>
                 {project.manager && (
                   <div className="text-sm text-slate-400">
                     {t('excellent.manager')}: {lang === 'ar' ? project.manager.name_ar : project.manager.name}
@@ -840,14 +975,28 @@ export default function ExcellentPage() {
                 <span className={`text-sm px-3 py-1 rounded ${getStatusColor(project.status)}`}>
                   {project.status}
                 </span>
-                <span className={`text-sm px-3 py-1 rounded ${getPriorityColor(project.priority)}`}>
-                  {project.priority}
-                </span>
                 {project.imported_from_xml && (
                   <span className="text-xs px-2 py-1 bg-blue-900/50 text-blue-400 rounded">
                     XML
                   </span>
                 )}
+                <button
+                  onClick={() => handleEditProject(project)}
+                  className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded-lg transition-colors"
+                  title="Edit Project"
+                >
+                  <PencilIcon className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedProjectForPhase(project);
+                    setShowAddPhaseModal(true);
+                  }}
+                  className="p-2 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded-lg transition-colors"
+                  title="Add Phase"
+                >
+                  <PlusIcon className="w-5 h-5" />
+                </button>
                 <button
                   onClick={() => confirmDeleteProject(project)}
                   className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
@@ -990,20 +1139,7 @@ export default function ExcellentPage() {
                 </select>
               </div>
             
-            <div className="relative">
-              <FunnelIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-              <select
-                value={priorityFilter}
-                onChange={(e) => setPriorityFilter(e.target.value)}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-              >
-                <option value="all">All Priority</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
-              </select>
-            </div>
+
             </div>
 
             <div className="flex gap-3">
@@ -1076,17 +1212,7 @@ export default function ExcellentPage() {
           </div>
         </div>
         
-        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-red-500/50 hover:bg-gradient-to-br hover:from-red-500/5 hover:to-transparent stagger-animate`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={`text-sm ${colors.textSecondary} mb-1`}>{t('excellent.high_priority')}</p>
-              <p className={`text-2xl font-bold ${colors.textPrimary} group-hover:text-red-400 transition-colors duration-200`}>
-                {projects.filter(p => p.priority === 'high' || p.priority === 'critical').length}
-              </p>
-            </div>
-            <ExclamationTriangleIcon className="w-8 h-8 text-red-400 group-hover:scale-110 transition-transform duration-200" />
-          </div>
-          </div>
+
         </div>
 
         {/* Projects List */}
@@ -1216,46 +1342,8 @@ export default function ExcellentPage() {
                 className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                 />
               </div>
-            <div className="mb-4">
-              <label htmlFor="newProjectStartDate" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.start_date')}
-              </label>
-                  <input
-                    type="date"
-                id="newProjectStartDate"
-                    value={newProject.start_date}
-                onChange={(e) => setNewProject({ ...newProject, start_date: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-                  />
-                </div>
-            <div className="mb-4">
-              <label htmlFor="newProjectEndDate" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.end_date')}
-              </label>
-                  <input
-                    type="date"
-                id="newProjectEndDate"
-                    value={newProject.end_date}
-                onChange={(e) => setNewProject({ ...newProject, end_date: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-                  />
-                </div>
-            <div className="mb-4">
-              <label htmlFor="newProjectPriority" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.priority')}
-              </label>
-                  <select
-                id="newProjectPriority"
-                    value={newProject.priority}
-                onChange={(e) => setNewProject({ ...newProject, priority: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
-                  </select>
-                </div>
+
+
             <div className="mb-4">
               <label htmlFor="newProjectManager" className="block text-sm font-medium text-slate-400 mb-1">
                 {t('excellent.manager')}
@@ -1377,46 +1465,8 @@ export default function ExcellentPage() {
                 className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
               />
             </div>
-            <div className="mb-4">
-              <label htmlFor="editTaskStartDate" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.start_date')}
-              </label>
-              <input
-                type="date"
-                id="editTaskStartDate"
-                value={editingTask.start_date}
-                onChange={(e) => setEditingTask({ ...editingTask, start_date: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="editTaskEndDate" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.end_date')}
-              </label>
-              <input
-                type="date"
-                id="editTaskEndDate"
-                value={editingTask.end_date}
-                onChange={(e) => setEditingTask({ ...editingTask, end_date: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="editTaskPriority" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.priority')}
-              </label>
-              <select
-                id="editTaskPriority"
-                value={editingTask.priority}
-                onChange={(e) => setEditingTask({ ...editingTask, priority: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
-              </select>
-            </div>
+
+
             <div className="mb-4">
               <label htmlFor="editTaskStatus" className="block text-sm font-medium text-slate-400 mb-1">
                 {t('excellent.status')}
@@ -1445,30 +1495,59 @@ export default function ExcellentPage() {
                 className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
               />
             </div>
+
             <div className="mb-4">
-              <label htmlFor="editTaskWork" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.work_hours')}
+              <label htmlFor="editTaskBaselineStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Start Date
               </label>
               <input
-                type="number"
-                id="editTaskWork"
-                value={editingTask.work}
-                onChange={(e) => setEditingTask({ ...editingTask, work: parseFloat(e.target.value) })}
+                type="date"
+                id="editTaskBaselineStart"
+                value={editingTask.baseline_start}
+                onChange={(e) => setEditingTask({ ...editingTask, baseline_start: e.target.value })}
                 className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
               />
             </div>
+
             <div className="mb-4">
-              <label htmlFor="editTaskCost" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.cost')}
+              <label htmlFor="editTaskBaselineFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Finish Date
               </label>
               <input
-                type="number"
-                id="editTaskCost"
-                value={editingTask.cost}
-                onChange={(e) => setEditingTask({ ...editingTask, cost: parseFloat(e.target.value) })}
+                type="date"
+                id="editTaskBaselineFinish"
+                value={editingTask.baseline_finish}
+                onChange={(e) => setEditingTask({ ...editingTask, baseline_finish: e.target.value })}
                 className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
               />
             </div>
+
+            <div className="mb-4">
+              <label htmlFor="editTaskActualStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Start Date
+              </label>
+              <input
+                type="date"
+                id="editTaskActualStart"
+                value={editingTask.actual_start}
+                onChange={(e) => setEditingTask({ ...editingTask, actual_start: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editTaskActualFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Finish Date
+              </label>
+              <input
+                type="date"
+                id="editTaskActualFinish"
+                value={editingTask.actual_finish}
+                onChange={(e) => setEditingTask({ ...editingTask, actual_finish: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowEditTaskModal(false)}
@@ -1542,46 +1621,8 @@ export default function ExcellentPage() {
                 className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
               />
             </div>
-            <div className="mb-4">
-              <label htmlFor="newTaskStartDate" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.start_date')}
-              </label>
-              <input
-                type="date"
-                id="newTaskStartDate"
-                value={newTask.start_date}
-                onChange={(e) => setNewTask({ ...newTask, start_date: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="newTaskEndDate" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.end_date')}
-              </label>
-              <input
-                type="date"
-                id="newTaskEndDate"
-                value={newTask.end_date}
-                onChange={(e) => setNewTask({ ...newTask, end_date: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="newTaskPriority" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.priority')}
-              </label>
-              <select
-                id="newTaskPriority"
-                value={newTask.priority}
-                onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
-              </select>
-            </div>
+
+
             <div className="mb-4">
               <label htmlFor="newTaskStatus" className="block text-sm font-medium text-slate-400 mb-1">
                 {t('excellent.status')}
@@ -1610,30 +1651,59 @@ export default function ExcellentPage() {
                 className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
               />
             </div>
+
             <div className="mb-4">
-              <label htmlFor="newTaskWork" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.work_hours')}
+              <label htmlFor="newTaskBaselineStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Start Date
               </label>
               <input
-                type="number"
-                id="newTaskWork"
-                value={newTask.work}
-                onChange={(e) => setNewTask({ ...newTask, work: parseFloat(e.target.value) })}
+                type="date"
+                id="newTaskBaselineStart"
+                value={newTask.baseline_start}
+                onChange={(e) => setNewTask({ ...newTask, baseline_start: e.target.value })}
                 className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
               />
             </div>
+
             <div className="mb-4">
-              <label htmlFor="newTaskCost" className="block text-sm font-medium text-slate-400 mb-1">
-                {t('excellent.cost')}
+              <label htmlFor="newTaskBaselineFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Finish Date
               </label>
               <input
-                type="number"
-                id="newTaskCost"
-                value={newTask.cost}
-                onChange={(e) => setNewTask({ ...newTask, cost: parseFloat(e.target.value) })}
+                type="date"
+                id="newTaskBaselineFinish"
+                value={newTask.baseline_finish}
+                onChange={(e) => setNewTask({ ...newTask, baseline_finish: e.target.value })}
                 className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
               />
             </div>
+
+            <div className="mb-4">
+              <label htmlFor="newTaskActualStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Start Date
+              </label>
+              <input
+                type="date"
+                id="newTaskActualStart"
+                value={newTask.actual_start}
+                onChange={(e) => setNewTask({ ...newTask, actual_start: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="newTaskActualFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Finish Date
+              </label>
+              <input
+                type="date"
+                id="newTaskActualFinish"
+                value={newTask.actual_finish}
+                onChange={(e) => setNewTask({ ...newTask, actual_finish: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => {
@@ -1650,6 +1720,173 @@ export default function ExcellentPage() {
               </button>
               <button
                 onClick={handleCreateTask}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
+              >
+                {t('excellent.create')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Project Modal */}
+      {showEditProjectModal && projectToEdit && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h3 className="text-xl font-semibold text-white mb-4">{t('excellent.edit_project')}</h3>
+            
+            <div className="mb-4">
+              <label htmlFor="editProjectName" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.name')}
+              </label>
+              <input
+                type="text"
+                id="editProjectName"
+                value={editingProject.name}
+                onChange={(e) => setEditingProject({ ...editingProject, name: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editProjectDescription" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.description')}
+              </label>
+              <textarea
+                id="editProjectDescription"
+                value={editingProject.description}
+                onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+
+
+            <div className="mb-4">
+              <label htmlFor="editProjectStatus" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.status')}
+              </label>
+              <select
+                id="editProjectStatus"
+                value={editingProject.status}
+                onChange={(e) => setEditingProject({ ...editingProject, status: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              >
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="on_hold">On Hold</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editProjectManager" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.manager')}
+              </label>
+              <select
+                id="editProjectManager"
+                value={editingProject.manager_id}
+                onChange={(e) => setEditingProject({ ...editingProject, manager_id: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              >
+                <option value="">{t('excellent.select_manager')}</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>
+                    {lang === 'ar' ? emp.name_ar : emp.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowEditProjectModal(false)}
+                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+              >
+                {t('excellent.cancel')}
+              </button>
+              <button
+                onClick={handleUpdateProject}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
+              >
+                {t('excellent.save_changes')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Phase Modal */}
+      {showAddPhaseModal && selectedProjectForPhase && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h3 className="text-xl font-semibold text-white mb-4">{t('excellent.add_phase')}</h3>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.project')}
+              </label>
+              <div className="text-white font-medium">
+                {selectedProjectForPhase.name}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="newPhaseName" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.name')}
+              </label>
+              <input
+                type="text"
+                id="newPhaseName"
+                value={newPhase.name}
+                onChange={(e) => setNewPhase({ ...newPhase, name: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="newPhaseDescription" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.description')}
+              </label>
+              <textarea
+                id="newPhaseDescription"
+                value={newPhase.description}
+                onChange={(e) => setNewPhase({ ...newPhase, description: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+
+
+            <div className="mb-4">
+              <label htmlFor="newPhaseStatus" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.status')}
+              </label>
+              <select
+                id="newPhaseStatus"
+                value={newPhase.status}
+                onChange={(e) => setNewPhase({ ...newPhase, status: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              >
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="on_hold">On Hold</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setShowAddPhaseModal(false);
+                  setSelectedProjectForPhase(null);
+                }}
+                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+              >
+                {t('excellent.cancel')}
+              </button>
+              <button
+                onClick={handleCreatePhase}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
               >
                 {t('excellent.create')}

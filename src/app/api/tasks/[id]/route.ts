@@ -6,10 +6,11 @@ const prisma = new PrismaClient();
 // DELETE /api/tasks/[id] - Delete a task and all its related data
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const taskId = parseInt(params.id);
+    const { id } = await params;
+    const taskId = parseInt(id);
 
     if (isNaN(taskId)) {
       return NextResponse.json(
@@ -105,10 +106,11 @@ export async function DELETE(
 // PUT /api/tasks/[id] - Update task progress and cascade updates
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const taskId = parseInt(params.id);
+    const { id } = await params;
+    const taskId = parseInt(id);
     const body = await request.json();
     
     const { 
@@ -118,11 +120,12 @@ export async function PUT(
       name,
       description,
       start_date,
-      priority,
       status,
       duration,
-      work,
-      cost
+      baseline_start,
+      baseline_finish,
+      actual_start,
+      actual_finish
     } = body;
 
     // Update the task
@@ -132,11 +135,12 @@ export async function PUT(
     if (name) updateData.name = name;
     if (description !== undefined) updateData.description = description;
     if (start_date) updateData.start_date = new Date(start_date);
-    if (priority) updateData.priority = priority;
     if (status) updateData.status = status;
     if (duration !== undefined) updateData.duration = duration;
-    if (work !== undefined) updateData.work = work;
-    if (cost !== undefined) updateData.cost = cost;
+    if (baseline_start !== undefined) updateData.baseline_start = baseline_start ? new Date(baseline_start) : null;
+    if (baseline_finish !== undefined) updateData.baseline_finish = baseline_finish ? new Date(baseline_finish) : null;
+    if (actual_start !== undefined) updateData.actual_start = actual_start ? new Date(actual_start) : null;
+    if (actual_finish !== undefined) updateData.actual_finish = actual_finish ? new Date(actual_finish) : null;
 
     const updatedTask = await prisma.task.update({
       where: { id: taskId },

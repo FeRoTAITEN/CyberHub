@@ -13,14 +13,15 @@ export async function POST(request: NextRequest) {
       description,
       start_date,
       end_date,
-      priority,
       status,
       duration,
-      work,
-      cost,
       project_id,
       phase_id,
-      parent_task_id
+      parent_task_id,
+      baseline_start,
+      baseline_finish,
+      actual_start,
+      actual_finish
     } = body;
 
     // Validate required fields
@@ -49,16 +50,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate priority and status
-    const validPriorities = ['low', 'medium', 'high', 'critical'];
+    // Validate status
     const validStatuses = ['active', 'completed', 'on_hold', 'cancelled'];
-    
-    if (priority && !validPriorities.includes(priority)) {
-      return NextResponse.json(
-        { error: 'Invalid priority. Must be one of: low, medium, high, critical' },
-        { status: 400 }
-      );
-    }
     
     if (status && !validStatuses.includes(status)) {
       return NextResponse.json(
@@ -69,12 +62,10 @@ export async function POST(request: NextRequest) {
 
     // Validate numeric fields
     const durationValue = duration ? parseFloat(duration) : 0;
-    const workValue = work ? parseFloat(work) : 0;
-    const costValue = cost ? parseFloat(cost) : 0;
 
-    if (isNaN(durationValue) || isNaN(workValue) || isNaN(costValue)) {
+    if (isNaN(durationValue)) {
       return NextResponse.json(
-        { error: 'Invalid numeric values for duration, work, or cost' },
+        { error: 'Invalid numeric values for duration' },
         { status: 400 }
       );
     }
@@ -85,14 +76,15 @@ export async function POST(request: NextRequest) {
       description,
       start_date: startDate,
       end_date: endDate,
-      priority,
       status,
       progress: 0,
       duration: durationValue,
-      work: workValue,
-      cost: costValue,
       order: 0,
       outline_level: parent_task_id ? 1 : 0,
+      baseline_start: baseline_start ? new Date(baseline_start) : null,
+      baseline_finish: baseline_finish ? new Date(baseline_finish) : null,
+      actual_start: actual_start ? new Date(actual_start) : null,
+      actual_finish: actual_finish ? new Date(actual_finish) : null,
     };
 
     // Validate and set foreign key references
