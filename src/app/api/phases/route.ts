@@ -11,34 +11,18 @@ export async function POST(request: NextRequest) {
     const {
       name,
       description,
-      start_date,
-      end_date,
       status,
-      project_id
+      project_id,
+      baseline_start,
+      baseline_finish,
+      actual_start,
+      actual_finish
     } = body;
 
     // Validate required fields
-    if (!name || !start_date || !end_date || !project_id) {
+    if (!name || !project_id) {
       return NextResponse.json(
-        { error: 'Missing required fields: Name, Start Date, End Date, and Project ID are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate date format
-    const startDate = new Date(start_date);
-    const endDate = new Date(end_date);
-    
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      return NextResponse.json(
-        { error: 'Invalid date format. Please use YYYY-MM-DD format' },
-        { status: 400 }
-      );
-    }
-
-    if (endDate < startDate) {
-      return NextResponse.json(
-        { error: 'End date cannot be before start date' },
+        { error: 'Missing required fields: Name and Project ID are required' },
         { status: 400 }
       );
     }
@@ -81,17 +65,31 @@ export async function POST(request: NextRequest) {
     const nextOrder = (maxOrder._max.order || 0) + 1;
 
     // Create the phase
+    const phaseData: any = {
+      name,
+      description,
+      status: status || 'active',
+      progress: 0,
+      order: nextOrder,
+      project_id: projectId,
+    };
+
+    // Add optional date fields
+    if (baseline_start) {
+      phaseData.baseline_start = new Date(baseline_start);
+    }
+    if (baseline_finish) {
+      phaseData.baseline_finish = new Date(baseline_finish);
+    }
+    if (actual_start) {
+      phaseData.actual_start = new Date(actual_start);
+    }
+    if (actual_finish) {
+      phaseData.actual_finish = new Date(actual_finish);
+    }
+
     const phase = await prisma.phase.create({
-      data: {
-        name,
-        description,
-        start_date: startDate,
-        end_date: endDate,
-        status: status || 'active',
-        progress: 0,
-        order: nextOrder,
-        project_id: projectId,
-      },
+      data: phaseData,
       include: {
         project: true,
         tasks: true,

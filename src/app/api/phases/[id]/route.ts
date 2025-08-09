@@ -3,6 +3,75 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// PUT /api/phases/[id] - Update a phase
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const phaseId = parseInt(id);
+    const body = await request.json();
+
+    if (isNaN(phaseId)) {
+      return NextResponse.json({ error: 'Invalid phase ID' }, { status: 400 });
+    }
+
+    const {
+      name,
+      description,
+      status,
+      baseline_start,
+      baseline_finish,
+      actual_start,
+      actual_finish
+    } = body;
+
+    // Validate required fields
+    if (!name) {
+      return NextResponse.json(
+        { error: 'Missing required fields: Name is required' },
+        { status: 400 }
+      );
+    }
+
+    // Update the phase
+    const updateData: any = {
+      name,
+      description,
+      status: status || 'active',
+    };
+
+    // Add optional date fields
+    if (baseline_start) {
+      updateData.baseline_start = new Date(baseline_start);
+    }
+    if (baseline_finish) {
+      updateData.baseline_finish = new Date(baseline_finish);
+    }
+    if (actual_start) {
+      updateData.actual_start = new Date(actual_start);
+    }
+    if (actual_finish) {
+      updateData.actual_finish = new Date(actual_finish);
+    }
+
+    const updatedPhase = await prisma.phase.update({
+      where: { id: phaseId },
+      data: updateData,
+      include: {
+        project: true,
+        tasks: true,
+      },
+    });
+
+    return NextResponse.json(updatedPhase);
+  } catch (error) {
+    console.error('Update phase error:', error);
+    return NextResponse.json({ error: 'Failed to update phase' }, { status: 500 });
+  }
+}
+
 // DELETE /api/phases/[id] - Delete a phase and all its related tasks
 export async function DELETE(
   request: NextRequest,

@@ -63,17 +63,25 @@ export async function POST(request: NextRequest) {
     const startDate = projectData.StartDate ? new Date(projectData.StartDate) : new Date();
     const endDate = projectData.FinishDate ? new Date(projectData.FinishDate) : new Date();
     const completionPercent = projectData.PercentComplete ? parseFloat(projectData.PercentComplete) : 0;
+    
+    // Extract baseline and actual dates for project
+    const projectBaselineStart = projectData.Baseline?.Start ? new Date(projectData.Baseline.Start) : null;
+    const projectBaselineFinish = projectData.Baseline?.Finish ? new Date(projectData.Baseline.Finish) : null;
+    const projectActualStart = projectData.ActualStart ? new Date(projectData.ActualStart) : null;
+    const projectActualFinish = projectData.ActualFinish ? new Date(projectData.ActualFinish) : null;
 
     // Create project
     const project = await prisma.project.create({
       data: {
         name: projectName,
         description: `Imported from ${file.name}`,
-        start_date: startDate,
-        end_date: endDate,
         progress: completionPercent,
         imported_from_xml: true,
         xml_file_path: file.name,
+        baseline_start: projectBaselineStart,
+        baseline_finish: projectBaselineFinish,
+        actual_start: projectActualStart,
+        actual_finish: projectActualFinish,
       },
     });
 
@@ -107,11 +115,13 @@ export async function POST(request: NextRequest) {
         const phase = await prisma.phase.create({
           data: {
             name: taskName,
-            start_date: taskStartDate,
-            end_date: taskEndDate,
             progress: taskProgress,
             order: parseInt(task.ID || '0'),
             project_id: project.id,
+            baseline_start: baselineStart,
+            baseline_finish: baselineFinish,
+            actual_start: actualStart,
+            actual_finish: actualFinish,
           },
         });
         phaseMap.set(taskUID, phase.id);
@@ -121,8 +131,6 @@ export async function POST(request: NextRequest) {
                 const createdTask = await prisma.task.create({
           data: {
             name: taskName,
-            start_date: taskStartDate,
-            end_date: taskEndDate,
             progress: taskProgress,
             order: parseInt(task.ID || '0'),
             project: {
@@ -144,8 +152,6 @@ export async function POST(request: NextRequest) {
         const createdTask = await prisma.task.create({
           data: {
             name: taskName,
-            start_date: taskStartDate,
-            end_date: taskEndDate,
             progress: taskProgress,
             order: parseInt(task.ID || '0'),
             project: {

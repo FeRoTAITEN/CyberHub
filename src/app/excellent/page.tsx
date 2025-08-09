@@ -42,6 +42,10 @@ interface Project {
   tasks: Task[];
   imported_from_xml: boolean;
   xml_file_path?: string;
+  baseline_start?: string;
+  baseline_finish?: string;
+  actual_start?: string;
+  actual_finish?: string;
 }
 
 interface Phase {
@@ -52,6 +56,10 @@ interface Phase {
   progress: number;
   order: number;
   tasks: Task[];
+  baseline_start?: string;
+  baseline_finish?: string;
+  actual_start?: string;
+  actual_finish?: string;
 }
 
 interface Task {
@@ -132,7 +140,6 @@ export default function ExcellentPage() {
     actual_finish: ''
   });
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
-  const [showAddSubtaskModal, setShowAddSubtaskModal] = useState(false);
   const [parentTask, setParentTask] = useState<Task | null>(null);
   const [parentProject, setParentProject] = useState<Project | null>(null);
   const [parentPhase, setParentPhase] = useState<Phase | null>(null);
@@ -160,7 +167,11 @@ export default function ExcellentPage() {
     name: '',
     description: '',
     status: 'active',
-    manager_id: ''
+    manager_id: '',
+    baseline_start: '',
+    baseline_finish: '',
+    actual_start: '',
+    actual_finish: ''
   });
 
   // Add Phase Modal State
@@ -169,8 +180,30 @@ export default function ExcellentPage() {
   const [newPhase, setNewPhase] = useState({
     name: '',
     description: '',
-    status: 'active'
+    status: 'active',
+    baseline_start: '',
+    baseline_finish: '',
+    actual_start: '',
+    actual_finish: ''
   });
+
+  // Edit Phase Modal State
+  const [showEditPhaseModal, setShowEditPhaseModal] = useState(false);
+  const [phaseToEdit, setPhaseToEdit] = useState<Phase | null>(null);
+  const [editingPhase, setEditingPhase] = useState({
+    name: '',
+    description: '',
+    status: 'active',
+    baseline_start: '',
+    baseline_finish: '',
+    actual_start: '',
+    actual_finish: ''
+  });
+
+  // Dragging state for progress bars
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragTaskId, setDragTaskId] = useState<number | null>(null);
+  const [tempProgress, setTempProgress] = useState<number | null>(null);
 
   // Load projects and employees on component mount
   useEffect(() => {
@@ -182,6 +215,23 @@ export default function ExcellentPage() {
   useEffect(() => {
     loadProjects();
   }, [statusFilter, searchTerm]);
+
+  // Add mouse and touch event listeners for dragging
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragTaskId, tempProgress]);
 
   const loadProjects = async () => {
     try {
@@ -318,7 +368,11 @@ export default function ExcellentPage() {
       name: project.name,
       description: project.description || '',
       status: project.status,
-      manager_id: project.manager?.id?.toString() || ''
+      manager_id: project.manager?.id?.toString() || '',
+      baseline_start: project.baseline_start ? project.baseline_start.split('T')[0] : '',
+      baseline_finish: project.baseline_finish ? project.baseline_finish.split('T')[0] : '',
+      actual_start: project.actual_start ? project.actual_start.split('T')[0] : '',
+      actual_finish: project.actual_finish ? project.actual_finish.split('T')[0] : ''
     });
     setShowEditProjectModal(true);
   };
@@ -336,7 +390,11 @@ export default function ExcellentPage() {
           name: editingProject.name,
           description: editingProject.description,
           status: editingProject.status,
-          manager_id: editingProject.manager_id ? parseInt(editingProject.manager_id) : null
+          manager_id: editingProject.manager_id ? parseInt(editingProject.manager_id) : null,
+          baseline_start: editingProject.baseline_start || null,
+          baseline_finish: editingProject.baseline_finish || null,
+          actual_start: editingProject.actual_start || null,
+          actual_finish: editingProject.actual_finish || null
         }),
       });
 
@@ -371,7 +429,11 @@ export default function ExcellentPage() {
           name: newPhase.name,
           description: newPhase.description,
           status: newPhase.status,
-          project_id: selectedProjectForPhase.id
+          project_id: selectedProjectForPhase.id,
+          baseline_start: newPhase.baseline_start || null,
+          baseline_finish: newPhase.baseline_finish || null,
+          actual_start: newPhase.actual_start || null,
+          actual_finish: newPhase.actual_finish || null
         }),
       });
 
@@ -381,12 +443,60 @@ export default function ExcellentPage() {
         setNewPhase({
           name: '',
           description: '',
-          status: 'active'
+          status: 'active',
+          baseline_start: '',
+          baseline_finish: '',
+          actual_start: '',
+          actual_finish: ''
         });
         loadProjects();
       }
     } catch (error) {
       console.error('Error creating phase:', error);
+    }
+  };
+
+  const handleEditPhase = (phase: Phase) => {
+    setPhaseToEdit(phase);
+    setEditingPhase({
+      name: phase.name,
+      description: phase.description || '',
+      status: phase.status,
+      baseline_start: phase.baseline_start ? phase.baseline_start.split('T')[0] : '',
+      baseline_finish: phase.baseline_finish ? phase.baseline_finish.split('T')[0] : '',
+      actual_start: phase.actual_start ? phase.actual_start.split('T')[0] : '',
+      actual_finish: phase.actual_finish ? phase.actual_finish.split('T')[0] : ''
+    });
+    setShowEditPhaseModal(true);
+  };
+
+  const handleUpdatePhase = async () => {
+    if (!phaseToEdit) return;
+
+    try {
+      const response = await fetch(`/api/phases/${phaseToEdit.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: editingPhase.name,
+          description: editingPhase.description,
+          status: editingPhase.status,
+          baseline_start: editingPhase.baseline_start || null,
+          baseline_finish: editingPhase.baseline_finish || null,
+          actual_start: editingPhase.actual_start || null,
+          actual_finish: editingPhase.actual_finish || null
+        }),
+      });
+
+      if (response.ok) {
+        setShowEditPhaseModal(false);
+        setPhaseToEdit(null);
+        loadProjects();
+      }
+    } catch (error) {
+      console.error('Error updating phase:', error);
     }
   };
 
@@ -411,6 +521,60 @@ export default function ExcellentPage() {
     }
   };
 
+  // Dragging handlers for progress bars
+  const handleMouseDown = (taskId: number, e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setDragTaskId(taskId);
+    
+    // Calculate initial percentage
+    const rect = e.currentTarget.getBoundingClientRect();
+    const percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    setTempProgress(Math.round(percentage));
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !dragTaskId) return;
+    
+    const progressBar = document.querySelector(`[data-task-id="${dragTaskId}"]`) as HTMLElement;
+    if (!progressBar) return;
+    
+    const rect = progressBar.getBoundingClientRect();
+    const percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    
+    // Update visual progress immediately without API call
+    setTempProgress(Math.round(percentage));
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging || !dragTaskId) return;
+    
+    e.preventDefault(); // Prevent scrolling
+    const touch = e.touches[0];
+    if (!touch) return;
+    
+    const progressBar = document.querySelector(`[data-task-id="${dragTaskId}"]`) as HTMLElement;
+    if (!progressBar) return;
+    
+    const rect = progressBar.getBoundingClientRect();
+    const percentage = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
+    
+    // Update visual progress immediately without API call
+    setTempProgress(Math.round(percentage));
+  };
+
+  const handleMouseUp = async () => {
+    if (dragTaskId && tempProgress !== null) {
+      // Only here we send data to API
+      await handleUpdateTaskProgress(dragTaskId, tempProgress);
+    }
+    
+    // Clean up state
+    setIsDragging(false);
+    setDragTaskId(null);
+    setTempProgress(null);
+  };
+
   const handleAssignEmployee = async (taskId: number, employeeId: number) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
@@ -428,6 +592,48 @@ export default function ExcellentPage() {
       }
     } catch (error) {
       console.error('Error assigning employee:', error);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: number) => {
+    if (!confirm(t('excellent.confirm_delete_task'))) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        loadProjects();
+      } else {
+        alert('Failed to delete task');
+      }
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      alert('Failed to delete task');
+    }
+  };
+
+  const handleDeletePhase = async (phaseId: number) => {
+    if (!confirm(t('excellent.confirm_delete_phase'))) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/phases/${phaseId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        loadProjects();
+      } else {
+        alert('Failed to delete phase');
+      }
+    } catch (error) {
+      console.error('Error deleting phase:', error);
+      alert('Failed to delete phase');
     }
   };
 
@@ -576,7 +782,6 @@ export default function ExcellentPage() {
         const createdTask = await response.json();
         console.log('Task created successfully:', createdTask);
         setShowAddTaskModal(false);
-        setShowAddSubtaskModal(false);
         setParentTask(null);
         setParentProject(null);
         setParentPhase(null);
@@ -643,6 +848,85 @@ export default function ExcellentPage() {
     return diffDays;
   };
 
+  // Helper function to calculate total tasks count in a project
+  const getTotalTasksCount = (project: Project): number => {
+    let totalTasks = 0;
+    
+    // Count tasks directly in project (not in phases)
+    totalTasks += project.tasks?.length || 0;
+    
+    // Count tasks in subtasks (project level)
+    project.tasks?.forEach(task => {
+      totalTasks += task.subtasks?.length || 0;
+    });
+    
+    // Count tasks in phases
+    project.phases?.forEach(phase => {
+      totalTasks += phase.tasks?.length || 0;
+      // Count subtasks within phase tasks
+      phase.tasks?.forEach(task => {
+        totalTasks += task.subtasks?.length || 0;
+      });
+    });
+    
+    return totalTasks;
+  };
+
+  // Helper function to calculate tasks count (without subtasks) in a project
+  const getTasksCount = (project: Project): number => {
+    let tasksCount = 0;
+    
+    // Count tasks directly in project (not in phases)
+    tasksCount += project.tasks?.length || 0;
+    
+    // Count tasks in phases
+    project.phases?.forEach(phase => {
+      tasksCount += phase.tasks?.length || 0;
+    });
+    
+    return tasksCount;
+  };
+
+  // Helper function to calculate subtasks count in a project
+  const getSubtasksCount = (project: Project): number => {
+    let subtasksCount = 0;
+    
+    // Count subtasks in project level tasks
+    project.tasks?.forEach(task => {
+      subtasksCount += task.subtasks?.length || 0;
+    });
+    
+    // Count subtasks in phase tasks
+    project.phases?.forEach(phase => {
+      phase.tasks?.forEach(task => {
+        subtasksCount += task.subtasks?.length || 0;
+      });
+    });
+    
+    return subtasksCount;
+  };
+
+  // Helper function to calculate tasks count in a phase
+  const getPhaseTasksCount = (phase: Phase): number => {
+    return phase.tasks?.length || 0;
+  };
+
+  // Helper function to calculate subtasks count in a phase
+  const getPhaseSubtasksCount = (phase: Phase): number => {
+    let subtasksCount = 0;
+    
+    phase.tasks?.forEach(task => {
+      subtasksCount += task.subtasks?.length || 0;
+    });
+    
+    return subtasksCount;
+  };
+
+  // Helper function to calculate subtasks count for a specific task
+  const getTaskSubtasksCount = (task: Task): number => {
+    return task.subtasks?.length || 0;
+  };
+
   // Helper function to find a task in a project (including subtasks)
   const findTaskInProject = (project: Project, taskId: number): Task | null => {
     // Search in project tasks
@@ -691,17 +975,57 @@ export default function ExcellentPage() {
     );
   };
 
+  const renderInteractiveProgressBar = (task: Task, size: 'sm' | 'md' | 'lg' = 'sm') => {
+    const sizeClasses = {
+      sm: 'h-2',
+      md: 'h-3',
+      lg: 'h-4'
+    };
+
+    // Use temp progress if this task is being dragged, otherwise use actual progress
+    const currentProgress = (dragTaskId === task.id && tempProgress !== null) 
+      ? tempProgress 
+      : task.progress;
+
+    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragging(true);
+      setDragTaskId(task.id);
+      
+      const touch = e.touches[0];
+      if (!touch) return;
+      
+      const rect = e.currentTarget.getBoundingClientRect();
+      const percentage = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
+      setTempProgress(Math.round(percentage));
+    };
+
+    return (
+      <div 
+        className={`w-full bg-slate-700 rounded-full ${sizeClasses[size]} cursor-pointer select-none hover:bg-slate-600 transition-colors touch-none`}
+        data-task-id={task.id}
+        onMouseDown={(e) => handleMouseDown(task.id, e)}
+        onTouchStart={handleTouchStart}
+        title={`Progress: ${currentProgress.toFixed(0)}% - Click/touch and drag to adjust`}
+      >
+        <div 
+          className="bg-green-500 rounded-full h-full transition-all duration-100"
+          style={{ width: `${currentProgress}%` }}
+        />
+      </div>
+    );
+  };
+
   const renderTask = (task: Task, level: number = 0) => {
     const isExpanded = expandedItems.has(`task-${task.id}`);
     const hasSubtasks = task.subtasks && task.subtasks.length > 0;
     const assignedEmployee = task.assignments && task.assignments[0]?.employee;
-    // Removed end_date references
 
     return (
       <div key={task.id} className="border-l-2 border-slate-700 ml-4">
         <div className="p-3 bg-slate-800/50 rounded-lg mb-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 flex-1">
+            <div className="flex items-center space-x-2">
               {hasSubtasks && (
                 <button
                   onClick={() => toggleExpanded(`task-${task.id}`)}
@@ -723,21 +1047,22 @@ export default function ExcellentPage() {
                   {task.progress === 100 && (
                     <CheckCircleIcon className="w-4 h-4 text-green-400" />
                   )}
-                  {hasSubtasks && (
-                    <div className="flex items-center space-x-1 text-xs text-slate-400">
-                      <span>({task.subtasks.length} subtasks)</span>
-                    </div>
-                  )}
                 </div>
                 
+                {task.description && (
+                  <p className="text-slate-400 mt-1">{task.description}</p>
+                )}
+                
                 <div className="flex items-center space-x-4 mt-2 text-sm text-slate-400">
+                  {getTaskSubtasksCount(task) > 0 && (
+                    <span>{getTaskSubtasksCount(task)} {t('excellent.subtasks_count')}</span>
+                  )}
                   {task.duration > 0 && (
                     <div className="flex items-center space-x-1">
                       <ClockIcon className="w-4 h-4" />
-                      <span>{Math.round(task.duration)}{t('excellent.duration_hours')}</span>
+                      <span>{Math.round(task.duration)} {t('excellent.duration_hours')}</span>
                     </div>
                   )}
-
                   {assignedEmployee && (
                     <div className="flex items-center space-x-1">
                       <UserGroupIcon className="w-4 h-4" />
@@ -746,88 +1071,89 @@ export default function ExcellentPage() {
                   )}
                 </div>
 
-                {/* Baseline and Actual Dates */}
-                {(task.baseline_start || task.baseline_finish || task.actual_start || task.actual_finish) && (
-                  <div className="flex items-center space-x-4 mt-2 text-xs text-slate-500">
-                    {task.baseline_start && (
-                      <div className="flex items-center space-x-1">
-                    <CalendarIcon className="w-3 h-3" />
-                    <span>Baseline Start: {new Date(task.baseline_start).toLocaleDateString()}</span>
-                  </div>
-                )}
-                {task.baseline_finish && (
-                  <div className="flex items-center space-x-1">
-                    <CalendarIcon className="w-3 h-3" />
-                    <span>Baseline Finish: {new Date(task.baseline_finish).toLocaleDateString()}</span>
-                  </div>
-                )}
-                {task.actual_start && (
-                  <div className="flex items-center space-x-1">
-                    <CalendarIcon className="w-3 h-3" />
-                    <span>Actual Start: {new Date(task.actual_start).toLocaleDateString()}</span>
-                  </div>
-                )}
-                {task.actual_finish && (
-                  <div className="flex items-center space-x-1">
-                    <CalendarIcon className="w-3 h-3" />
-                    <span>Actual Finish: {new Date(task.actual_finish).toLocaleDateString()}</span>
-                  </div>
-                )}
-              </div>
-            )}
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
+              <div className="text-right">
+                {/* Task Baseline and Actual Dates */}
+                {(task.baseline_start || task.baseline_finish || task.actual_start || task.actual_finish) && (
+                  <div className="mt-2 space-y-1">
+                    {task.baseline_start && (
+                      <div className="text-xs text-slate-500">
+                        <span className="font-medium">Baseline Start:</span> {new Date(task.baseline_start).toLocaleDateString()}
+                      </div>
+                    )}
+                    {task.baseline_finish && (
+                      <div className="text-xs text-slate-500">
+                        <span className="font-medium">Baseline Finish:</span> {new Date(task.baseline_finish).toLocaleDateString()}
+                      </div>
+                    )}
+                    {task.actual_start && (
+                      <div className="text-xs text-slate-500">
+                        <span className="font-medium">Actual Start:</span> {new Date(task.actual_start).toLocaleDateString()}
+                      </div>
+                    )}
+                    {task.actual_finish && (
+                      <div className="text-xs text-slate-500">
+                        <span className="font-medium">Actual Finish:</span> {new Date(task.actual_finish).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
               <div className="w-32">
-                {renderProgressBar(task.progress, 'sm')}
-                <div className="text-xs text-slate-400 mt-1">{task.progress}%</div>
+                {renderInteractiveProgressBar(task, 'sm')}
+                <div className="text-xs text-slate-400 mt-1">
+                  {((dragTaskId === task.id && tempProgress !== null) ? tempProgress : task.progress).toFixed(2)}%
+                </div>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={task.progress}
-                  onChange={(e) => handleUpdateTaskProgress(task.id, parseInt(e.target.value))}
-                  className="w-20"
-                />
-                
-                <select
-                  value={assignedEmployee?.id || ''}
-                  onChange={(e) => handleAssignEmployee(task.id, parseInt(e.target.value))}
-                  className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm"
-                >
-                  <option value="">{t('excellent.select_employee')}</option>
-                  {employees.map(emp => (
-                    <option key={emp.id} value={emp.id}>
-                      {lang === 'ar' ? emp.name_ar : emp.name}
-                    </option>
-                  ))}
-                </select>
-                
-                <button
-                  onClick={() => handleEditTask(task)}
-                  className="p-1 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded transition-colors"
-                  title="Edit Task"
-                >
-                  <PencilIcon className="w-4 h-4" />
-                </button>
-                
-                <button
-                  onClick={() => {
-                    setParentTask(task);
-                    setParentProject(null);
-                    setParentPhase(null);
-                    setShowAddSubtaskModal(true);
-                  }}
-                  className="p-1 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded transition-colors"
-                  title="Add Subtask"
-                >
-                  <PlusIcon className="w-4 h-4" />
-                </button>
-              </div>
+              <span className={`text-sm px-3 py-1 rounded ${getStatusColor(task.status)}`}>
+                {task.status}
+              </span>
+              
+              <button
+                onClick={() => handleEditTask(task)}
+                className="p-1 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded transition-colors"
+                title="Edit Task"
+              >
+                <PencilIcon className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={() => {
+                  setParentTask(task);
+                  setParentProject(null);
+                  setParentPhase(null);
+                  setShowAddTaskModal(true);
+                }}
+                className="p-1 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded transition-colors"
+                title="Add Subtask"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={() => handleDeleteTask(task.id)}
+                className="p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
+                title="Delete Task"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+              
+              <select
+                value={assignedEmployee?.id || ''}
+                onChange={(e) => handleAssignEmployee(task.id, parseInt(e.target.value))}
+                className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm"
+              >
+                <option value="">{t('excellent.select_employee')}</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>
+                    {lang === 'ar' ? emp.name_ar : emp.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -863,29 +1189,62 @@ export default function ExcellentPage() {
                 </button>
               )}
               
-              <h3 className="text-lg font-semibold text-white">
-                {phase.name}
-              </h3>
-              <span className={`text-sm px-2 py-1 rounded ${getStatusColor(phase.status)}`}>
-                {phase.status}
-              </span>
-              {phase.description && (
-                <span className="text-sm text-slate-400 ml-2">
-                  {phase.description}
-                </span>
-              )}
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-white">
+                  {phase.name}
+                </h3>
+                {phase.description && (
+                  <p className="text-slate-400 mt-1">{phase.description}</p>
+                )}
+                <div className="flex items-center space-x-4 mt-2 text-sm text-slate-400">
+                  <span>{getPhaseTasksCount(phase)} {t('excellent.tasks_count')}</span>
+                  <span>{getPhaseSubtasksCount(phase)} {t('excellent.subtasks_count')}</span>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <div className="text-sm text-slate-400">
-                  {phase.tasks?.length || 0} {t('excellent.tasks_in_phase')}
+                {/* Phase Baseline and Actual Dates */}
+                <div className="mt-2 space-y-1">
+                  {phase.baseline_start && (
+                    <div className="text-xs text-slate-500">
+                      <span className="font-medium">Baseline Start:</span> {new Date(phase.baseline_start).toLocaleDateString()}
+                    </div>
+                  )}
+                  {phase.baseline_finish && (
+                    <div className="text-xs text-slate-500">
+                      <span className="font-medium">Baseline Finish:</span> {new Date(phase.baseline_finish).toLocaleDateString()}
+                    </div>
+                  )}
+                  {phase.actual_start && (
+                    <div className="text-xs text-slate-500">
+                      <span className="font-medium">Actual Start:</span> {new Date(phase.actual_start).toLocaleDateString()}
+                    </div>
+                  )}
+                  {phase.actual_finish && (
+                    <div className="text-xs text-slate-500">
+                      <span className="font-medium">Actual Finish:</span> {new Date(phase.actual_finish).toLocaleDateString()}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="w-48">
                 {renderProgressBar(phase.progress, 'md')}
-                <div className="text-sm text-slate-400 mt-1">{phase.progress}% complete</div>
+                <div className="text-sm text-slate-400 mt-1">{phase.progress.toFixed(2)}% complete</div>
               </div>
+              
+              <span className={`text-sm px-3 py-1 rounded ${getStatusColor(phase.status)}`}>
+                {phase.status}
+              </span>
+              
+              <button
+                onClick={() => handleEditPhase(phase)}
+                className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded transition-colors"
+                title="Edit Phase"
+              >
+                <PencilIcon className="w-5 h-5" />
+              </button>
               
               <button
                 onClick={() => {
@@ -898,6 +1257,14 @@ export default function ExcellentPage() {
                 title="Add Task to Phase"
               >
                 <PlusIcon className="w-5 h-5" />
+              </button>
+              
+              <button
+                onClick={() => handleDeletePhase(phase.id)}
+                className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
+                title="Delete Phase"
+              >
+                <TrashIcon className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -944,7 +1311,8 @@ export default function ExcellentPage() {
                 )}
                 <div className="flex items-center space-x-4 mt-2 text-sm text-slate-400">
                   <span>{project.phases?.length || 0} {t('excellent.phases_count')}</span>
-                  <span>{project.tasks?.length || 0} {t('excellent.tasks_count')}</span>
+                  <span>{getTasksCount(project)} {t('excellent.tasks_count')}</span>
+                  <span>{getSubtasksCount(project)} {t('excellent.subtasks_count')}</span>
                   {project.imported_from_xml && (
                     <span className="text-blue-400">{t('excellent.imported_from_xml')}</span>
                   )}
@@ -964,22 +1332,41 @@ export default function ExcellentPage() {
                     {t('excellent.manager')}: {lang === 'ar' ? project.manager.name_ar : project.manager.name}
                   </div>
                 )}
+                
+                {/* Project Baseline and Actual Dates */}
+                <div className="mt-2 space-y-1">
+                  {project.baseline_start && (
+                    <div className="text-xs text-slate-500">
+                      <span className="font-medium">Baseline Start:</span> {new Date(project.baseline_start).toLocaleDateString()}
+                    </div>
+                  )}
+                  {project.baseline_finish && (
+                    <div className="text-xs text-slate-500">
+                      <span className="font-medium">Baseline Finish:</span> {new Date(project.baseline_finish).toLocaleDateString()}
+                    </div>
+                  )}
+                  {project.actual_start && (
+                    <div className="text-xs text-slate-500">
+                      <span className="font-medium">Actual Start:</span> {new Date(project.actual_start).toLocaleDateString()}
+                    </div>
+                  )}
+                  {project.actual_finish && (
+                    <div className="text-xs text-slate-500">
+                      <span className="font-medium">Actual Finish:</span> {new Date(project.actual_finish).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="w-64">
                 {renderProgressBar(project.progress, 'lg')}
-                <div className="text-sm text-slate-400 mt-1">{project.progress}% complete</div>
+                <div className="text-sm text-slate-400 mt-1">{project.progress.toFixed(2)}% complete</div>
               </div>
               
               <div className="flex items-center space-x-2">
                 <span className={`text-sm px-3 py-1 rounded ${getStatusColor(project.status)}`}>
                   {project.status}
                 </span>
-                {project.imported_from_xml && (
-                  <span className="text-xs px-2 py-1 bg-blue-900/50 text-blue-400 rounded">
-                    XML
-                  </span>
-                )}
                 <button
                   onClick={() => handleEditProject(project)}
                   className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded-lg transition-colors"
@@ -1708,7 +2095,6 @@ export default function ExcellentPage() {
               <button
                 onClick={() => {
                   setShowAddTaskModal(false);
-                  setShowAddSubtaskModal(false);
                   setParentTask(null);
                   setParentProject(null);
                   setParentPhase(null);
@@ -1798,6 +2184,58 @@ export default function ExcellentPage() {
               </select>
             </div>
 
+            <div className="mb-4">
+              <label htmlFor="editProjectBaselineStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Start
+              </label>
+              <input
+                type="date"
+                id="editProjectBaselineStart"
+                value={editingProject.baseline_start}
+                onChange={(e) => setEditingProject({ ...editingProject, baseline_start: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editProjectBaselineFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Finish
+              </label>
+              <input
+                type="date"
+                id="editProjectBaselineFinish"
+                value={editingProject.baseline_finish}
+                onChange={(e) => setEditingProject({ ...editingProject, baseline_finish: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editProjectActualStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Start
+              </label>
+              <input
+                type="date"
+                id="editProjectActualStart"
+                value={editingProject.actual_start}
+                onChange={(e) => setEditingProject({ ...editingProject, actual_start: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editProjectActualFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Finish
+              </label>
+              <input
+                type="date"
+                id="editProjectActualFinish"
+                value={editingProject.actual_finish}
+                onChange={(e) => setEditingProject({ ...editingProject, actual_finish: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowEditProjectModal(false)}
@@ -1875,6 +2313,58 @@ export default function ExcellentPage() {
               </select>
             </div>
 
+            <div className="mb-4">
+              <label htmlFor="newPhaseBaselineStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Start
+              </label>
+              <input
+                type="date"
+                id="newPhaseBaselineStart"
+                value={newPhase.baseline_start}
+                onChange={(e) => setNewPhase({ ...newPhase, baseline_start: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="newPhaseBaselineFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Finish
+              </label>
+              <input
+                type="date"
+                id="newPhaseBaselineFinish"
+                value={newPhase.baseline_finish}
+                onChange={(e) => setNewPhase({ ...newPhase, baseline_finish: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="newPhaseActualStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Start
+              </label>
+              <input
+                type="date"
+                id="newPhaseActualStart"
+                value={newPhase.actual_start}
+                onChange={(e) => setNewPhase({ ...newPhase, actual_start: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="newPhaseActualFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Finish
+              </label>
+              <input
+                type="date"
+                id="newPhaseActualFinish"
+                value={newPhase.actual_finish}
+                onChange={(e) => setNewPhase({ ...newPhase, actual_finish: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => {
@@ -1890,6 +2380,125 @@ export default function ExcellentPage() {
                 className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
               >
                 {t('excellent.create')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Phase Modal */}
+      {showEditPhaseModal && phaseToEdit && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h3 className="text-xl font-semibold text-white mb-4">Edit Phase</h3>
+            
+            <div className="mb-4">
+              <label htmlFor="editPhaseName" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.name')}
+              </label>
+              <input
+                type="text"
+                id="editPhaseName"
+                value={editingPhase.name}
+                onChange={(e) => setEditingPhase({ ...editingPhase, name: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editPhaseDescription" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.description')}
+              </label>
+              <textarea
+                id="editPhaseDescription"
+                value={editingPhase.description}
+                onChange={(e) => setEditingPhase({ ...editingPhase, description: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+                rows={3}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editPhaseStatus" className="block text-sm font-medium text-slate-400 mb-1">
+                {t('excellent.status')}
+              </label>
+              <select
+                id="editPhaseStatus"
+                value={editingPhase.status}
+                onChange={(e) => setEditingPhase({ ...editingPhase, status: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              >
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="on_hold">On Hold</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editPhaseBaselineStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Start
+              </label>
+              <input
+                type="date"
+                id="editPhaseBaselineStart"
+                value={editingPhase.baseline_start}
+                onChange={(e) => setEditingPhase({ ...editingPhase, baseline_start: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editPhaseBaselineFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Baseline Finish
+              </label>
+              <input
+                type="date"
+                id="editPhaseBaselineFinish"
+                value={editingPhase.baseline_finish}
+                onChange={(e) => setEditingPhase({ ...editingPhase, baseline_finish: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editPhaseActualStart" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Start
+              </label>
+              <input
+                type="date"
+                id="editPhaseActualStart"
+                value={editingPhase.actual_start}
+                onChange={(e) => setEditingPhase({ ...editingPhase, actual_start: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="editPhaseActualFinish" className="block text-sm font-medium text-slate-400 mb-1">
+                Actual Finish
+              </label>
+              <input
+                type="date"
+                id="editPhaseActualFinish"
+                value={editingPhase.actual_finish}
+                onChange={(e) => setEditingPhase({ ...editingPhase, actual_finish: e.target.value })}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowEditPhaseModal(false)}
+                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+              >
+                {t('excellent.cancel')}
+              </button>
+              <button
+                onClick={handleUpdatePhase}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
+              >
+                {t('excellent.save_changes')}
               </button>
             </div>
           </div>

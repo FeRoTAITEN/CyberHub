@@ -40,30 +40,21 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
     }
 
-    const { name, description, start_date, end_date, status, manager_id } = body;
+    const { 
+      name, 
+      description, 
+      status, 
+      manager_id,
+      baseline_start,
+      baseline_finish,
+      actual_start,
+      actual_finish
+    } = body;
 
     // Validate required fields
-    if (!name || !start_date || !end_date) {
+    if (!name) {
       return NextResponse.json(
-        { error: 'Missing required fields: Name, Start Date, and End Date are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate date format
-    const startDate = new Date(start_date);
-    const endDate = new Date(end_date);
-    
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      return NextResponse.json(
-        { error: 'Invalid date format. Please use YYYY-MM-DD format' },
-        { status: 400 }
-      );
-    }
-
-    if (endDate < startDate) {
-      return NextResponse.json(
-        { error: 'End date cannot be before start date' },
+        { error: 'Missing required fields: Name is required' },
         { status: 400 }
       );
     }
@@ -81,10 +72,22 @@ export async function PUT(
     const updateData: any = {
       name,
       description,
-      start_date: startDate,
-      end_date: endDate,
       status,
     };
+
+    // Add optional date fields
+    if (baseline_start) {
+      updateData.baseline_start = new Date(baseline_start);
+    }
+    if (baseline_finish) {
+      updateData.baseline_finish = new Date(baseline_finish);
+    }
+    if (actual_start) {
+      updateData.actual_start = new Date(actual_start);
+    }
+    if (actual_finish) {
+      updateData.actual_finish = new Date(actual_finish);
+    }
 
     // Add manager if provided
     if (manager_id) {

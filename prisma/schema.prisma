@@ -212,8 +212,6 @@ model ProcedureVersion {
 model Project {
   id                Int       @id @default(autoincrement())
   description       String?
-  start_date        DateTime?
-  end_date          DateTime?
   status            String    @default("active")
   progress          Float     @default(0)
   manager_id        Int?
@@ -222,32 +220,36 @@ model Project {
   imported_from_xml Boolean   @default(false)
   xml_file_path     String?
   name              String
+  baseline_start    DateTime?
+  baseline_finish   DateTime?
+  actual_start      DateTime?
+  actual_finish     DateTime?
   phases            Phase[]
   manager           Employee? @relation("ProjectManager", fields: [manager_id], references: [id])
   tasks             Task[]
 }
 
 model Phase {
-  id          Int      @id @default(autoincrement())
-  description String?
-  start_date  DateTime?
-  end_date    DateTime?
-  status      String   @default("active")
-  progress    Float    @default(0)
-  order       Int      @default(0)
-  project_id  Int
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  name        String
-  project     Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  tasks       Task[]
+  id              Int      @id @default(autoincrement())
+  description     String?
+  status          String   @default("active")
+  progress        Float    @default(0)
+  order           Int      @default(0)
+  project_id      Int
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  name            String
+  baseline_start  DateTime?
+  baseline_finish DateTime?
+  actual_start    DateTime?
+  actual_finish   DateTime?
+  project         Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  tasks           Task[]
 }
 
 model Task {
   id                       Int              @id @default(autoincrement())
   description              String?
-  start_date               DateTime?
-  end_date                 DateTime?
   status                   String           @default("active")
   progress                 Float            @default(0)
   order                    Int              @default(0)

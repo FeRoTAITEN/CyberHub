@@ -11,8 +11,6 @@ export async function POST(request: NextRequest) {
     const {
       name,
       description,
-      start_date,
-      end_date,
       status,
       duration,
       project_id,
@@ -25,27 +23,9 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields
-    if (!name || !start_date || !end_date) {
+    if (!name) {
       return NextResponse.json(
-        { error: 'Missing required fields: Name, Start Date, and End Date are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate date format
-    const startDate = new Date(start_date);
-    const endDate = new Date(end_date);
-    
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      return NextResponse.json(
-        { error: 'Invalid date format. Please use YYYY-MM-DD format' },
-        { status: 400 }
-      );
-    }
-
-    if (endDate < startDate) {
-      return NextResponse.json(
-        { error: 'End date cannot be before start date' },
+        { error: 'Missing required fields: Name is required' },
         { status: 400 }
       );
     }
@@ -74,8 +54,6 @@ export async function POST(request: NextRequest) {
     const taskData: any = {
       name: name,
       description,
-      start_date: startDate,
-      end_date: endDate,
       status,
       progress: 0,
       duration: durationValue,

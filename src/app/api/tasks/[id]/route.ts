@@ -115,11 +115,9 @@ export async function PUT(
     
     const { 
       progress, 
-      end_date, 
       assigned_employee_id,
       name,
       description,
-      start_date,
       status,
       duration,
       baseline_start,
@@ -131,10 +129,8 @@ export async function PUT(
     // Update the task
     const updateData: any = {};
     if (progress !== undefined) updateData.progress = progress;
-    if (end_date) updateData.end_date = new Date(end_date);
     if (name) updateData.name = name;
     if (description !== undefined) updateData.description = description;
-    if (start_date) updateData.start_date = new Date(start_date);
     if (status) updateData.status = status;
     if (duration !== undefined) updateData.duration = duration;
     if (baseline_start !== undefined) updateData.baseline_start = baseline_start ? new Date(baseline_start) : null;
