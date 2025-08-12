@@ -825,12 +825,22 @@ export default function ExcellentPage() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'text-green-400';
-      case 'completed': return 'text-blue-400';
-      case 'on_hold': return 'text-yellow-400';
-      case 'cancelled': return 'text-red-400';
-      default: return 'text-slate-400';
+    if (isSalam) {
+      switch (status) {
+        case 'active': return 'bg-[#00F000] text-[#003931]';
+        case 'completed': return 'bg-[#36C639] text-white';
+        case 'on_hold': return 'bg-[#73F64B] text-[#003931]';
+        case 'cancelled': return 'bg-red-500 text-white';
+        default: return 'bg-[#EEFDEC] text-[#005147]';
+      }
+    } else {
+      switch (status) {
+        case 'active': return 'text-green-400';
+        case 'completed': return 'text-blue-400';
+        case 'on_hold': return 'text-yellow-400';
+        case 'cancelled': return 'text-red-400';
+        default: return 'text-slate-400';
+      }
     }
   };
 
@@ -966,9 +976,9 @@ export default function ExcellentPage() {
     };
 
     return (
-      <div className={`w-full bg-slate-700 rounded-full ${sizeClasses[size]}`}>
+      <div className={`w-full ${colors.progressBg} rounded-full ${sizeClasses[size]}`}>
         <div 
-          className="bg-green-500 rounded-full transition-all duration-300"
+          className={`${colors.progressFill} rounded-full transition-all duration-300`}
           style={{ width: `${progress}%`, height: '100%' }}
         />
       </div>
@@ -1002,14 +1012,14 @@ export default function ExcellentPage() {
 
     return (
       <div 
-        className={`w-full bg-slate-700 rounded-full ${sizeClasses[size]} cursor-pointer select-none hover:bg-slate-600 transition-colors touch-none`}
+        className={`w-full ${colors.progressBg} rounded-full ${sizeClasses[size]} cursor-pointer select-none hover:${colors.cardBgHover} transition-colors touch-none`}
         data-task-id={task.id}
         onMouseDown={(e) => handleMouseDown(task.id, e)}
         onTouchStart={handleTouchStart}
         title={`Progress: ${currentProgress.toFixed(0)}% - Click/touch and drag to adjust`}
       >
         <div 
-          className="bg-green-500 rounded-full h-full transition-all duration-100"
+          className={`${colors.progressFill} rounded-full h-full transition-all duration-100`}
           style={{ width: `${currentProgress}%` }}
         />
       </div>
@@ -1022,14 +1032,14 @@ export default function ExcellentPage() {
     const assignedEmployee = task.assignments && task.assignments[0]?.employee;
 
     return (
-      <div key={task.id} className="border-l-2 border-slate-700 ml-4">
-        <div className="p-3 bg-slate-800/50 rounded-lg mb-2">
+      <div key={task.id} className={`border-l-2 ${colors.borderPrimary} ml-4`}>
+        <div className={`p-3 ${colors.cardBgHover} border ${colors.borderPrimary} rounded-lg mb-2 transition-all duration-200`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               {hasSubtasks && (
                 <button
                   onClick={() => toggleExpanded(`task-${task.id}`)}
-                  className="p-1 hover:bg-slate-700 rounded"
+                  className={`p-1 hover:${colors.cardBgHover} rounded ${colors.textPrimary}`}
                 >
                   {isExpanded ? (
                     <ChevronDownIcon className="w-4 h-4" />
@@ -1041,19 +1051,19 @@ export default function ExcellentPage() {
               
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
-                  <h4 className="font-medium text-white">
+                  <h4 className={`font-medium ${colors.textPrimary}`}>
                     {task.name}
                   </h4>
                   {task.progress === 100 && (
-                    <CheckCircleIcon className="w-4 h-4 text-green-400" />
+                    <CheckCircleIcon className={`w-4 h-4 ${colors.primary}`} />
                   )}
                 </div>
                 
                 {task.description && (
-                  <p className="text-slate-400 mt-1">{task.description}</p>
+                  <p className={`${colors.textSecondary} mt-1`}>{task.description}</p>
                 )}
                 
-                <div className="flex items-center space-x-4 mt-2 text-sm text-slate-400">
+                <div className={`flex items-center space-x-4 mt-2 text-sm ${colors.textSecondary}`}>
                   {getTaskSubtasksCount(task) > 0 && (
                     <span>{getTaskSubtasksCount(task)} {t('excellent.subtasks_count')}</span>
                   )}
@@ -1080,22 +1090,22 @@ export default function ExcellentPage() {
                 {(task.baseline_start || task.baseline_finish || task.actual_start || task.actual_finish) && (
                   <div className="mt-2 space-y-1">
                     {task.baseline_start && (
-                      <div className="text-xs text-slate-500">
+                      <div className={`text-xs ${colors.textSecondary}`}>
                         <span className="font-medium">Baseline Start:</span> {new Date(task.baseline_start).toLocaleDateString()}
                       </div>
                     )}
                     {task.baseline_finish && (
-                      <div className="text-xs text-slate-500">
+                      <div className={`text-xs ${colors.textSecondary}`}>
                         <span className="font-medium">Baseline Finish:</span> {new Date(task.baseline_finish).toLocaleDateString()}
                       </div>
                     )}
                     {task.actual_start && (
-                      <div className="text-xs text-slate-500">
+                      <div className={`text-xs ${colors.textSecondary}`}>
                         <span className="font-medium">Actual Start:</span> {new Date(task.actual_start).toLocaleDateString()}
                       </div>
                     )}
                     {task.actual_finish && (
-                      <div className="text-xs text-slate-500">
+                      <div className={`text-xs ${colors.textSecondary}`}>
                         <span className="font-medium">Actual Finish:</span> {new Date(task.actual_finish).toLocaleDateString()}
                       </div>
                     )}
@@ -1104,7 +1114,7 @@ export default function ExcellentPage() {
               </div>
               <div className="w-32">
                 {renderInteractiveProgressBar(task, 'sm')}
-                <div className="text-xs text-slate-400 mt-1">
+                <div className={`text-xs ${colors.textSecondary} mt-1`}>
                   {((dragTaskId === task.id && tempProgress !== null) ? tempProgress : task.progress).toFixed(2)}%
                 </div>
               </div>
@@ -1115,7 +1125,7 @@ export default function ExcellentPage() {
               
               <button
                 onClick={() => handleEditTask(task)}
-                className="p-1 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded transition-colors"
+                className={`p-1 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
                 title="Edit Task"
               >
                 <PencilIcon className="w-4 h-4" />
@@ -1128,7 +1138,7 @@ export default function ExcellentPage() {
                   setParentPhase(null);
                   setShowAddTaskModal(true);
                 }}
-                className="p-1 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded transition-colors"
+                className={`p-1 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
                 title="Add Subtask"
               >
                 <PlusIcon className="w-4 h-4" />
@@ -1136,7 +1146,7 @@ export default function ExcellentPage() {
               
               <button
                 onClick={() => handleDeleteTask(task.id)}
-                className="p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
+                className="p-1 text-red-500 hover:text-red-400 hover:bg-red-50 rounded transition-colors"
                 title="Delete Task"
               >
                 <TrashIcon className="w-4 h-4" />
@@ -1145,7 +1155,7 @@ export default function ExcellentPage() {
               <select
                 value={assignedEmployee?.id || ''}
                 onChange={(e) => handleAssignEmployee(task.id, parseInt(e.target.value))}
-                className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm"
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded px-2 py-1 text-sm ${colors.textPrimary}`}
               >
                 <option value="">{t('excellent.select_employee')}</option>
                 {employees.map(emp => (
@@ -1173,13 +1183,13 @@ export default function ExcellentPage() {
 
     return (
       <div key={phase.id} className="mb-6">
-        <div className="bg-slate-800/80 rounded-lg p-4">
+        <div className={`${colors.cardBgHover} border ${colors.borderPrimary} rounded-lg p-4 transition-all duration-200`}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
               {hasTasks && (
                 <button
                   onClick={() => toggleExpanded(`phase-${phase.id}`)}
-                  className="p-1 hover:bg-slate-700 rounded"
+                  className={`p-1 hover:${colors.cardBgHover} rounded ${colors.textPrimary}`}
                 >
                   {isExpanded ? (
                     <ChevronDownIcon className="w-4 h-4" />
@@ -1190,13 +1200,13 @@ export default function ExcellentPage() {
               )}
               
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className={`text-lg font-semibold ${colors.textPrimary}`}>
                   {phase.name}
                 </h3>
                 {phase.description && (
-                  <p className="text-slate-400 mt-1">{phase.description}</p>
+                  <p className={`${colors.textSecondary} mt-1`}>{phase.description}</p>
                 )}
-                <div className="flex items-center space-x-4 mt-2 text-sm text-slate-400">
+                <div className={`flex items-center space-x-4 mt-2 text-sm ${colors.textSecondary}`}>
                   <span>{getPhaseTasksCount(phase)} {t('excellent.tasks_count')}</span>
                   <span>{getPhaseSubtasksCount(phase)} {t('excellent.subtasks_count')}</span>
                 </div>
@@ -1208,22 +1218,22 @@ export default function ExcellentPage() {
                 {/* Phase Baseline and Actual Dates */}
                 <div className="mt-2 space-y-1">
                   {phase.baseline_start && (
-                    <div className="text-xs text-slate-500">
+                    <div className={`text-xs ${colors.textSecondary}`}>
                       <span className="font-medium">Baseline Start:</span> {new Date(phase.baseline_start).toLocaleDateString()}
                     </div>
                   )}
                   {phase.baseline_finish && (
-                    <div className="text-xs text-slate-500">
+                    <div className={`text-xs ${colors.textSecondary}`}>
                       <span className="font-medium">Baseline Finish:</span> {new Date(phase.baseline_finish).toLocaleDateString()}
                     </div>
                   )}
                   {phase.actual_start && (
-                    <div className="text-xs text-slate-500">
+                    <div className={`text-xs ${colors.textSecondary}`}>
                       <span className="font-medium">Actual Start:</span> {new Date(phase.actual_start).toLocaleDateString()}
                     </div>
                   )}
                   {phase.actual_finish && (
-                    <div className="text-xs text-slate-500">
+                    <div className={`text-xs ${colors.textSecondary}`}>
                       <span className="font-medium">Actual Finish:</span> {new Date(phase.actual_finish).toLocaleDateString()}
                     </div>
                   )}
@@ -1231,7 +1241,7 @@ export default function ExcellentPage() {
               </div>
               <div className="w-48">
                 {renderProgressBar(phase.progress, 'md')}
-                <div className="text-sm text-slate-400 mt-1">{phase.progress.toFixed(2)}% complete</div>
+                <div className={`text-sm ${colors.textSecondary} mt-1`}>{phase.progress.toFixed(2)}% complete</div>
               </div>
               
               <span className={`text-sm px-3 py-1 rounded ${getStatusColor(phase.status)}`}>
@@ -1240,7 +1250,7 @@ export default function ExcellentPage() {
               
               <button
                 onClick={() => handleEditPhase(phase)}
-                className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded transition-colors"
+                className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
                 title="Edit Phase"
               >
                 <PencilIcon className="w-5 h-5" />
@@ -1253,7 +1263,7 @@ export default function ExcellentPage() {
                   setParentTask(null);
                   setShowAddTaskModal(true);
                 }}
-                className="p-2 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded transition-colors"
+                className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
                 title="Add Task to Phase"
               >
                 <PlusIcon className="w-5 h-5" />
@@ -1261,7 +1271,7 @@ export default function ExcellentPage() {
               
               <button
                 onClick={() => handleDeletePhase(phase.id)}
-                className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
+                className="p-2 text-red-500 hover:text-red-400 hover:bg-red-50 rounded transition-colors"
                 title="Delete Phase"
               >
                 <TrashIcon className="w-5 h-5" />
@@ -1285,14 +1295,14 @@ export default function ExcellentPage() {
     const hasTasks = project.tasks && project.tasks.length > 0;
 
     return (
-      <div key={project.id} className="card mb-8">
+      <div key={project.id} className={`${colors.cardBg} border ${colors.borderPrimary} rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-8`}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               {(hasPhases || hasTasks) && (
                 <button
                   onClick={() => toggleExpanded(`project-${project.id}`)}
-                  className="p-2 hover:bg-slate-700 rounded-lg"
+                  className={`p-2 ${colors.cardBgHover} rounded-lg transition-colors ${colors.textPrimary}`}
                 >
                   {isExpanded ? (
                     <ChevronDownIcon className="w-6 h-6" />
@@ -1303,13 +1313,13 @@ export default function ExcellentPage() {
               )}
               
               <div>
-                <h2 className="text-xl font-bold text-white">
+                <h2 className={`text-xl font-bold ${colors.textPrimary}`}>
                   {project.name}
                 </h2>
                 {project.description && (
-                  <p className="text-slate-400 mt-1">{project.description}</p>
+                  <p className={`${colors.textSecondary} mt-1`}>{project.description}</p>
                 )}
-                <div className="flex items-center space-x-4 mt-2 text-sm text-slate-400">
+                <div className={`flex items-center space-x-4 mt-2 text-sm ${colors.textSecondary}`}>
                   <span>{project.phases?.length || 0} {t('excellent.phases_count')}</span>
                   <span>{getTasksCount(project)} {t('excellent.tasks_count')}</span>
                   <span>{getSubtasksCount(project)} {t('excellent.subtasks_count')}</span>
@@ -1328,7 +1338,7 @@ export default function ExcellentPage() {
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 {project.manager && (
-                  <div className="text-sm text-slate-400">
+                  <div className={`text-sm ${colors.textSecondary}`}>
                     {t('excellent.manager')}: {lang === 'ar' ? project.manager.name_ar : project.manager.name}
                   </div>
                 )}
@@ -1336,22 +1346,22 @@ export default function ExcellentPage() {
                 {/* Project Baseline and Actual Dates */}
                 <div className="mt-2 space-y-1">
                   {project.baseline_start && (
-                    <div className="text-xs text-slate-500">
+                    <div className={`text-xs ${colors.textSecondary}`}>
                       <span className="font-medium">Baseline Start:</span> {new Date(project.baseline_start).toLocaleDateString()}
                     </div>
                   )}
                   {project.baseline_finish && (
-                    <div className="text-xs text-slate-500">
+                    <div className={`text-xs ${colors.textSecondary}`}>
                       <span className="font-medium">Baseline Finish:</span> {new Date(project.baseline_finish).toLocaleDateString()}
                     </div>
                   )}
                   {project.actual_start && (
-                    <div className="text-xs text-slate-500">
+                    <div className={`text-xs ${colors.textSecondary}`}>
                       <span className="font-medium">Actual Start:</span> {new Date(project.actual_start).toLocaleDateString()}
                     </div>
                   )}
                   {project.actual_finish && (
-                    <div className="text-xs text-slate-500">
+                    <div className={`text-xs ${colors.textSecondary}`}>
                       <span className="font-medium">Actual Finish:</span> {new Date(project.actual_finish).toLocaleDateString()}
                     </div>
                   )}
@@ -1360,7 +1370,7 @@ export default function ExcellentPage() {
               
               <div className="w-64">
                 {renderProgressBar(project.progress, 'lg')}
-                <div className="text-sm text-slate-400 mt-1">{project.progress.toFixed(2)}% complete</div>
+                <div className={`text-sm ${colors.textSecondary} mt-1`}>{project.progress.toFixed(2)}% complete</div>
               </div>
               
               <div className="flex items-center space-x-2">
@@ -1369,7 +1379,7 @@ export default function ExcellentPage() {
                 </span>
                 <button
                   onClick={() => handleEditProject(project)}
-                  className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded-lg transition-colors"
+                  className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded-lg transition-colors`}
                   title="Edit Project"
                 >
                   <PencilIcon className="w-5 h-5" />
@@ -1379,14 +1389,14 @@ export default function ExcellentPage() {
                     setSelectedProjectForPhase(project);
                     setShowAddPhaseModal(true);
                   }}
-                  className="p-2 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded-lg transition-colors"
+                  className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded-lg transition-colors`}
                   title="Add Phase"
                 >
                   <PlusIcon className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => confirmDeleteProject(project)}
-                  className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+                  className="p-2 text-red-500 hover:text-red-400 hover:bg-red-50 rounded-lg transition-colors"
                   title="Delete Project"
                 >
                   <TrashIcon className="w-5 h-5" />
@@ -1399,7 +1409,7 @@ export default function ExcellentPage() {
             <div className="space-y-4">
               {hasPhases && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3">{t('excellent.phases')}</h3>
+                  <h3 className={`text-lg font-semibold ${colors.textPrimary} mb-3`}>{t('excellent.phases')}</h3>
                   {project.phases?.map(phase => renderPhase(phase))}
                 </div>
               )}
@@ -1407,7 +1417,7 @@ export default function ExcellentPage() {
               {hasTasks && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-white">{t('excellent.tasks')}</h3>
+                    <h3 className={`text-lg font-semibold ${colors.textPrimary}`}>{t('excellent.tasks')}</h3>
                     <button
                       onClick={() => {
                         setParentProject(project);
@@ -1415,7 +1425,7 @@ export default function ExcellentPage() {
                         setParentTask(null);
                         setShowAddTaskModal(true);
                       }}
-                      className="p-2 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded transition-colors"
+                      className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
                       title="Add Task to Project"
                     >
                       <PlusIcon className="w-5 h-5" />
@@ -1431,23 +1441,38 @@ export default function ExcellentPage() {
     );
   };
 
+  // Theme-aware styling
+  const isSalam = theme === 'salam';
+  const isLight = theme === 'light';
+  const isDark = !isSalam && !isLight;
+
   // Theme colors based on current theme
   const colors = {
-    primary: theme === 'light' ? 'text-green-600' : 'text-green-400',
-    primaryHover: theme === 'light' ? 'text-green-500' : 'text-green-300',
-    primaryBg: theme === 'light' ? 'bg-green-600' : 'bg-green-500',
-    primaryBgHover: theme === 'light' ? 'bg-green-500' : 'bg-green-400',
-    cardBg: theme === 'light' ? 'bg-white' : 'bg-slate-900',
-    cardBgHover: theme === 'light' ? 'bg-slate-50' : 'bg-slate-800',
-    textPrimary: theme === 'light' ? 'text-slate-900' : 'text-white',
-    textSecondary: theme === 'light' ? 'text-slate-600' : 'text-slate-400',
-    borderPrimary: theme === 'light' ? 'border-slate-200' : 'border-slate-700',
-    borderHover: theme === 'light' ? 'border-green-500' : 'border-green-500',
-    inputBg: theme === 'light' ? 'bg-white' : 'bg-slate-800',
-    inputBorder: theme === 'light' ? 'border-slate-300' : 'border-slate-700',
-    iconBg: theme === 'light' ? 'bg-slate-200' : 'bg-slate-800',
-    glassBg: theme === 'light' ? 'bg-white/80' : 'bg-slate-900/80',
-    glassBorder: theme === 'light' ? 'border-green-500/20' : 'border-green-500/20'
+    primary: isSalam ? 'text-[#00F000]' : isLight ? 'text-green-600' : 'text-green-400',
+    primaryHover: isSalam ? 'text-[#73F64B]' : isLight ? 'text-green-500' : 'text-green-300',
+    primaryBg: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
+    primaryBgHover: isSalam ? 'bg-[#73F64B]' : isLight ? 'bg-green-500' : 'bg-green-400',
+    cardBg: isSalam ? 'bg-white' : isLight ? 'bg-white' : 'bg-slate-900',
+    cardBgHover: isSalam ? 'bg-[#EEFDEC]' : isLight ? 'bg-slate-50' : 'bg-slate-800',
+    textPrimary: isSalam ? 'text-[#003931]' : isLight ? 'text-slate-900' : 'text-white',
+    textSecondary: isSalam ? 'text-[#005147]' : isLight ? 'text-slate-600' : 'text-slate-400',
+    borderPrimary: isSalam ? 'border-[#003931]' : isLight ? 'border-slate-200' : 'border-slate-700',
+    borderHover: isSalam ? 'border-[#00F000]' : 'border-green-500',
+    inputBg: isSalam ? 'bg-white' : isLight ? 'bg-white' : 'bg-slate-800',
+    inputBorder: isSalam ? 'border-[#003931]' : isLight ? 'border-slate-300' : 'border-slate-700',
+    iconBg: isSalam ? 'bg-[#EEFDEC]' : isLight ? 'bg-slate-200' : 'bg-slate-800',
+    glassBg: isSalam ? 'bg-white/95' : isLight ? 'bg-white/80' : 'bg-slate-900/80',
+    glassBorder: isSalam ? 'border-[#00F000]/20' : 'border-green-500/20',
+    tabActiveBg: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
+    tabActiveText: isSalam ? 'text-[#003931]' : 'text-white',
+    tabInactiveText: isSalam ? 'text-[#005147]' : isLight ? 'text-slate-600' : 'text-slate-400',
+    tabInactiveHover: isSalam ? 'hover:bg-[#EEFDEC]' : isLight ? 'hover:bg-slate-100' : 'hover:bg-slate-800',
+    progressBg: isSalam ? 'bg-[#EEFDEC]' : isLight ? 'bg-gray-200' : 'bg-slate-700',
+    progressFill: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
+    badgeSuccess: isSalam ? 'bg-[#00F000] text-[#003931]' : 'bg-green-500 text-white',
+    badgeWarning: isSalam ? 'bg-[#73F64B] text-[#003931]' : 'bg-yellow-500 text-white',
+    badgeError: isSalam ? 'bg-red-500 text-white' : 'bg-red-500 text-white',
+    badgeInfo: isSalam ? 'bg-[#36C639] text-white' : 'bg-blue-500 text-white'
   };
 
   // Tab configuration
@@ -1501,7 +1526,7 @@ export default function ExcellentPage() {
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               <div className="relative flex-1">
-                <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                <MagnifyingGlassIcon className={`w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 ${colors.textSecondary}`} />
                 <input
                   type="text"
                 placeholder={t('excellent.search_projects')}
@@ -1512,7 +1537,7 @@ export default function ExcellentPage() {
               </div>
               
               <div className="relative">
-                <FunnelIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                <FunnelIcon className={`w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 ${colors.textSecondary}`} />
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -1540,7 +1565,7 @@ export default function ExcellentPage() {
               
               <button
                 onClick={() => setShowNewProjectModal(true)}
-              className={`bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105`}
+              className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105`}
               >
                 <PlusIcon className="w-5 h-5" />
               <span>{t('excellent.new_project')}</span>
@@ -1611,9 +1636,9 @@ export default function ExcellentPage() {
             </div>
           ) : projects.length === 0 ? (
             <div className="card text-center py-12">
-              <ChartBarIcon className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">{t('excellent.no_projects')}</h3>
-              <p className="text-slate-400 mb-6">{t('excellent.import_first')}</p>
+              <ChartBarIcon className={`w-16 h-16 ${colors.textSecondary} mx-auto mb-4`} />
+              <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-2`}>{t('excellent.no_projects')}</h3>
+              <p className={`${colors.textSecondary} mb-6`}>{t('excellent.import_first')}</p>
               <button
                 onClick={() => setShowImportModal(true)}
                 className="btn-primary"
@@ -1686,8 +1711,8 @@ export default function ExcellentPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 flex items-center space-x-2 ${
                     activeTab === tab.id
-                      ? `${colors.primaryBg} text-white shadow-lg`
-                      : `${colors.textSecondary} hover:${colors.textPrimary}`
+                      ? `${colors.tabActiveBg} ${colors.tabActiveText} shadow-lg`
+                      : `${colors.tabInactiveText} ${colors.tabInactiveHover} hover:${colors.textPrimary}`
                   }`}
                 >
                   <IconComponent className="w-5 h-5" />
@@ -1704,10 +1729,10 @@ export default function ExcellentPage() {
       {/* New Project Modal */}
       {showNewProjectModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">{t('excellent.new_project')}</h3>
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>{t('excellent.new_project')}</h3>
             <div className="mb-4">
-              <label htmlFor="newProjectName" className="block text-sm font-medium text-slate-400 mb-1">
+              <label htmlFor="newProjectName" className={`block text-sm font-medium ${colors.textSecondary} mb-1`}>
                 {t('excellent.name')}
               </label>
                 <input
@@ -1715,31 +1740,31 @@ export default function ExcellentPage() {
                 id="newProjectName"
                 value={newProject.name}
                 onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#00F000] focus:border-transparent transition-all duration-200`}
                 />
               </div>
             <div className="mb-4">
-              <label htmlFor="newProjectDescription" className="block text-sm font-medium text-slate-400 mb-1">
+              <label htmlFor="newProjectDescription" className={`block text-sm font-medium ${colors.textSecondary} mb-1`}>
                 {t('excellent.description')}
               </label>
                 <textarea
                 id="newProjectDescription"
                   value={newProject.description}
                 onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#00F000] focus:border-transparent transition-all duration-200`}
                 />
               </div>
 
 
             <div className="mb-4">
-              <label htmlFor="newProjectManager" className="block text-sm font-medium text-slate-400 mb-1">
+              <label htmlFor="newProjectManager" className={`block text-sm font-medium ${colors.textSecondary} mb-1`}>
                 {t('excellent.manager')}
               </label>
                   <select
                 id="newProjectManager"
                     value={newProject.manager_id}
                 onChange={(e) => setNewProject({ ...newProject, manager_id: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#00F000] focus:border-transparent transition-all duration-200 ${colors.textPrimary}`}
                   >
                 <option value="">{t('excellent.select_manager')}</option>
                     {employees.map(emp => (
@@ -1752,13 +1777,13 @@ export default function ExcellentPage() {
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowNewProjectModal(false)}
-                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
               >
                 {t('excellent.cancel')}
               </button>
               <button
                 onClick={handleCreateProject}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
+                className={`${colors.primaryBg} ${colors.tabActiveText} px-4 py-2 rounded-lg font-medium hover:${colors.primaryBgHover} transition-all duration-200`}
               >
                 {t('excellent.create_project')}
               </button>
@@ -1770,26 +1795,26 @@ export default function ExcellentPage() {
       {/* Import XML Modal */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">{t('excellent.import_xml')}</h3>
-            <p className="text-slate-400 mb-4">{t('excellent.import_xml_description')}</p>
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>{t('excellent.import_xml')}</h3>
+            <p className={`${colors.textSecondary} mb-4`}>{t('excellent.import_xml_description')}</p>
             <input
               type="file"
               accept=".xml"
               onChange={handleFileSelect}
-              className="block w-full text-sm text-slate-400 border border-slate-600 rounded-lg cursor-pointer bg-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-500 file:text-white hover:file:bg-green-600"
+              className={`block w-full text-sm ${colors.textSecondary} border ${colors.inputBorder} rounded-lg cursor-pointer ${colors.inputBg} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:${colors.primaryBg} file:${colors.tabActiveText} hover:file:${colors.primaryBgHover}`}
             />
             <div className="flex justify-end space-x-2 mt-4">
               <button
                 onClick={() => setShowImportModal(false)}
-                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
               >
                 {t('excellent.cancel')}
               </button>
               <button
                 onClick={handleImportXML}
                 disabled={importing}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`${colors.primaryBg} ${colors.tabActiveText} px-4 py-2 rounded-lg font-medium hover:${colors.primaryBgHover} transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {importing ? `${t('excellent.importing')}...` : t('excellent.import_xml')}
               </button>
@@ -1801,13 +1826,13 @@ export default function ExcellentPage() {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirmModal && projectToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">{t('excellent.confirm_delete')}</h3>
-            <p className="text-slate-400 mb-6">{t('excellent.deleteConfirm')}</p>
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>{t('excellent.confirm_delete')}</h3>
+            <p className={`${colors.textSecondary} mb-6`}>{t('excellent.deleteConfirm')}</p>
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowDeleteConfirmModal(false)}
-                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
               >
                 {t('excellent.cancel')}
               </button>
@@ -1826,10 +1851,10 @@ export default function ExcellentPage() {
       {/* Edit Task Modal */}
       {showEditTaskModal && taskToEdit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">{t('excellent.edit_task')}</h3>
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>{t('excellent.edit_task')}</h3>
             <div className="mb-4">
-              <label htmlFor="editTaskNameEn" className="block text-sm font-medium text-slate-400 mb-1">
+              <label htmlFor="editTaskNameEn" className={`block text-sm font-medium ${colors.textSecondary} mb-1`}>
                 {t('excellent.name')}
               </label>
               <input
@@ -1837,19 +1862,19 @@ export default function ExcellentPage() {
                 id="editTaskNameEn"
                 value={editingTask.name}
                 onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#00F000] focus:border-transparent transition-all duration-200 ${colors.textPrimary}`}
               />
               </div>
 
             <div className="mb-4">
-              <label htmlFor="editTaskDescription" className="block text-sm font-medium text-slate-400 mb-1">
+              <label htmlFor="editTaskDescription" className={`block text-sm font-medium ${colors.textSecondary} mb-1`}>
                 {t('excellent.description')}
               </label>
               <textarea
                 id="editTaskDescription"
                 value={editingTask.description}
                 onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#00F000] focus:border-transparent transition-all duration-200 ${colors.textPrimary}`}
               />
             </div>
 
@@ -1938,13 +1963,13 @@ export default function ExcellentPage() {
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowEditTaskModal(false)}
-                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
               >
                 {t('excellent.cancel')}
               </button>
               <button
                 onClick={handleUpdateTask}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
+                className={`${colors.primaryBg} ${colors.tabActiveText} px-4 py-2 rounded-lg font-medium hover:${colors.primaryBgHover} transition-all duration-200`}
               >
                 {t('excellent.save_changes')}
               </button>
@@ -1956,20 +1981,20 @@ export default function ExcellentPage() {
       {/* Add Task Modal */}
       {showAddTaskModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>
               {parentTask ? t('excellent.add_subtask') : t('excellent.add_task')}
             </h3>
             {!parentTask && !parentPhase && !parentProject && (
               <div className="mb-4">
-                <label htmlFor="newTaskProject" className="block text-sm font-medium text-slate-400 mb-1">
+                <label htmlFor="newTaskProject" className={`block text-sm font-medium ${colors.textSecondary} mb-1`}>
                   {t('excellent.project')}
                 </label>
                 <select
                   id="newTaskProject"
                   value={selectedProjectForTask || ''}
                   onChange={(e) => setSelectedProjectForTask(e.target.value ? parseInt(e.target.value) : null)}
-                  className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+                  className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#00F000] focus:border-transparent transition-all duration-200 ${colors.textPrimary}`}
                 >
                   <option value="">{t('excellent.select_project')}</option>
                   {projects.length > 0 ? (
@@ -2100,13 +2125,13 @@ export default function ExcellentPage() {
                   setParentPhase(null);
                   setSelectedProjectForTask(null);
                 }}
-                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
               >
                 {t('excellent.cancel')}
               </button>
               <button
                 onClick={handleCreateTask}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
+                className={`${colors.primaryBg} ${colors.tabActiveText} px-4 py-2 rounded-lg font-medium hover:${colors.primaryBgHover} transition-all duration-200`}
               >
                 {t('excellent.create')}
               </button>
@@ -2118,11 +2143,11 @@ export default function ExcellentPage() {
       {/* Edit Project Modal */}
       {showEditProjectModal && projectToEdit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">{t('excellent.edit_project')}</h3>
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>{t('excellent.edit_project')}</h3>
             
             <div className="mb-4">
-              <label htmlFor="editProjectName" className="block text-sm font-medium text-slate-400 mb-1">
+              <label htmlFor="editProjectName" className={`block text-sm font-medium ${colors.textSecondary} mb-1`}>
                 {t('excellent.name')}
               </label>
               <input
@@ -2130,7 +2155,7 @@ export default function ExcellentPage() {
                 id="editProjectName"
                 value={editingProject.name}
                 onChange={(e) => setEditingProject({ ...editingProject, name: e.target.value })}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#00F000] focus:border-transparent transition-all duration-200 ${colors.textPrimary}`}
               />
             </div>
 
@@ -2239,13 +2264,13 @@ export default function ExcellentPage() {
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowEditProjectModal(false)}
-                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
               >
                 {t('excellent.cancel')}
               </button>
               <button
                 onClick={handleUpdateProject}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
+                className={`${colors.primaryBg} ${colors.tabActiveText} px-4 py-2 rounded-lg font-medium hover:${colors.primaryBgHover} transition-all duration-200`}
               >
                 {t('excellent.save_changes')}
               </button>
@@ -2257,20 +2282,20 @@ export default function ExcellentPage() {
       {/* Add Phase Modal */}
       {showAddPhaseModal && selectedProjectForPhase && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">{t('excellent.add_phase')}</h3>
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>{t('excellent.add_phase')}</h3>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-400 mb-1">
+              <label className={`block text-sm font-medium ${colors.textSecondary} mb-1`}>
                 {t('excellent.project')}
               </label>
-              <div className="text-white font-medium">
+              <div className={`${colors.textPrimary} font-medium`}>
                 {selectedProjectForPhase.name}
               </div>
             </div>
 
             <div className="mb-4">
-              <label htmlFor="newPhaseName" className="block text-sm font-medium text-slate-400 mb-1">
+              <label htmlFor="newPhaseName" className={`block text-sm font-medium ${colors.textSecondary} mb-1`}>
                 {t('excellent.name')}
               </label>
               <input
@@ -2371,13 +2396,13 @@ export default function ExcellentPage() {
                   setShowAddPhaseModal(false);
                   setSelectedProjectForPhase(null);
                 }}
-                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
               >
                 {t('excellent.cancel')}
               </button>
               <button
                 onClick={handleCreatePhase}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
+                className={`${colors.primaryBg} ${colors.tabActiveText} px-4 py-2 rounded-lg font-medium hover:${colors.primaryBgHover} transition-all duration-200`}
               >
                 {t('excellent.create')}
               </button>
@@ -2389,8 +2414,8 @@ export default function ExcellentPage() {
       {/* Edit Phase Modal */}
       {showEditPhaseModal && phaseToEdit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">Edit Phase</h3>
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>Edit Phase</h3>
             
             <div className="mb-4">
               <label htmlFor="editPhaseName" className="block text-sm font-medium text-slate-400 mb-1">
@@ -2490,13 +2515,13 @@ export default function ExcellentPage() {
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowEditPhaseModal(false)}
-                className="bg-slate-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-500 transition-all duration-200"
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
               >
                 {t('excellent.cancel')}
               </button>
               <button
                 onClick={handleUpdatePhase}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-500 transition-all duration-200"
+                className={`${colors.primaryBg} ${colors.tabActiveText} px-4 py-2 rounded-lg font-medium hover:${colors.primaryBgHover} transition-all duration-200`}
               >
                 {t('excellent.save_changes')}
               </button>

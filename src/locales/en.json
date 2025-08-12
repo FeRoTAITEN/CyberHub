@@ -18,14 +18,14 @@
     "staff": "Staff Directory",
     "qa": "Q&A",
     "games": "Educational Games",
-    "policies": "Policies & Standards",
+    "governance": "Governance",
     "grc": "GRC",
     "projects": "Project Management",
     "more": "More"
   },
-  "policies": {
-    "title": "Cybersecurity Policies, Standards & Procedures",
-    "intro": "Comprehensive management of cybersecurity policies, standards, and procedures at Salam Company",
+  "governance": {
+    "title": "Governance",
+    "intro": "Comprehensive governance framework for cybersecurity policies, standards, and procedures at Salam Company",
     "lastUpdated": "Last Updated",
     "policies_tab": "Policies",
     "standards_tab": "Standards",

@@ -65,6 +65,31 @@ export default function NewsPage() {
 
   // تحديد ما إذا كان الثيم Salam أم لا
   const isSalam = theme === 'salam';
+  
+  // Theme-aware colors
+  const themeColors = {
+    // Card backgrounds
+    cardBg: isSalam ? 'bg-white' : 'bg-slate-900',
+    cardBgHover: isSalam ? 'bg-[#EEFDEC]' : 'bg-slate-800',
+    cardBorder: isSalam ? 'border-[#003931]' : 'border-slate-700',
+    
+    // Text colors
+    textPrimary: isSalam ? 'text-[#003931]' : 'text-white',
+    textSecondary: isSalam ? 'text-[#005147]' : 'text-slate-400',
+    textMuted: isSalam ? 'text-[#005147]' : 'text-slate-500',
+    
+    // Icon colors
+    iconPrimary: isSalam ? 'text-[#00F000]' : 'text-green-400',
+    iconSecondary: isSalam ? 'text-[#36C639]' : 'text-blue-400',
+    iconBg: isSalam ? 'bg-[#EEFDEC]' : 'bg-slate-800',
+    iconBgHover: isSalam ? 'bg-[#36C639]' : 'bg-slate-700',
+    
+    // Interactive elements
+    linkHover: isSalam ? 'hover:text-[#00F000]' : 'hover:text-green-400',
+    buttonBg: isSalam ? 'bg-[#00F000]' : 'bg-green-600',
+    buttonText: isSalam ? 'text-[#003931]' : 'text-white',
+    buttonHover: isSalam ? 'hover:bg-[#73F64B]' : 'hover:bg-green-500'
+  };
 
   // تضمين سكربت تويتر مرة واحدة فقط
   useEffect(() => {
@@ -98,7 +123,7 @@ export default function NewsPage() {
             <NewspaperIcon className={`w-12 h-12 ${isSalam ? 'text-[#36C639]' : 'text-white'}`} />
           </div>
           <h1 className={`page-title title-animate ${isSalam ? 'text-[#003931]' : ''}`}>{t('news.title')}</h1>
-          <p className={`page-subtitle subtitle-animate ${isSalam ? 'text-[#005147]' : ''}`}>
+          <p className={`page-subtitle subtitle-animate ${isSalam ? 'text-white' : ''}`}>
             {t('news.intro')}
           </p>
         </div>
@@ -106,21 +131,21 @@ export default function NewsPage() {
         {/* Internal News Section - First */}
         <div className="mb-12 content-animate">
           <div className="flex items-center gap-3 mb-6">
-            <NewspaperIcon className="w-6 h-6 text-green-400" />
-            <h2 className="heading-2">
+            <NewspaperIcon className={`w-6 h-6 ${themeColors.iconPrimary}`} />
+            <h2 className={`heading-2 ${themeColors.textPrimary}`}>
               {lang === 'ar' ? 'الأخبار والتحديثات الداخلية' : 'Internal News & Updates'}
             </h2>
           </div>
           <div className="space-y-6">
             {internalNewsData.map((item, index) => (
-              <div key={item.id} className="card-hover group p-6 flex flex-col md:flex-row items-start md:items-center gap-6 stagger-animate" style={{ animationDelay: `${0.1 * (index + 1)}s` }}>
-                <div className="flex-shrink-0 w-16 h-16 bg-slate-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <NewspaperIcon className="w-8 h-8 text-green-400" />
+              <div key={item.id} className={`${themeColors.cardBg} ${themeColors.cardBorder} border hover:${themeColors.cardBgHover} group p-6 flex flex-col md:flex-row items-start md:items-center gap-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 stagger-animate`} style={{ animationDelay: `${0.1 * (index + 1)}s` }}>
+                <div className={`flex-shrink-0 w-16 h-16 ${themeColors.iconBg} hover:${themeColors.iconBgHover} rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300`}>
+                  <NewspaperIcon className={`w-8 h-8 ${themeColors.iconPrimary}`} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-2">{item.title[lang]}</h3>
-                  <p className="text-slate-400 mb-2">{item.summary[lang]}</p>
-                  <div className="flex items-center gap-2 text-slate-500 text-sm">
+                  <h3 className={`text-xl font-bold ${themeColors.textPrimary} mb-2`}>{item.title[lang]}</h3>
+                  <p className={`${themeColors.textSecondary} mb-2`}>{item.summary[lang]}</p>
+                  <div className={`flex items-center gap-2 ${themeColors.textMuted} text-sm`}>
                     <CalendarIcon className="w-4 h-4" />
                     <span>{formatDate(item.date)}</span>
                   </div>
@@ -133,8 +158,8 @@ export default function NewsPage() {
         {/* Social Media Section */}
         <div className="mb-12 content-animate">
           <div className="flex items-center gap-3 mb-6">
-            <GlobeAltIcon className="w-6 h-6 text-blue-400" />
-            <h2 className="heading-2">
+            <GlobeAltIcon className={`w-6 h-6 ${themeColors.iconSecondary}`} />
+            <h2 className={`heading-2 ${themeColors.textPrimary}`}>
               {lang === 'ar' ? 'آخر المنشورات من حساباتنا الاجتماعية' : 'Latest Posts from Our Social Media'}
             </h2>
           </div>
@@ -147,7 +172,7 @@ export default function NewsPage() {
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className={`text-lg font-semibold ${themeColors.textPrimary}`}>
                 {lang === 'ar' ? 'منشورات X' : 'X Posts'}
               </h3>
             </div>
@@ -168,11 +193,11 @@ export default function NewsPage() {
 
         {/* Follow Us Section */}
         <div className="mt-16 flex justify-center content-animate">
-          <div className="card-glass p-8 rounded-2xl flex flex-col items-center w-full max-w-2xl shadow-2xl border-0">
-            <h3 className="text-2xl md:text-3xl font-bold mb-2 text-center text-gradient">
+          <div className={`${themeColors.cardBg} ${themeColors.cardBorder} border p-8 rounded-2xl flex flex-col items-center w-full max-w-2xl shadow-2xl`}>
+            <h3 className={`text-2xl md:text-3xl font-bold mb-2 text-center ${themeColors.textPrimary}`}>
               {lang === 'ar' ? 'تابعنا على منصاتنا الاجتماعية' : 'Follow Us on Social Media'}
             </h3>
-            <p className="text-slate-300 mb-8 text-center text-lg max-w-xl">
+            <p className={`${themeColors.textSecondary} mb-8 text-center text-lg max-w-xl`}>
               {lang === 'ar' 
                 ? 'انضم إلى مجتمع سلام وكن أول من يتابع آخر أخبار الأمن السيبراني والتقنية.'
                 : 'Join Salam community and be the first to get the latest cybersecurity and tech updates.'
@@ -182,7 +207,7 @@ export default function NewsPage() {
               {/* زر X */}
               <button
                 onClick={() => handleExternalLink('https://twitter.com/salam')}
-                className="group flex items-center gap-3 w-full md:w-auto justify-center px-5 py-4 rounded-2xl border-2 border-black shadow-lg bg-black/90 min-w-[140px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 hover:-translate-y-1 hover:shadow-green-500/30 hover:border-green-500"
+                className={`group flex items-center gap-3 w-full md:w-auto justify-center px-5 py-4 rounded-2xl border-2 ${isSalam ? 'border-[#003931] bg-[#003931]/90 hover:border-[#00F000] hover:shadow-[#00F000]/30' : 'border-black bg-black/90 hover:border-green-500 hover:shadow-green-500/30'} shadow-lg min-w-[140px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 hover:-translate-y-1`}
                 style={{ boxShadow: '0 4px 24px 0 rgba(16,185,129,0.10)' }}
               >
                 <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border-2 border-black shadow-md group-hover:scale-110 transition-transform">
@@ -195,7 +220,7 @@ export default function NewsPage() {
               {/* زر LinkedIn */}
               <button
                 onClick={() => handleExternalLink('https://www.linkedin.com/company/salam-ksa/')}
-                className="group flex items-center gap-3 w-full md:w-auto justify-center px-5 py-4 rounded-2xl border-2 border-[#0077b5] shadow-lg bg-[#0077b5]/90 min-w-[140px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 hover:-translate-y-1 hover:shadow-green-500/30 hover:border-green-500"
+                className={`group flex items-center gap-3 w-full md:w-auto justify-center px-5 py-4 rounded-2xl border-2 ${isSalam ? 'border-[#36C639] bg-[#36C639]/90 hover:border-[#00F000] hover:shadow-[#00F000]/30' : 'border-[#0077b5] bg-[#0077b5]/90 hover:border-green-500 hover:shadow-green-500/30'} shadow-lg min-w-[140px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 hover:-translate-y-1`}
                 style={{ boxShadow: '0 4px 24px 0 rgba(16,185,129,0.10)' }}
               >
                 <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border-2 border-[#0077b5] shadow-md group-hover:scale-110 transition-transform">
@@ -208,7 +233,7 @@ export default function NewsPage() {
               {/* زر سناب شات */}
               <button
                 onClick={() => handleExternalLink('https://www.snapchat.com/@salam.saudi')}
-                className="group flex items-center gap-3 w-full md:w-auto justify-center px-5 py-4 rounded-2xl border-2 border-yellow-400 shadow-lg bg-[#FFFC00] min-w-[140px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 hover:-translate-y-1 hover:shadow-green-500/30 hover:border-green-500"
+                className={`group flex items-center gap-3 w-full md:w-auto justify-center px-5 py-4 rounded-2xl border-2 ${isSalam ? 'border-[#73F64B] bg-[#73F64B] hover:border-[#00F000] hover:shadow-[#00F000]/30' : 'border-yellow-400 bg-[#FFFC00] hover:border-green-500 hover:shadow-green-500/30'} shadow-lg min-w-[140px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 hover:-translate-y-1`}
                 style={{ boxShadow: '0 4px 24px 0 rgba(250,204,21,0.10)' }}
               >
                 <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border-2 border-black shadow-md group-hover:scale-110 transition-transform">

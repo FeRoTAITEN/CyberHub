@@ -92,6 +92,23 @@ const themeColors = {
     iconBg: 'bg-zinc-800',
     glassBg: 'bg-zinc-950/80',
     glassBorder: 'border-green-500/20'
+  },
+  salam: {
+    primary: 'text-[#00F000]',
+    primaryHover: 'text-[#73F64B]',
+    primaryBg: 'bg-[#00F000]',
+    primaryBgHover: 'bg-[#73F64B]',
+    cardBg: 'bg-white',
+    cardBgHover: 'bg-[#EEFDEC]',
+    textPrimary: 'text-black',
+    textSecondary: 'text-[#005147]',
+    borderPrimary: 'border-[#003931]',
+    borderHover: 'border-[#00F000]',
+    inputBg: 'bg-white',
+    inputBorder: 'border-[#003931]',
+    iconBg: 'bg-[#EEFDEC]',
+    glassBg: 'bg-white/80',
+    glassBorder: 'border-[#00F000]/20'
   }
 };
 

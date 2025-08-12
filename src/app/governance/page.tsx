@@ -17,20 +17,18 @@ interface Policy {
   id: number;
   title_en: string;
   title_ar: string;
-  description_en: string;
-  description_ar: string;
+  description: string;
   version: string;
   file_size: string;
-  file_url?: string;
+  file_path?: string;
   downloads: number;
   views: number;
-  status: string;
   is_visible: boolean;
   created_at: string;
   updated_at: string;
 }
 
-export default function PoliciesPage() {
+export default function GovernancePage() {
   const { lang } = useLang();
   const { theme } = useTheme();
   const { t } = useTranslation(lang);
@@ -44,7 +42,7 @@ export default function PoliciesPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Theme colors based on current theme
-  const themeColors = {
+  const colors = {
     default: {
       primary: 'text-green-500',
       primaryHover: 'text-green-400',
@@ -106,20 +104,18 @@ export default function PoliciesPage() {
       borderHover: 'border-green-400',
     },
     salam: {
-      primary: 'text-[#36C639]',
+      primary: 'text-[#00F000]',
       primaryHover: 'text-[#73F64B]',
-      primaryBg: 'bg-[#36C639]',
+      primaryBg: 'bg-[#00F000]',
       primaryBgHover: 'bg-[#73F64B]',
-      cardBg: 'bg-[#F8FFFE]',
-      cardBgHover: 'bg-[#E6F7F0]',
+      cardBg: 'bg-white',
+      cardBgHover: 'bg-[#EEFDEC]',
       textPrimary: 'text-[#003931]',
       textSecondary: 'text-[#005147]',
-      borderPrimary: 'border-[#E6F7F0]',
-      borderHover: 'border-[#36C639]',
+      borderPrimary: 'border-[#003931]',
+      borderHover: 'border-[#00F000]',
     }
-  };
-
-  const colors = themeColors[theme as keyof typeof themeColors] || themeColors.default;
+  }[theme];
 
   // Fetch data based on active tab
   useEffect(() => {
@@ -148,25 +144,9 @@ export default function PoliciesPage() {
           }
         } else {
           console.error(`Failed to fetch ${activeTab}:`, response.status, response.statusText);
-          // Set empty arrays if API fails
-          if (activeTab === 'policies') {
-            setPolicies([]);
-          } else if (activeTab === 'standards') {
-            setStandards([]);
-          } else if (activeTab === 'procedures') {
-            setProcedures([]);
-          }
         }
       } catch (error) {
         console.error(`Error fetching ${activeTab}:`, error);
-        // Set empty arrays if API fails
-        if (activeTab === 'policies') {
-          setPolicies([]);
-        } else if (activeTab === 'standards') {
-          setStandards([]);
-        } else if (activeTab === 'procedures') {
-          setProcedures([]);
-        }
       } finally {
         setIsLoading(false);
       }
@@ -191,7 +171,7 @@ export default function PoliciesPage() {
 
       // Simulate download
       const link = document.createElement('a');
-      link.href = item.file_url || "#";
+              link.href = item.file_path || "#";
       link.download = `${lang === 'ar' ? item.title_ar : item.title_en}.pdf`;
       document.body.appendChild(link);
       link.click();
@@ -246,7 +226,7 @@ export default function PoliciesPage() {
       }
       
       // Open item in new tab
-      window.open(item.file_url || "#", '_blank');
+      window.open(item.file_path || "#", '_blank');
     } catch (error) {
       console.error('Error viewing item:', error);
     }
@@ -334,27 +314,27 @@ export default function PoliciesPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 content-animate">
-          <div className={`card text-center p-8 stagger-animate ${theme === 'salam' ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}>
-            <div className={`text-3xl font-bold mb-3 ${theme === 'salam' ? 'text-[#36C639]' : 'text-green-400'}`}>
+          <div className={`${colors.cardBg} ${colors.cardBgHover} border ${colors.borderPrimary} text-center p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 stagger-animate`}>
+            <div className={`text-3xl font-bold ${colors.primary} mb-3`}>
               {stats.total}
             </div>
-            <div className={`text-sm font-medium ${theme === 'salam' ? 'text-[#005147]' : 'text-slate-300'}`}>
+            <div className={`${colors.textSecondary} text-sm font-medium`}>
               {t('governance.total_items')}
             </div>
           </div>
-          <div className={`card text-center p-8 stagger-animate ${theme === 'salam' ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}>
-            <div className={`text-3xl font-bold mb-3 ${theme === 'salam' ? 'text-[#36C639]' : 'text-blue-400'}`}>
+          <div className={`${colors.cardBg} ${colors.cardBgHover} border ${colors.borderPrimary} text-center p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 stagger-animate`}>
+            <div className={`text-3xl font-bold ${theme === 'salam' ? 'text-[#36C639]' : 'text-blue-400'} mb-3`}>
               {stats.downloads}
             </div>
-            <div className={`text-sm font-medium ${theme === 'salam' ? 'text-[#005147]' : 'text-slate-300'}`}>
+            <div className={`${colors.textSecondary} text-sm font-medium`}>
               {t("grc.total_downloads")}
             </div>
           </div>
-          <div className={`card text-center p-8 stagger-animate ${theme === 'salam' ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}>
-            <div className={`text-3xl font-bold mb-3 ${theme === 'salam' ? 'text-[#36C639]' : 'text-purple-400'}`}>
+          <div className={`${colors.cardBg} ${colors.cardBgHover} border ${colors.borderPrimary} text-center p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 stagger-animate`}>
+            <div className={`text-3xl font-bold ${theme === 'salam' ? 'text-[#73F64B]' : 'text-purple-400'} mb-3`}>
               {stats.views}
             </div>
-            <div className={`text-sm font-medium ${theme === 'salam' ? 'text-[#005147]' : 'text-slate-300'}`}>
+            <div className={`${colors.textSecondary} text-sm font-medium`}>
               {t("grc.total_views")}
             </div>
           </div>
@@ -363,15 +343,15 @@ export default function PoliciesPage() {
         {/* Loading State */}
         {isLoading && (
           <div className="text-center py-12">
-            <div className="text-slate-400">{t("grc.loading")}</div>
+            <div className={colors.textSecondary}>{t("grc.loading")}</div>
           </div>
         )}
 
         {/* Content based on active tab */}
         {!isLoading && currentData.length === 0 && (
           <div className="text-center py-12">
-            <DocumentTextIcon className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-            <div className="text-slate-400 text-lg">
+            <DocumentTextIcon className={`w-16 h-16 ${colors.textSecondary} mx-auto mb-4`} />
+            <div className={`${colors.textSecondary} text-lg`}>
               {t('governance.no_items')}
             </div>
           </div>
@@ -381,7 +361,7 @@ export default function PoliciesPage() {
           {currentData.map((item: Policy, index: number) => (
             <div
               key={item.id}
-              className={`card-hover group p-8 stagger-animate ${theme === 'salam' ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}
+              className={`${colors.cardBg} hover:${colors.cardBgHover} border ${colors.borderPrimary} group p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 stagger-animate`}
               style={{ animationDelay: `${0.1 * (index + 1)}s` }}
             >
               {/* Header */}
@@ -391,21 +371,19 @@ export default function PoliciesPage() {
                     lang === "ar" ? "space-x-reverse space-x-4" : "space-x-4"
                   }`}
                 >
-                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${
-                    theme === 'salam' ? 'bg-[#36C639]' : 'bg-green-600'
-                  }`}>
-                    <DocumentTextIcon className="w-7 h-7 text-white" />
+                  <div className={`w-14 h-14 ${colors.primaryBg} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <DocumentTextIcon className={`w-7 h-7 ${theme === 'salam' ? 'text-[#003931]' : 'text-white'}`} />
                   </div>
                   <div>
-                    <h3 className={`text-xl font-semibold mb-2 ${theme === 'salam' ? 'text-[#003931]' : 'text-white'}`}>
+                    <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-2`}>
                       {lang === 'ar' ? item.title_ar : item.title_en}
                     </h3>
                     <div
-                      className={`flex items-center text-sm ${
+                      className={`flex items-center text-sm ${colors.textSecondary} ${
                         lang === "ar"
                           ? "space-x-reverse space-x-3"
                           : "space-x-3"
-                      } ${theme === 'salam' ? 'text-[#005147]' : 'text-slate-400'}`}
+                      }`}
                     >
                       <span>v{item.version}</span>
                     </div>
@@ -416,29 +394,25 @@ export default function PoliciesPage() {
                     lang === "ar" ? "space-x-reverse space-x-2" : "space-x-2"
                   }`}
                 >
-                  <span className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${
-                    theme === 'salam' 
-                      ? 'bg-[#36C639]/20 text-[#36C639] border-[#36C639]/30' 
-                      : 'bg-green-600/20 text-green-400 border-green-500/30'
-                  }`}>
+                  <span className="px-3 py-1.5 bg-green-600/20 text-green-400 rounded-lg text-xs font-medium border border-green-500/30">
                     {lang === "ar" ? "نشط" : "Active"}
                   </span>
                 </div>
               </div>
 
               {/* Description */}
-              <p className={`mb-8 leading-relaxed text-base ${theme === 'salam' ? 'text-[#005147]' : 'text-slate-300'}`}>
-                {lang === 'ar' ? item.description_ar : item.description_en}
+              <p className={`${colors.textSecondary} mb-8 leading-relaxed text-base`}>
+                {item.description}
               </p>
 
               {/* Metadata */}
               <div className="grid grid-cols-2 gap-6 mb-8">
                 <div
-                  className={`flex items-center text-sm ${
+                  className={`flex items-center text-sm text-slate-400 ${
                     lang === "ar" ? "space-x-reverse space-x-3" : "space-x-3"
-                  } ${theme === 'salam' ? 'text-[#005147]' : 'text-slate-400'}`}
+                  }`}
                 >
-                  <CalendarIcon className={`w-5 h-5 ${theme === 'salam' ? 'text-[#36C639]' : 'text-slate-500'}`} />
+                  <CalendarIcon className="w-5 h-5 text-slate-500" />
                   <span className="font-medium">
                     {new Date(item.updated_at).toLocaleDateString(
                       lang === "ar" ? "ar-EG" : "en-US",
@@ -446,7 +420,7 @@ export default function PoliciesPage() {
                     )}
                   </span>
                 </div>
-                <div className={`text-sm ${theme === 'salam' ? 'text-[#005147]' : 'text-slate-400'}`}>
+                <div className="text-sm text-slate-400">
                   <span className="font-medium">
                     {lang === "ar" ? "الحجم" : "Size"}:
                   </span>{" "}
@@ -455,20 +429,18 @@ export default function PoliciesPage() {
               </div>
 
               {/* Footer */}
-              <div className={`flex items-center justify-between pt-4 border-t ${
-                theme === 'salam' ? 'border-[#E6F7F0]' : 'border-slate-700/50'
-              }`}>
+              <div className={`flex items-center justify-between pt-4 border-t ${colors.borderPrimary}`}>
                 <div
-                  className={`flex items-center text-sm ${
+                  className={`flex items-center text-sm ${colors.textSecondary} ${
                     lang === "ar" ? "space-x-reverse space-x-6" : "space-x-6"
-                  } ${theme === 'salam' ? 'text-[#005147]' : 'text-slate-400'}`}
+                  }`}
                 >
                   <div
                     className={`flex items-center ${
                       lang === "ar" ? "space-x-reverse space-x-2" : "space-x-2"
                     }`}
                   >
-                    <ArrowDownTrayIcon className={`w-4 h-4 ${theme === 'salam' ? 'text-[#36C639]' : 'text-slate-500'}`} />
+                    <ArrowDownTrayIcon className={`w-4 h-4 ${colors.textSecondary}`} />
                     <span className="font-medium">
                       {item.downloads} {t("grc.downloads")}
                     </span>
@@ -478,7 +450,7 @@ export default function PoliciesPage() {
                       lang === "ar" ? "space-x-reverse space-x-2" : "space-x-2"
                     }`}
                   >
-                    <EyeIcon className={`w-4 h-4 ${theme === 'salam' ? 'text-[#36C639]' : 'text-slate-500'}`} />
+                    <EyeIcon className={`w-4 h-4 ${colors.textSecondary}`} />
                     <span className="font-medium">
                       {item.views} {t("grc.views")}
                     </span>
@@ -491,11 +463,7 @@ export default function PoliciesPage() {
                 >
                   <button
                     onClick={() => handleView(item)}
-                    className={`btn-secondary text-sm px-4 py-2 rounded-lg transition-all duration-200 ${
-                      theme === 'salam' 
-                        ? 'bg-[#36C639] hover:bg-[#73F64B] text-white border-[#36C639] hover:border-[#73F64B]' 
-                        : 'hover:bg-slate-700'
-                    }`}
+                    className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} text-sm px-4 py-2 rounded-lg transition-all duration-200 hover:${colors.cardBgHover}`}
                   >
                     <EyeIcon
                       className={`w-4 h-4 ${lang === "ar" ? "ml-2" : "mr-2"}`}
@@ -504,11 +472,7 @@ export default function PoliciesPage() {
                   </button>
                   <button
                     onClick={() => handleDownload(item)}
-                    className={`btn-primary text-sm px-4 py-2 rounded-lg transition-all duration-200 ${
-                      theme === 'salam' 
-                        ? 'bg-[#36C639] hover:bg-[#73F64B] text-white' 
-                        : 'hover:bg-green-700'
-                    }`}
+                    className={`${colors.primaryBg} ${theme === 'salam' ? 'text-[#003931]' : 'text-white'} text-sm px-4 py-2 rounded-lg transition-all duration-200 hover:${colors.primaryBgHover}`}
                   >
                     <ArrowDownTrayIcon
                       className={`w-4 h-4 ${lang === "ar" ? "ml-2" : "mr-2"}`}
@@ -522,18 +486,18 @@ export default function PoliciesPage() {
         </div>
 
         {/* Important Notice */}
-        <div className={`card border-green-500/30 p-8 content-animate ${theme === 'salam' ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}>
+        <div className={`${colors.cardBg} border ${colors.borderHover} p-8 rounded-xl shadow-lg content-animate`}>
           <div
             className={`flex items-start ${
               lang === "ar" ? "space-x-reverse space-x-4" : "space-x-4"
             }`}
           >
-            <ShieldCheckIcon className={`w-7 h-7 mt-1 flex-shrink-0 ${theme === 'salam' ? 'text-[#36C639]' : 'text-green-400'}`} />
+            <ShieldCheckIcon className={`w-7 h-7 ${colors.primary} mt-1 flex-shrink-0`} />
             <div>
-              <h3 className={`text-xl font-semibold mb-4 ${theme === 'salam' ? 'text-[#003931]' : 'text-white'}`}>
+              <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>
                 {lang === "ar" ? "ملاحظة مهمة" : "Important Notice"}
               </h3>
-              <p className={`leading-relaxed text-base ${theme === 'salam' ? 'text-[#005147]' : 'text-slate-300'}`}>
+              <p className={`${colors.textSecondary} leading-relaxed text-base`}>
                 {lang === "ar"
                   ? "جميع السياسات والمعايير والإجراءات المذكورة أعلاه إلزامية لجميع موظفي الشركة. يرجى قراءة وفهم هذه الوثائق والالتزام بها. في حالة وجود أي استفسارات، يرجى التواصل مع فريق الأمن السيبراني."
                   : "All policies, standards, and procedures listed above are mandatory for all company employees. Please read and understand these documents and comply with them. If you have any questions, please contact the cybersecurity team."}

@@ -14,7 +14,7 @@ import {
   EyeSlashIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
-import { useLang } from "../ClientLayout";
+import { useLang, useTheme } from "../ClientLayout";
 import { useTranslation } from "@/lib/useTranslation";
 
 interface Policy {
@@ -42,7 +42,12 @@ interface Policy {
 
 export default function GRCPage() {
   const { lang } = useLang();
+  const { theme } = useTheme();
   const { t } = useTranslation(lang);
+  
+  // Theme-aware styling
+  const isSalam = theme === 'salam';
+  const isDark = theme === 'default' || theme === 'cyber' || theme === 'midnight' || theme === 'novel';
   
   // Tab state management
   const [activeTab, setActiveTab] = useState<'policies' | 'standards' | 'procedures'>('policies');
@@ -465,13 +470,19 @@ export default function GRCPage() {
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8 content-animate">
-          <div className="flex rounded-lg p-1 bg-slate-900 border border-slate-700">
+          <div className={`flex rounded-lg p-1 ${
+            isSalam ? 'bg-white border border-[#003931]' : 'bg-slate-900 border border-slate-700'
+          }`}>
             <button
               onClick={() => setActiveTab('policies')}
               className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
                 activeTab === 'policies'
-                  ? 'bg-green-500 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white'
+                  ? isSalam 
+                    ? 'bg-[#00F000] text-[#003931] shadow-lg'
+                    : 'bg-green-500 text-white shadow-lg'
+                  : isSalam
+                    ? 'text-[#005147] hover:text-[#003931] hover:bg-[#EEFDEC]'
+                    : 'text-slate-400 hover:text-white'
               }`}
             >
               {t('policies.policies_tab')}
@@ -480,8 +491,12 @@ export default function GRCPage() {
               onClick={() => setActiveTab('standards')}
               className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
                 activeTab === 'standards'
-                  ? 'bg-green-500 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white'
+                  ? isSalam 
+                    ? 'bg-[#00F000] text-[#003931] shadow-lg'
+                    : 'bg-green-500 text-white shadow-lg'
+                  : isSalam
+                    ? 'text-[#005147] hover:text-[#003931] hover:bg-[#EEFDEC]'
+                    : 'text-slate-400 hover:text-white'
               }`}
             >
               {t('policies.standards_tab')}
@@ -490,8 +505,12 @@ export default function GRCPage() {
               onClick={() => setActiveTab('procedures')}
               className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
                 activeTab === 'procedures'
-                  ? 'bg-green-500 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white'
+                  ? isSalam 
+                    ? 'bg-[#00F000] text-[#003931] shadow-lg'
+                    : 'bg-green-500 text-white shadow-lg'
+                  : isSalam
+                    ? 'text-[#005147] hover:text-[#003931] hover:bg-[#EEFDEC]'
+                    : 'text-slate-400 hover:text-white'
               }`}
             >
               {t('policies.procedures_tab')}
@@ -501,38 +520,60 @@ export default function GRCPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 content-animate">
-          <div className="card text-center p-8 stagger-animate">
-            <div className="text-3xl font-bold text-green-400 mb-3">
+          <div className={`text-center p-8 stagger-animate ${
+            isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
+          }`}>
+            <div className={`text-3xl font-bold mb-3 ${
+              isSalam ? 'text-[#00F000]' : 'text-green-400'
+            }`}>
               {currentData.length}
             </div>
-            <div className="text-slate-300 text-sm font-medium">
+            <div className={`text-sm font-medium ${
+              isSalam ? 'text-[#005147]' : 'text-slate-300'
+            }`}>
               {activeTab === 'policies' ? t("grc.total_policies") : 
                activeTab === 'standards' ? (lang === 'ar' ? 'إجمالي المعايير' : 'Total Standards') :
                (lang === 'ar' ? 'إجمالي الإجراءات' : 'Total Procedures')}
             </div>
           </div>
-          <div className="card text-center p-8 stagger-animate">
-            <div className="text-3xl font-bold text-blue-400 mb-3">
+          <div className={`text-center p-8 stagger-animate ${
+            isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
+          }`}>
+            <div className={`text-3xl font-bold mb-3 ${
+              isSalam ? 'text-[#36C639]' : 'text-blue-400'
+            }`}>
               {totalDownloads}
             </div>
-            <div className="text-slate-300 text-sm font-medium">
+            <div className={`text-sm font-medium ${
+              isSalam ? 'text-[#005147]' : 'text-slate-300'
+            }`}>
               {t("grc.total_downloads")}
             </div>
           </div>
-          <div className="card text-center p-8 stagger-animate">
-            <div className="text-3xl font-bold text-purple-400 mb-3">
+          <div className={`text-center p-8 stagger-animate ${
+            isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
+          }`}>
+            <div className={`text-3xl font-bold mb-3 ${
+              isSalam ? 'text-[#73F64B]' : 'text-purple-400'
+            }`}>
               {totalViews}
             </div>
-            <div className="text-slate-300 text-sm font-medium">
+            <div className={`text-sm font-medium ${
+              isSalam ? 'text-[#005147]' : 'text-slate-300'
+            }`}>
               {t("grc.total_views")}
             </div>
           </div>
         </div>
 
         {/* Management Section */}
-        <div className="card p-8 mb-12 content-animate">
+        <div className={`p-8 mb-12 content-animate ${
+          isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
+        }`}>
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className={`text-2xl font-bold ${
+              isSalam ? 'text-[#003931]' : 'text-white'
+            }`}>
               {activeTab === 'policies' ? t("grc.policy_management") : 
                activeTab === 'standards' ? (lang === 'ar' ? 'إدارة المعايير' : 'Standards Management') :
                (lang === 'ar' ? 'إدارة الإجراءات' : 'Procedures Management')}
@@ -542,7 +583,11 @@ export default function GRCPage() {
                 resetForm();
                 setShowUploadModal(true);
               }}
-              className="btn-primary flex items-center px-6 py-3 rounded-lg transition-all duration-200 hover:bg-green-700"
+              className={`flex items-center px-6 py-3 rounded-lg transition-all duration-200 ${
+                isSalam 
+                  ? 'bg-[#00F000] text-[#003931] hover:bg-[#73F64B] shadow-lg'
+                  : 'btn-primary hover:bg-green-700'
+              }`}
             >
               <PlusIcon className={`w-5 h-5 ${lang === "ar" ? "ml-2" : "mr-2"}`} />
               {activeTab === 'policies' ? t("grc.upload_policy") : 
@@ -555,23 +600,37 @@ export default function GRCPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="text-right py-4 px-4 text-slate-300 font-medium">
+                <tr className={`border-b ${
+                  isSalam ? 'border-[#003931]' : 'border-slate-700'
+                }`}>
+                  <th className={`text-right py-4 px-4 font-medium ${
+                    isSalam ? 'text-[#003931]' : 'text-slate-300'
+                  }`}>
                     {t("grc.policy_title")}
                   </th>
-                  <th className="text-right py-4 px-4 text-slate-300 font-medium">
+                  <th className={`text-right py-4 px-4 font-medium ${
+                    isSalam ? 'text-[#003931]' : 'text-slate-300'
+                  }`}>
                     {t("grc.policy_version")}
                   </th>
-                  <th className="text-right py-4 px-4 text-slate-300 font-medium">
+                  <th className={`text-right py-4 px-4 font-medium ${
+                    isSalam ? 'text-[#003931]' : 'text-slate-300'
+                  }`}>
                     {t("grc.downloads")}
                   </th>
-                  <th className="text-right py-4 px-4 text-slate-300 font-medium">
+                  <th className={`text-right py-4 px-4 font-medium ${
+                    isSalam ? 'text-[#003931]' : 'text-slate-300'
+                  }`}>
                     {t("grc.views")}
                   </th>
-                  <th className="text-right py-4 px-4 text-slate-300 font-medium">
+                  <th className={`text-right py-4 px-4 font-medium ${
+                    isSalam ? 'text-[#003931]' : 'text-slate-300'
+                  }`}>
                     {t("grc.last_updated")}
                   </th>
-                  <th className="text-right py-4 px-4 text-slate-300 font-medium">
+                  <th className={`text-right py-4 px-4 font-medium ${
+                    isSalam ? 'text-[#003931]' : 'text-slate-300'
+                  }`}>
                     {t("grc.actions")}
                   </th>
                 </tr>
@@ -580,29 +639,45 @@ export default function GRCPage() {
                 {currentData.map((policy) => (
                   <tr
                     key={policy.id}
-                    className="border-b border-slate-700/50 hover:bg-slate-800/50 transition-colors"
+                    className={`transition-colors ${
+                      isSalam 
+                        ? 'border-b border-[#003931]/20 hover:bg-[#EEFDEC]/50'
+                        : 'border-b border-slate-700/50 hover:bg-slate-800/50'
+                    }`}
                   >
                     <td className="py-4 px-4">
                       <div>
-                        <div className="font-medium text-white">
+                        <div className={`font-medium ${
+                          isSalam ? 'text-[#003931]' : 'text-white'
+                        }`}>
                           {lang === 'ar' ? policy.title_ar : policy.title_en}
                         </div>
-                        <div className="text-sm text-slate-400 mt-1">
+                        <div className={`text-sm mt-1 ${
+                          isSalam ? 'text-[#005147]' : 'text-slate-400'
+                        }`}>
                           {lang === 'ar' ? policy.description_ar : policy.description_en}
                         </div>
                       </div>
                     </td>
 
-                    <td className="py-4 px-4 text-slate-300">
+                    <td className={`py-4 px-4 ${
+                      isSalam ? 'text-[#005147]' : 'text-slate-300'
+                    }`}>
                       {policy.version}
                     </td>
-                    <td className="py-4 px-4 text-slate-300">
+                    <td className={`py-4 px-4 ${
+                      isSalam ? 'text-[#005147]' : 'text-slate-300'
+                    }`}>
                       {policy.downloads}
                     </td>
-                    <td className="py-4 px-4 text-slate-300">
+                    <td className={`py-4 px-4 ${
+                      isSalam ? 'text-[#005147]' : 'text-slate-300'
+                    }`}>
                       {policy.views}
                     </td>
-                    <td className="py-4 px-4 text-slate-300">
+                    <td className={`py-4 px-4 ${
+                      isSalam ? 'text-[#005147]' : 'text-slate-300'
+                    }`}>
                       {new Date(policy.updated_at).toLocaleDateString(
                         lang === "ar" ? "ar-EG" : "en-US",
                         { year: "numeric", month: "short", day: "numeric" }
@@ -612,7 +687,11 @@ export default function GRCPage() {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleView(policy)}
-                          className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all duration-200 hover:scale-110"
+                          className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                            isSalam 
+                              ? 'bg-[#36C639]/10 hover:bg-[#36C639]/20 text-[#36C639]'
+                              : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-400'
+                          }`}
                           title={t("grc.view")}
                         >
                           <EyeIcon className="w-4 h-4" />
@@ -620,7 +699,11 @@ export default function GRCPage() {
                         
                         <button
                           onClick={() => handleDownload(policy)}
-                          className="p-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg transition-all duration-200 hover:scale-110"
+                          className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                            isSalam 
+                              ? 'bg-[#00F000]/10 hover:bg-[#00F000]/20 text-[#00F000]'
+                              : 'bg-green-500/10 hover:bg-green-500/20 text-green-400'
+                          }`}
                           title={t("grc.download")}
                         >
                           <ArrowDownTrayIcon className="w-4 h-4" />
@@ -628,7 +711,11 @@ export default function GRCPage() {
 
                         <button
                           onClick={() => handleUpdateFile(policy)}
-                          className="p-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded-lg transition-all duration-200 hover:scale-110"
+                          className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                            isSalam 
+                              ? 'bg-[#73F64B]/10 hover:bg-[#73F64B]/20 text-[#73F64B]'
+                              : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400'
+                          }`}
                           title={lang === "ar" ? "تحديث الملف" : "Update File"}
                         >
                           <CloudArrowUpIcon className="w-4 h-4" />
