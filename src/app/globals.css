@@ -40,6 +40,70 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/fonts/salam%20fonts/NotoKufiArabic-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/fonts/salam%20fonts/NotoKufiArabic-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/fonts/salam%20fonts/NotoKufiArabic-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/fonts/salam%20fonts/NotoKufiArabic-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Arabic';
+  src: url('/fonts/salam%20fonts/NotoSans-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Arabic';
+  src: url('/fonts/salam%20fonts/NotoSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Arabic';
+  src: url('/fonts/salam%20fonts/NotoSans-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Arabic';
+  src: url('/fonts/salam%20fonts/NotoSans-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* الخط الأساسي للموقع - سيتم تطبيقه على جميع النصوص */
 :root {
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
@@ -49,7 +113,7 @@
 .font-cairo {
   font-family: 'Cairo', 'Inter', Arial, Helvetica, sans-serif !important;
 }
-.font-tajawal {
+.font-tajawal { 
   font-family: 'Tajawal', 'Inter', Arial, Helvetica, sans-serif !important;
 }
 .font-noto {
@@ -70,6 +134,10 @@
 
 .font-vt323 {
   font-family: 'VT323', monospace !important;
+}
+
+.font-kufi {
+  font-family: 'Noto Kufi Arabic', 'Inter', Arial, Helvetica, sans-serif !important;
 }
 
 @keyframes typing {
@@ -145,12 +213,12 @@
   }
 
   /* الخط الأساسي للموقع - سيتم تطبيقه عند عدم اختيار خط محدد */
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) {
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) {
     font-family: var(--font-primary) !important;
   }
 
   /* تطبيق الخط الأساسي للعربية */
-  [dir="rtl"] body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) {
+  [dir="rtl"] body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) {
     font-family: var(--font-primary-arabic) !important;
   }
 
@@ -285,22 +353,40 @@
     font-family: inherit !important;
   }
 
+  body.font-kufi *,
+  body.font-kufi h1,
+  body.font-kufi h2,
+  body.font-kufi h3,
+  body.font-kufi h4,
+  body.font-kufi h5,
+  body.font-kufi h6,
+  body.font-kufi p,
+  body.font-kufi span,
+  body.font-kufi div,
+  body.font-kufi button,
+  body.font-kufi input,
+  body.font-kufi textarea,
+  body.font-kufi label,
+  body.font-kufi a {
+    font-family: 'Noto Kufi Arabic', 'Noto Sans Arabic', 'Inter', Arial, Helvetica, sans-serif !important;
+  }
+
   /* تطبيق الخط الأساسي على جميع العناصر */
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) *,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h1,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h2,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h3,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h4,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h5,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) h6,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) p,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) span,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) div,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) button,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) input,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) textarea,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) label,
-  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon) a {
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) *,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) h1,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) h2,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) h3,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) h4,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) h5,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) h6,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) p,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) span,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) div,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) button,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) input,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) textarea,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) label,
+  body:not(.font-cairo):not(.font-tajawal):not(.font-noto):not(.font-amiri):not(.font-frutiger):not(.font-icomoon):not(.font-kufi) a {
     font-family: inherit !important;
   }
 }
@@ -666,8 +752,6 @@
   .theme-light .threat-item:hover {
     @apply border-red-500/50 shadow-red-500/20;
   }
-
-
 
   .theme-midnight {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
@@ -1285,7 +1369,165 @@
   .theme-cyber .text-blue-400 {
     color: #60a5fa !important;
   }
-  
+
+  /* Salam Theme - Exact color grades as in the reference image, without white at the end */
+  .theme-salam,
+  .theme-salam .gradient-bg {
+    background: linear-gradient(180deg, #003931 0%, #005147 25%, #36C639 55%, #73F64B 100%);
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  /* Salam theme text colors */
+  .theme-salam {
+    color: #003931;
+  }
+  .theme-salam h1,
+  .theme-salam h2,
+  .theme-salam h3,
+  .theme-salam h4,
+  .theme-salam h5,
+  .theme-salam h6 {
+    color: #003931;
+    font-weight: bold;
+  }
+  .theme-salam .text-slate-400,
+  .theme-salam .text-slate-500 {
+    color: #005147 !important;
+  }
+
+  /* Salam theme cards */
+  .theme-salam .card {
+    background: #fff;
+    color: #003931;
+    border-radius: 2rem;
+    box-shadow: 0 4px 24px 0 rgba(0,57,49,0.08);
+    border: none;
+  }
+  .theme-salam .card-hover {
+    background: #fff;
+    color: #003931;
+    border-radius: 2rem;
+    box-shadow: 0 8px 32px 0 rgba(0,57,49,0.12);
+    border: 2px solid #36C639;
+    transition: box-shadow 0.2s, border 0.2s;
+  }
+
+  /* Salam theme navigation */
+  .theme-salam nav {
+    background: #003931;
+    color: #fff;
+    border-bottom: none;
+  }
+  .theme-salam .nav-link {
+    background: transparent;
+    color: #fff;
+    border-radius: 1rem;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s;
+  }
+  .theme-salam .nav-link.active,
+  .theme-salam .tab-active {
+    background: #36C639;
+    color: #fff;
+  }
+  .theme-salam .nav-link:not(.active):hover,
+  .theme-salam .tab-inactive:hover {
+    background: #005147;
+    color: #fff;
+  }
+  .theme-salam .tab-inactive {
+    background: #EEFDEC;
+    color: #003931;
+    border: 1px solid #36C639;
+  }
+
+  /* Salam theme buttons */
+  .theme-salam .btn-primary {
+    background: #003931;
+    color: #fff;
+    border-radius: 1rem;
+    font-weight: bold;
+    box-shadow: 0 2px 8px 0 rgba(0,57,49,0.10);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .theme-salam .btn-primary:hover {
+    background: #36C639;
+    color: #fff;
+    box-shadow: 0 4px 16px 0 rgba(54,198,57,0.18);
+  }
+
+  /* Salam theme input fields */
+  .theme-salam .input-field {
+    background: #fff;
+    color: #003931;
+    border: 1.5px solid #36C639;
+    border-radius: 1rem;
+    font-weight: 500;
+    transition: border 0.2s;
+  }
+  .theme-salam .input-field:focus {
+    border: 2px solid #003931;
+    outline: none;
+  }
+
+  /* Salam theme quick links and filter buttons */
+  .theme-salam .quick-link,
+  .theme-salam .category-btn {
+    background: #EEFDEC;
+    color: #003931;
+    border: 1.5px solid #36C639;
+    border-radius: 1rem;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+  }
+  .theme-salam .quick-link:hover,
+  .theme-salam .category-btn:hover {
+    background: #36C639;
+    color: #fff;
+    border: 1.5px solid #003931;
+  }
+  .theme-salam .category-btn.active {
+    background: #003931;
+    color: #fff;
+    border: 1.5px solid #36C639;
+  }
+
+  /* Salam theme section titles with Reliable Green and white stroke */
+  .theme-salam .section-title {
+    color: #003931;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 
+      -1px -1px 0 #ffffff,
+      1px -1px 0 #ffffff,
+      -1px 1px 0 #ffffff,
+      1px 1px 0 #ffffff;
+  }
+
+  /* Salam theme icon circles */
+  .theme-salam .icon-circle {
+    background: #003931;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Salam theme scrollbar */
+  .theme-salam ::-webkit-scrollbar {
+    width: 8px;
+  }
+  .theme-salam ::-webkit-scrollbar-thumb {
+    background: #36C639;
+    border-radius: 4px;
+  }
+  .theme-salam ::-webkit-scrollbar-thumb:hover {
+    background: #003931;
+  }
+
   .cyber-glow {
     box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
   }
@@ -1544,7 +1786,7 @@
 
   /* Icon Animation */
   .icon-animate {
-    animation: iconBounce 0.8s ease-out 0.2s forwards;
+    animation: iconBounce 0.8s ease-out 0.2s forwards, iconFloat 3s ease-in-out 1s infinite;
     opacity: 0;
     transform: scale(0.8);
   }
@@ -1560,6 +1802,15 @@
     100% {
       opacity: 1;
       transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes iconFloat {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
     }
   }
 
@@ -1668,6 +1919,41 @@
     font-weight: 400;
   }
 
+  /* Title and Subtitle Animations */
+  .title-animate {
+    animation: titleFadeIn 1s ease-out 0.3s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .subtitle-animate {
+    animation: subtitleFadeIn 1s ease-out 0.6s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  @keyframes titleFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes subtitleFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   /* Light theme adjustments for page headers */
   .theme-light .page-title {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -1681,8 +1967,8 @@
   }
 
   .theme-light .page-header-icon {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    box-shadow: 0 0 30px rgba(5, 150, 105, 0.2);
+    background: transparent;
+    box-shadow: none;
   }
 
   /* Text Scramble Effect */
@@ -1873,4 +2159,49 @@
 
 .theme-cyber * {
   scrollbar-color: #00ffea #0a0a0a;
+}
+
+/* Salam theme scrollbar */
+.theme-salam ::-webkit-scrollbar {
+  width: 8px;
+}
+.theme-salam ::-webkit-scrollbar-thumb {
+  background: #36C639;
+  border-radius: 4px;
+}
+.theme-salam ::-webkit-scrollbar-thumb:hover {
+  background: #003931;
+}
+
+/* Salam theme alerts - using colors from themes.md */
+.theme-salam .alert-critical {
+  background: #FFE6E6;
+  border: 2px solid #FF6B6B;
+  color: #8B0000;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(255, 107, 107, 0.15);
+}
+
+.theme-salam .alert-warning {
+  background: #FFF3CD;
+  border: 2px solid #FFC107;
+  color: #856404;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(255, 193, 7, 0.15);
+}
+
+.theme-salam .alert-info {
+  background: #EEFDEC;
+  border: 2px solid #36C639;
+  color: #003931;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(54, 198, 57, 0.15);
+}
+
+.theme-salam .alert-success {
+  background: #C8FCC0;
+  border: 2px solid #00F000;
+  color: #003931;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(0, 240, 0, 0.15);
 }

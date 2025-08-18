@@ -7,42 +7,43 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const includeInactive = searchParams.get('includeInactive') === 'true';
-    const departmentId = searchParams.get('departmentId');
+    const search = searchParams.get('search');
+    const department = searchParams.get('department');
 
-    const whereClause: any = {};
+    const where: any = {};
     
-    if (!includeInactive) {
-      whereClause.is_active = true;
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { name_ar: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { job_title: { contains: search, mode: 'insensitive' } },
+      ];
     }
     
-    if (departmentId) {
-      whereClause.department_id = parseInt(departmentId);
+    if (department) {
+      where.department_id = parseInt(department);
     }
 
     const employees = await prisma.employee.findMany({
-      where: whereClause,
+      where,
       include: {
         department: {
           select: {
             id: true,
             name: true,
-            description: true
-          }
-        }
+          },
+        },
       },
       orderBy: {
-        name: 'asc'
-      }
+        name: 'asc',
+      },
     });
 
-    return NextResponse.json({ employees });
+    return NextResponse.json(employees);
   } catch (error) {
     console.error('Error fetching employees:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch employees' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch employees' }, { status: 500 });
   }
 }
 
@@ -51,72 +52,40 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const {
-      name,
-      name_ar,
-      email,
-      phone,
-      job_title,
-      job_title_ar,
-      department_id,
-      location,
-      hire_date,
-      status,
-      gender
-    } = body;
+    const { name, name_ar, email, job_title, job_title_ar, department_id, phone, location, hire_date, gender, is_active } = body;
 
     if (!name || !email || !department_id) {
-      return NextResponse.json(
-        { error: 'Missing required fields: name, email, department_id' },
-        { status: 400 }
-      );
-    }
-
-    // Check if email already exists
-    const existingEmployee = await prisma.employee.findUnique({
-      where: { email }
-    });
-
-    if (existingEmployee) {
-      return NextResponse.json(
-        { error: 'Employee with this email already exists' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const employee = await prisma.employee.create({
       data: {
         name,
-        name_ar,
+        name_ar: name_ar || name,
         email,
-        phone,
-        job_title,
-        job_title_ar,
+        job_title: job_title || 'Employee',
+        job_title_ar: job_title_ar || job_title || 'موظف',
         department_id: parseInt(department_id),
+        phone,
         location,
         hire_date: hire_date ? new Date(hire_date) : null,
-        status,
-        gender,
-        is_active: true
+        gender: gender || 'male',
+        is_active: is_active !== undefined ? is_active : true,
       },
       include: {
         department: {
           select: {
             id: true,
             name: true,
-            description: true
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
-    return NextResponse.json({ employee }, { status: 201 });
+    return NextResponse.json(employee);
   } catch (error) {
     console.error('Error creating employee:', error);
-    return NextResponse.json(
-      { error: 'Failed to create employee' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create employee' }, { status: 500 });
   }
 }
 

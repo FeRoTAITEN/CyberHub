@@ -96,14 +96,17 @@ export default function QAPage() {
 
   // Modern, theme-aware card design with icons (same as services)
   const isDark = theme === 'default' || theme === 'cyber' || theme === 'midnight';
-  const cardBg = isDark ? 'bg-slate-900' : 'bg-white';
-  const cardTitle = isDark ? 'text-white' : 'text-slate-900';
-  const cardDesc = isDark ? 'text-slate-400' : 'text-slate-600';
-  const cardShadow = isDark ? 'shadow-lg' : 'shadow-md';
-  const cardHover = isDark
-    ? 'hover:shadow-2xl'
-    : 'hover:shadow-lg';
-  const cardClass = `card p-6 rounded-xl border-2 border-transparent ${cardBg} ${cardShadow} transition-all duration-200 hover:-translate-y-1 hover:border-green-500 ${cardHover} flex flex-col h-full items-center text-center`;
+  const isSalam = theme === 'salam';
+  
+  // Salam theme specific styling - matching the exact design from image
+  const cardBg = isSalam ? 'bg-white' : (isDark ? 'bg-slate-900' : 'bg-white');
+  const cardTitle = isSalam ? 'text-green-800' : (isDark ? 'text-white' : 'text-slate-900');
+  const cardDesc = isSalam ? 'text-green-700' : (isDark ? 'text-slate-400' : 'text-slate-600');
+  const cardShadow = isSalam ? 'shadow-lg' : (isDark ? 'shadow-lg' : 'shadow-md');
+  const cardHover = isSalam 
+    ? 'hover:shadow-xl hover:border-green-500/50 transition-all duration-300'
+    : (isDark ? 'hover:shadow-2xl' : 'hover:shadow-lg');
+  const cardClass = `card p-8 rounded-xl border border-green-200/30 ${cardBg} ${cardShadow} transition-all duration-300 hover:-translate-y-1 hover:border-green-500 ${cardHover} flex flex-col h-full items-center text-center`;
 
   // Helper to get icon for category
   const getCategoryIcon = (cat: string) => {
@@ -135,35 +138,51 @@ export default function QAPage() {
         <div className="flex flex-col gap-6 mb-6 content-animate">
           {/* إحصائيات */}
           <div className="card p-6">
-            <h2 className="heading-2 mb-4 flex items-center gap-2">
+            <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+              isSalam ? 'text-green-800' : ''
+            }`}>
               <span className="text-2xl">📊</span>
               <span>{lang === 'ar' ? 'إحصائيات الأسئلة' : 'Q&A Statistics'}</span>
             </h2>
             <div className="grid grid-cols-2 gap-4">
           {stats.map((stat, index) => (
-                <div key={index} className="text-center p-3 bg-slate-800 rounded-lg stat-card">
-              <div className="text-2xl mb-2">{stat.icon}</div>
-                  <div className="text-xl font-bold text-green-400 mb-1">{stat.value}</div>
-                  <div className="text-slate-300 text-xs mb-2">{stat.label}</div>
+                <div key={index} className={`text-center p-4 rounded-xl stat-card ${
+                  isSalam ? 'bg-white border border-green-200/30 shadow-lg' : 'bg-slate-800'
+                }`}>
+              <div className="text-3xl mb-3">{stat.icon}</div>
+                  <div className={`text-2xl font-bold mb-2 ${
+                    isSalam ? 'text-green-800' : 'text-green-400'
+                  }`}>{stat.value}</div>
+                  <div className={`text-sm font-medium ${
+                    isSalam ? 'text-green-700' : 'text-slate-300'
+                  }`}>{stat.label}</div>
             </div>
           ))}
         </div>
           </div>
           {/* البحث والفلاتر */}
           <div className="card p-6">
-            <h2 className="heading-2 mb-4 flex items-center gap-2">
-              <MagnifyingGlassIcon className="w-5 h-5 text-green-400" />
+            <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
+              isSalam ? 'text-green-800' : ''
+            }`}>
+              <MagnifyingGlassIcon className={`w-5 h-5 ${
+                isSalam ? 'text-green-600' : 'text-green-400'
+              }`} />
               <span>{lang === 'ar' ? 'بحث وفلاتر' : 'Search & Filters'}</span>
             </h2>
             {/* Search Bar */}
             <div className="relative mb-6">
-              <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <MagnifyingGlassIcon className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+                isSalam ? 'text-green-500' : 'text-slate-400'
+              }`} />
               <input
                 type="text"
                 placeholder={lang === 'ar' ? 'ابحث في الأسئلة والأجوبة...' : 'Search questions and answers...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-field pl-12 pr-4 py-3"
+                className={`input-field pl-12 pr-4 py-4 rounded-xl ${
+                  isSalam ? 'bg-white border-green-200/50 focus:border-green-500 focus:ring-green-500' : ''
+                }`}
               />
             </div>
             {/* Category Filter */}
@@ -174,10 +193,14 @@ export default function QAPage() {
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
                       selectedCategory === category.id
-                        ? 'bg-green-600 text-white shadow-lg'
-                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white'
+                        ? isSalam 
+                          ? 'bg-green-600 text-white shadow-lg'
+                          : 'bg-green-600 text-white shadow-lg'
+                        : isSalam
+                          ? 'bg-white text-green-700 hover:bg-green-50 border border-green-200/50 shadow-sm'
+                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -191,7 +214,7 @@ export default function QAPage() {
 
         {/* عدد النتائج */}
         <div className="mb-6 content-animate">
-          <p className="text-slate-300">
+          <p className={isSalam ? 'text-green-700' : 'text-slate-300'}>
             {lang === 'ar' 
               ? `تم العثور على ${filteredQA.length} سؤال`
               : `Found ${filteredQA.length} questions`}
@@ -200,24 +223,30 @@ export default function QAPage() {
 
         {/* Q&A Cards Grid */}
         {loading ? (
-          <div className="text-center py-16 text-slate-400 text-lg">{lang === 'ar' ? 'جاري تحميل الأسئلة...' : 'Loading questions...'}</div>
+          <div className={`text-center py-16 text-lg ${
+            isSalam ? 'text-green-600' : 'text-slate-400'
+          }`}>{lang === 'ar' ? 'جاري تحميل الأسئلة...' : 'Loading questions...'}</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 content-animate">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 content-animate">
             {filteredQA.map((item, idx) => {
               const Icon = getCategoryIcon(item.category);
               return (
                 <div
                   key={item.id}
-                  className={cardClass}
+                  className={`${cardClass} ${isSalam ? 'hover:scale-105' : ''}`}
                   dir={lang === 'ar' ? 'rtl' : 'ltr'}
                   style={{ animationDelay: `${0.1 * (idx + 1)}s` }}
                 >
-                  {/* Category Icon */}
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}>
-                    <Icon className={`w-6 h-6 ${isDark ? 'text-green-400' : 'text-green-600'}`} />
+                  {/* Category Icon - matching the icon style from image */}
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${
+                    isSalam ? 'bg-green-600' : (isDark ? 'bg-slate-800' : 'bg-slate-200')
+                  }`}>
+                    <Icon className={`w-6 h-6 ${
+                      isSalam ? 'text-white' : (isDark ? 'text-green-400' : 'text-green-600')
+                    }`} />
                   </div>
-                  <h2 className={`text-lg font-bold mb-2 ${cardTitle}`}>{item.question[lang]}</h2>
-                  <p className={`text-sm ${cardDesc}`}>{item.answer[lang]}</p>
+                  <h2 className={`text-xl font-bold mb-3 ${cardTitle}`}>{item.question[lang]}</h2>
+                  <p className={`text-base leading-relaxed ${cardDesc}`}>{item.answer[lang]}</p>
                 </div>
               );
             })}
@@ -226,19 +255,35 @@ export default function QAPage() {
 
         {/* قسم المساعدة */}
         <div className="mt-12 content-animate">
-          <div className="card border-green-500/30 p-8">
+          <div className={`card p-8 rounded-xl ${
+            isSalam 
+              ? 'bg-white border border-green-200/30 shadow-lg' 
+              : 'border-green-500/30'
+          }`}>
             <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-              <QuestionMarkCircleIcon className="w-7 h-7 text-green-400 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-4">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                isSalam ? 'bg-green-600' : 'bg-green-500'
+              }`}>
+                <QuestionMarkCircleIcon className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className={`text-2xl font-bold mb-4 ${
+                  isSalam ? 'text-green-800' : 'text-white'
+                }`}>
                   {lang === 'ar' ? 'هل لديك سؤال آخر؟' : 'Have another question?'}
                 </h3>
-                <p className="text-slate-300 leading-relaxed text-base mb-4">
+                <p className={`leading-relaxed text-base mb-6 ${
+                  isSalam ? 'text-green-700' : 'text-slate-300'
+                }`}>
                   {lang === 'ar' 
                     ? 'إذا لم تجد إجابة لسؤالك هنا، يمكنك التواصل مع فريق الأمن السيبراني للحصول على المساعدة.'
                     : 'If you couldn\'t find an answer to your question here, you can contact the cybersecurity team for assistance.'}
                 </p>
-                <button className="btn-primary">
+                <button className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 ${
+                  isSalam 
+                    ? 'bg-green-600 text-white hover:bg-green-700 hover:shadow-xl shadow-lg'
+                    : 'btn-primary'
+                }`}>
                   {lang === 'ar' ? 'تواصل معنا' : 'Contact Us'}
                 </button>
               </div>

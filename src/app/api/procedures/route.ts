@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const whereClause: any = {};
     
     if (!includeArchived) {
-      whereClause.status = { not: 'archived' };
+      whereClause.is_archived = false;
     }
     
     if (onlyVisible) {
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         created_at: 'desc'
       },
       include: {
-        archived_versions: {
+        versions: {
           orderBy: {
             created_at: 'desc'
           }
@@ -119,17 +119,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Ensure fileUrl is not null
+    if (!fileUrl) {
+      return NextResponse.json(
+        { error: 'File is required' },
+        { status: 400 }
+      );
+    }
+
     const procedure = await prisma.procedure.create({
       data: {
         title_en: titleEn,
         title_ar: titleAr,
-        description_en: descriptionEn,
-        description_ar: descriptionAr,
+        description: descriptionEn, // Using only one description field as per schema
         version: version,
-        file_size: fileSize,
-        file_url: fileUrl,
-        created_by: 1, // Default admin user
-        updated_by: 1
+        file_path: fileUrl, // Using file_path as per schema
       }
     });
 
