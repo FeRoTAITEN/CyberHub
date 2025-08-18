@@ -753,8 +753,6 @@
     @apply border-red-500/50 shadow-red-500/20;
   }
 
-
-
   .theme-midnight {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
   }
@@ -1496,6 +1494,18 @@
     border: 1.5px solid #36C639;
   }
 
+  /* Salam theme section titles with Reliable Green and white stroke */
+  .theme-salam .section-title {
+    color: #003931;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 
+      -1px -1px 0 #ffffff,
+      1px -1px 0 #ffffff,
+      -1px 1px 0 #ffffff,
+      1px 1px 0 #ffffff;
+  }
+
   /* Salam theme icon circles */
   .theme-salam .icon-circle {
     background: #003931;
@@ -1776,7 +1786,7 @@
 
   /* Icon Animation */
   .icon-animate {
-    animation: iconBounce 0.8s ease-out 0.2s forwards;
+    animation: iconBounce 0.8s ease-out 0.2s forwards, iconFloat 3s ease-in-out 1s infinite;
     opacity: 0;
     transform: scale(0.8);
   }
@@ -1792,6 +1802,15 @@
     100% {
       opacity: 1;
       transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes iconFloat {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
     }
   }
 
@@ -1845,21 +1864,29 @@
   }
 
   .page-header-icon {
-    width: auto;
-    height: auto;
-    background: transparent;
-    border-radius: 0;
+    width: 6rem;
+    height: 6rem;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 2rem;
-    box-shadow: none;
+    box-shadow: 0 0 30px rgba(5, 150, 105, 0.3);
     position: relative;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .page-header-icon::before {
-    display: none;
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
   }
 
   @keyframes shimmer {
@@ -1890,6 +1917,41 @@
     margin: 0 auto;
     line-height: 1.6;
     font-weight: 400;
+  }
+
+  /* Title and Subtitle Animations */
+  .title-animate {
+    animation: titleFadeIn 1s ease-out 0.3s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .subtitle-animate {
+    animation: subtitleFadeIn 1s ease-out 0.6s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  @keyframes titleFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes subtitleFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* Light theme adjustments for page headers */
@@ -2097,4 +2159,49 @@
 
 .theme-cyber * {
   scrollbar-color: #00ffea #0a0a0a;
+}
+
+/* Salam theme scrollbar */
+.theme-salam ::-webkit-scrollbar {
+  width: 8px;
+}
+.theme-salam ::-webkit-scrollbar-thumb {
+  background: #36C639;
+  border-radius: 4px;
+}
+.theme-salam ::-webkit-scrollbar-thumb:hover {
+  background: #003931;
+}
+
+/* Salam theme alerts - using colors from themes.md */
+.theme-salam .alert-critical {
+  background: #FFE6E6;
+  border: 2px solid #FF6B6B;
+  color: #8B0000;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(255, 107, 107, 0.15);
+}
+
+.theme-salam .alert-warning {
+  background: #FFF3CD;
+  border: 2px solid #FFC107;
+  color: #856404;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(255, 193, 7, 0.15);
+}
+
+.theme-salam .alert-info {
+  background: #EEFDEC;
+  border: 2px solid #36C639;
+  color: #003931;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(54, 198, 57, 0.15);
+}
+
+.theme-salam .alert-success {
+  background: #C8FCC0;
+  border: 2px solid #00F000;
+  color: #003931;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(0, 240, 0, 0.15);
 }

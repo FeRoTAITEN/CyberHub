@@ -34,9 +34,26 @@
     "no_items": "لا توجد عناصر متاحة"
   },
 
+  "policies": {
+    "standards_tab": "المعايير",
+    "procedures_tab": "الإجراءات"
+  },
   "grc": {
     "title": "إدارة GRC",
     "intro": "نظام إدارة الحوكمة والمخاطر والامتثال",
+    "dashboard_tab": "لوحة تحكم GRC",
+    "governance_tab": "الحوكمة",
+    "risk_tab": "المخاطر",
+    "compliance_tab": "الامتثال",
+    "dashboard_content_title": "نظرة عامة على لوحة تحكم GRC",
+    "dashboard_content_description": "مرحباً بك في لوحة تحكم GRC. هنا يمكنك مراقبة أنشطة الحوكمة والمخاطر والامتثال في جميع أنحاء المنظمة.",
+    "risk_content_title": "إدارة المخاطر",
+    "risk_content_description": "تحديد وتقييم وإدارة المخاطر السيبرانية لحماية الأصول التنظيمية وضمان استمرارية الأعمال.",
+    "compliance_content_title": "إدارة الامتثال",
+    "compliance_content_description": "مراقبة وضمان الالتزام بمعايير الأمن السيبراني واللوائح والسياسات الداخلية.",
+    "policies_tab": "السياسات",
+    "standards_tab": "المعايير",
+    "procedures_tab": "الإجراءات",
     "policy_management": "إدارة السياسات",
     "upload_policy": "رفع سياسة",
     "policy_title": "عنوان السياسة",
@@ -84,7 +101,9 @@
     "last_updated": "آخر تحديث",
     "update_file": "تحديث الملف",
     "current_file": "الملف الحالي",
-    "file_updated": "تم تحديث الملف بنجاح"
+    "file_updated": "تم تحديث الملف بنجاح",
+    "confirm_delete": "تأكيد الحذف",
+    "deleting": "جاري الحذف..."
   },
   "news": {
     "title": "الأخبار والتحديثات",

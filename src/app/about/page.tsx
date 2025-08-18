@@ -26,26 +26,8 @@ export default function AboutPage() {
   const { theme } = useTheme();
   const { t } = useTranslation(lang);
   
+  // تحديد ما إذا كان الثيم Salam أم لا
   const isSalam = theme === 'salam';
-
-  // ألوان Salam المخصصة
-  const salamColors = {
-    text: '#003931',
-    textSecondary: '#005147',
-    accent: '#36C639',
-    accentLight: '#73F64B',
-    background: '#FFFFFF',
-    cardBg: '#F8FFFE',
-    cardBorder: '#E6F7F0',
-    buttonBg: '#36C639',
-    buttonHover: '#2BA32E',
-    iconBg: '#E6F7F0',
-    iconColor: '#36C639',
-    success: '#36C639',
-    warning: '#FFA500',
-    danger: '#FF4444',
-    info: '#36C639'
-  };
 
   // بيانات نائب رئيس القسم
   const deputyManager = {
@@ -302,12 +284,12 @@ export default function AboutPage() {
         {/* Hero Section */}
         <div className="page-header">
           <div className="page-header-icon icon-animate">
-            <ShieldCheckIcon className={`w-12 h-12 ${isSalam ? 'text-[#36C639]' : 'text-white'}`} />
+            <ShieldCheckIcon className="w-12 h-12 text-white" />
           </div>
-          <h1 className={`page-title title-animate ${isSalam ? 'text-[#003931]' : ''}`}>
+          <h1 className="page-title title-animate">
             {lang === "ar" ? "قسم الأمن السيبراني" : "Cyber Security Sector"}
           </h1>
-          <p className={`page-subtitle subtitle-animate ${isSalam ? 'text-white' : ''}`}>
+          <p className="page-subtitle subtitle-animate">
             {lang === "ar"
               ? "نحن نحمي الأصول الرقمية لشركة Salam ونضمن أمانها من خلال أحدث التقنيات وأفضل الممارسات الأمنية"
               : "We protect Salam Company's digital assets and ensure their security through the latest technologies and best security practices"}
@@ -316,14 +298,14 @@ export default function AboutPage() {
 
         {/* نائب رئيس القسم */}
         <div className="mb-16 content-animate">
-          <h2 className={`heading-2 mb-8 text-center ${isSalam ? 'text-[#003931]' : ''}`}>
+          <h2 className={`mb-8 text-center ${isSalam ? 'section-title' : 'heading-2'}`}>
             {lang === "ar" ? "كلمة نائب رئيس القسم" : "Deputy Head Message"}
           </h2>
-          <div className={`card max-w-4xl mx-auto ${isSalam ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}>
+          <div className={`card max-w-4xl mx-auto ${isSalam ? 'bg-white border border-[#003931]' : ''}`}>
             <div className="flex flex-col lg:flex-row items-center gap-8">
               <div className="flex-shrink-0">
-                <div className={`w-48 h-48 rounded-full overflow-hidden border-4 ${isSalam ? 'border-[#36C639]/30' : 'border-green-500/30'}`}>
-                  <div className={`w-full h-full ${isSalam ? 'bg-[#E6F7F0]' : 'bg-slate-700'} flex items-center justify-center`}>
+                <div className={`w-48 h-48 rounded-full overflow-hidden border-4 ${isSalam ? 'border-[#003931]/30' : 'border-green-500/30'}`}>
+                  <div className={`w-full h-full ${isSalam ? 'bg-[#EEFDEC]' : 'bg-slate-700'} flex items-center justify-center`}>
                     <UserGroupIcon className={`w-20 h-20 ${isSalam ? 'text-[#36C639]' : 'text-slate-400'}`} />
                   </div>
                 </div>
@@ -359,7 +341,7 @@ export default function AboutPage() {
           <div
             className={`card stagger-animate ${
               lang === "ar" ? "text-right" : "text-left"
-            } ${isSalam ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}
+            } ${isSalam ? 'bg-white border border-[#003931]' : ''}`}
           >
             <div className="flex items-center mb-4">
               <div
@@ -383,7 +365,7 @@ export default function AboutPage() {
           <div
             className={`card stagger-animate ${
               lang === "ar" ? "text-right" : "text-left"
-            } ${isSalam ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}
+            } ${isSalam ? 'bg-white border border-[#003931]' : ''}`}
           >
             <div className="flex items-center mb-4">
               <div
@@ -407,19 +389,19 @@ export default function AboutPage() {
 
         {/* الموظفين المميزين */}
         <div className="mb-16 content-animate">
-          <h2 className={`heading-2 mb-8 text-center ${isSalam ? 'text-[#003931]' : ''}`}>
+          <h2 className={`mb-8 text-center ${isSalam ? 'section-title' : 'heading-2'}`}>
             {lang === "ar" ? "فريقنا المميز" : "Our Distinguished Team"}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {featuredEmployees.map((employee, index) => (
               <div
                 key={index}
-                className={`card-hover group stagger-animate ${isSalam ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}
+                className={`card-hover group stagger-animate ${isSalam ? 'bg-white border border-[#003931]' : ''}`}
                 style={{ animationDelay: `${0.1 * (index + 1)}s` }}
               >
                 <div className="text-center mb-6">
-                  <div className={`w-32 h-32 rounded-full overflow-hidden border-4 ${isSalam ? 'border-[#36C639]/30' : 'border-green-500/30'} mx-auto mb-4`}>
-                    <div className={`w-full h-full ${isSalam ? 'bg-[#E6F7F0]' : 'bg-slate-700'} flex items-center justify-center`}>
+                  <div className={`w-32 h-32 rounded-full overflow-hidden border-4 ${isSalam ? 'border-[#003931]/30' : 'border-green-500/30'} mx-auto mb-4`}>
+                    <div className={`w-full h-full ${isSalam ? 'bg-[#EEFDEC]' : 'bg-slate-700'} flex items-center justify-center`}>
                       <UserGroupIcon className={`w-16 h-16 ${isSalam ? 'text-[#36C639]' : 'text-slate-400'}`} />
                     </div>
                   </div>
@@ -437,7 +419,7 @@ export default function AboutPage() {
 
         {/* Services */}
         <div className="mb-12 content-animate">
-          <h2 className={`heading-2 mb-8 text-center ${isSalam ? 'text-[#003931]' : ''}`}>
+          <h2 className={`mb-8 text-center ${isSalam ? 'section-title' : 'heading-2'}`}>
             {lang === "ar" ? "خدماتنا" : "Our Services"}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -446,7 +428,7 @@ export default function AboutPage() {
               return (
                 <div
                   key={index}
-                  className={`card-hover group stagger-animate ${isSalam ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}
+                  className={`card-hover group stagger-animate ${isSalam ? 'bg-white border border-[#003931]' : ''}`}
                   style={{ animationDelay: `${0.1 * (index + 1)}s` }}
                 >
                   <div
@@ -466,7 +448,7 @@ export default function AboutPage() {
 
         {/* الجوائز والتكريمات */}
         <div className="mb-16 content-animate">
-          <h2 className={`heading-2 mb-8 text-center ${isSalam ? 'text-[#003931]' : ''}`}>
+          <h2 className={`mb-8 text-center ${isSalam ? 'section-title' : 'heading-2'}`}>
             {lang === "ar" ? "الجوائز والتكريمات" : "Awards & Recognition"}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -475,7 +457,7 @@ export default function AboutPage() {
               return (
                 <div
                   key={index}
-                  className={`card-hover group stagger-animate ${isSalam ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}
+                  className={`card-hover group stagger-animate ${isSalam ? 'bg-white border border-[#003931]' : ''}`}
                   style={{ animationDelay: `${0.1 * (index + 1)}s` }}
                 >
                   <div className="flex items-start gap-4">
@@ -507,17 +489,17 @@ export default function AboutPage() {
 
         {/* Organizational Structure */}
         <div className="mb-12 content-animate">
-          <h2 className={`heading-2 mb-8 text-center ${isSalam ? 'text-[#003931]' : ''}`}>
+          <h2 className={`mb-8 text-center ${isSalam ? 'section-title' : 'heading-2'}`}>
             {lang === "ar" ? "الهيكل التنظيمي" : "Organizational Structure"}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {teamStructure.map((team, index) => (
               <div
                 key={index}
-                className={`card text-center stagger-animate ${isSalam ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}
+                className={`card text-center stagger-animate ${isSalam ? 'bg-white border border-[#003931]' : ''}`}
                 style={{ animationDelay: `${0.1 * (index + 1)}s` }}
               >
-                <div className={`w-16 h-16 ${isSalam ? 'bg-[#E6F7F0]' : 'bg-slate-700'} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                <div className={`w-16 h-16 ${isSalam ? 'bg-[#EEFDEC]' : 'bg-slate-700'} rounded-full flex items-center justify-center mx-auto mb-4`}>
                   <UserGroupIcon className={`w-8 h-8 ${isSalam ? 'text-[#36C639]' : 'text-green-400'}`} />
                 </div>
                 <h3 className={`text-lg font-semibold mb-2 ${isSalam ? 'text-[#003931]' : 'text-white'}`}>
@@ -538,8 +520,8 @@ export default function AboutPage() {
         </div>
 
         {/* Values */}
-        <div className={`card content-animate ${isSalam ? 'bg-[#F8FFFE] border-[#E6F7F0]' : ''}`}>
-          <h2 className={`heading-2 mb-8 text-center ${isSalam ? 'text-[#003931]' : ''}`}>
+        <div className={`card content-animate ${isSalam ? 'bg-white border border-[#003931]' : ''}`}>
+          <h2 className={`mb-8 text-center ${isSalam ? 'section-title' : 'heading-2'}`}>
             {lang === "ar" ? "قيمنا" : "Our Values"}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

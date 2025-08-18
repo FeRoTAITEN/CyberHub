@@ -111,9 +111,26 @@
       "excellence_standards": "Excellence Standards"
     }
   },
+  "policies": {
+    "standards_tab": "Standards",
+    "procedures_tab": "Procedures"
+  },
   "grc": {
     "title": "GRC Management",
     "intro": "Governance, Risk, and Compliance management system",
+    "dashboard_tab": "GRC Dashboard",
+    "governance_tab": "Governance",
+    "risk_tab": "Risk",
+    "compliance_tab": "Compliance",
+    "dashboard_content_title": "GRC Dashboard Overview",
+    "dashboard_content_description": "Welcome to the GRC Dashboard. Here you can monitor governance, risk, and compliance activities across the organization.",
+    "risk_content_title": "Risk Management",
+    "risk_content_description": "Identify, assess, and manage cybersecurity risks to protect organizational assets and ensure business continuity.",
+    "compliance_content_title": "Compliance Management",
+    "compliance_content_description": "Monitor and ensure adherence to cybersecurity standards, regulations, and internal policies.",
+    "policies_tab": "Policies",
+    "standards_tab": "Standards",
+    "procedures_tab": "Procedures",
     "policy_management": "Policy Management",
     "upload_policy": "Upload Policy",
     "policy_title": "Policy Title",
@@ -161,7 +178,9 @@
     "last_updated": "Last Updated",
     "update_file": "Update File",
     "current_file": "Current File",
-    "file_updated": "File updated successfully"
+    "file_updated": "File updated successfully",
+    "confirm_delete": "Confirm Delete",
+    "deleting": "Deleting..."
   },
   "news": {
     "title": "News & Updates",

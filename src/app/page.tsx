@@ -407,8 +407,8 @@ export default function HomePage() {
             
             {/* Important Alerts */}
             <section className="content-animate">
-              <h2 className="heading-2 mb-6 flex items-center gap-3">
-                <ExclamationTriangleIcon className="w-6 h-6 text-red-400" />
+                <h2 className={`mb-6 flex items-center gap-3 ${isSalam ? 'section-title' : 'heading-2'}`}>
+                  <ExclamationTriangleIcon className={`w-6 h-6 ${isSalam ? 'text-white' : 'text-red-400'}`} />
                 {t("home.important_alerts")}
               </h2>
                              <div className="space-y-4">
@@ -428,8 +428,8 @@ export default function HomePage() {
 
             {/* Quick Stats */}
             <section className="content-animate">
-              <h2 className="heading-2 mb-6 flex items-center gap-3">
-                <ChartBarIcon className="w-6 h-6 text-blue-400" />
+                <h2 className={`mb-6 flex items-center gap-3 ${isSalam ? 'section-title' : 'heading-2'}`}>
+                  <ChartBarIcon className={`w-6 h-6 ${isSalam ? 'text-white' : 'text-blue-400'}`} />
                 {lang === 'ar' ? 'إحصائيات سريعة' : 'Quick Stats'}
               </h2>
               <div className="grid grid-cols-2 gap-4">
@@ -454,20 +454,20 @@ export default function HomePage() {
 
             {/* Recent Activities */}
             <section className="content-animate">
-              <h2 className="heading-2 mb-6 flex items-center gap-3">
-                <ClockIcon className="w-6 h-6 text-yellow-400" />
+                <h2 className={`mb-6 flex items-center gap-3 ${isSalam ? 'section-title' : 'heading-2'}`}>
+                  <ClockIcon className={`w-6 h-6 ${isSalam ? 'text-white' : 'text-blue-400'}`} />
                 {t("home.recent_activity")}
               </h2>
               <div className="space-y-3">
                 {recentActivities.map((activity) => (
                   <div
                     key={activity.id}
-                    className={`activity-${activity.type} p-3 rounded-lg`}
+                    className={`p-3 rounded-lg ${isSalam ? 'bg-white border border-[#003931]' : `activity-${activity.type}`}`}
                   >
-                    <p className="text-sm text-slate-300 mb-1">
+                    <p className={`text-sm mb-1 ${isSalam ? 'text-[#005147]' : 'text-slate-300'}`}>
                       {activity.message}
                     </p>
-                    <span className="text-xs text-slate-500">
+                    <span className={`text-xs ${isSalam ? 'text-[#005147]/70' : 'text-slate-500'}`}>
                       {activity.time}
                     </span>
                   </div>
@@ -595,32 +595,32 @@ export default function HomePage() {
             <section className="content-animate">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Projects */}
-                <div className="card-hover group p-6 rounded-xl bg-[#101e2c] border border-slate-600">
+                <div className={`p-6 rounded-xl ${isSalam ? 'bg-white border border-[#003931]' : 'card-hover group bg-[#101e2c] border border-slate-600'}`}>
                   <div className="flex items-center gap-3 mb-4">
-                    <ChartBarIcon className="w-6 h-6 text-blue-400" />
-                    <h2 className="text-lg font-bold text-white">{lang === 'ar' ? 'المشاريع المرتبطة' : 'Related Projects'}</h2>
+                    <ChartBarIcon className={`w-6 h-6 ${isSalam ? 'text-[#36C639]' : 'text-blue-400'}`} />
+                    <h2 className={`text-lg font-bold ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{lang === 'ar' ? 'المشاريع المرتبطة' : 'Related Projects'}</h2>
                   </div>
                   <div className="space-y-3">
                     {projectsData.slice(0, 2).map((p) => (
-                      <div key={p.id} className="flex items-center justify-between bg-slate-800 rounded-lg px-4 py-3">
-                        <span className="font-bold text-white text-sm">{p.name}</span>
-                        <span className="px-2 py-1 rounded-lg text-xs font-semibold text-white bg-green-600">{p.status}</span>
+                      <div key={p.id} className={`flex items-center justify-between rounded-lg px-4 py-3 ${isSalam ? 'bg-[#EEFDEC] border border-[#003931]' : 'bg-slate-800'}`}>
+                        <span className={`font-bold text-sm ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{p.name}</span>
+                        <span className={`px-2 py-1 rounded-lg text-xs font-semibold text-white ${isSalam ? 'bg-[#00F000]' : 'bg-green-600'}`}>{p.status}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Tasks */}
-                <div className="card-hover group p-6 rounded-xl bg-[#101e2c] border border-slate-600">
+                <div className={`p-6 rounded-xl ${isSalam ? 'bg-white border border-[#003931]' : 'card-hover group bg-[#101e2c] border border-slate-600'}`}>
                   <div className="flex items-center gap-3 mb-4">
-                    <ClipboardDocumentCheckIcon className="w-6 h-6 text-yellow-400" />
-                    <h2 className="text-lg font-bold text-white">{lang === 'ar' ? 'المهام المرتبطة' : 'Related Tasks'}</h2>
+                    <ClipboardDocumentCheckIcon className={`w-6 h-6 ${isSalam ? 'text-[#73F64B]' : 'text-yellow-400'}`} />
+                    <h2 className={`text-lg font-bold ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{lang === 'ar' ? 'المهام المرتبطة' : 'Related Tasks'}</h2>
                   </div>
                   <div className="space-y-3">
                     {tasksData.slice(0, 2).map((t) => (
-                      <div key={t.id} className="flex items-center justify-between bg-slate-800 rounded-lg px-4 py-3">
-                        <span className="font-bold text-white text-sm">{t.title}</span>
-                        <span className="px-2 py-1 rounded-lg text-xs font-semibold text-white bg-blue-600">{t.status}</span>
+                      <div key={t.id} className={`flex items-center justify-between rounded-lg px-4 py-3 ${isSalam ? 'bg-[#EEFDEC] border border-[#003931]' : 'bg-slate-800'}`}>
+                        <span className={`font-bold text-sm ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{t.title}</span>
+                        <span className={`px-2 py-1 rounded-lg text-xs font-semibold text-white ${isSalam ? 'bg-[#36C639]' : 'bg-blue-600'}`}>{t.status}</span>
                       </div>
                     ))}
                   </div>
@@ -630,8 +630,8 @@ export default function HomePage() {
 
             {/* Active Projects */}
             <section className="content-animate">
-              <h2 className="heading-2 mb-6 flex items-center gap-3">
-                <ChartBarIcon className="w-6 h-6 text-green-400" />
+                <h2 className={`mb-6 flex items-center gap-3 ${isSalam ? 'section-title' : 'heading-2'}`}>
+                <ChartBarIcon className={`w-6 h-6 ${isSalam ? 'text-white' : 'text-green-400'}`} />
                 {t("home.active_projects")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -16,45 +16,52 @@
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#FFFFFF](https://via.placeholder.com/20/FFFFFF/000000?text=+) | Cloud White | `#FFFFFF` | `255, 255, 255` | خلفيات البطاقات، النصوص على الخلفيات الداكنة |
-| ![#003931](https://via.placeholder.com/20/003931/FFFFFF?text=+) | Reliable Green | `#003931` | `0, 57, 49` | العناوين H2، النصوص الفرعية، الحدود |
-| ![#005147](https://via.placeholder.com/20/005147/FFFFFF?text=+) | Dark Saudi Green | `#005147` | `0, 81, 71` | النصوص الثانوية، الأيقونات غير النشطة |
-| ![#00F000](https://via.placeholder.com/20/00F000/000000?text=+) | Vibrant Green | `#00F000` | `0, 240, 0` | الأزرار الرئيسية، التأكيدات، الأيقونات النشطة |
+| <div style="width: 20px; height: 20px; background-color: #FFFFFF; border: 1px solid #ccc; border-radius: 3px;"></div> | Cloud White | `#FFFFFF` | `255, 255, 255` | خلفيات البطاقات، النصوص على الخلفيات الداكنة |
+| <div style="width: 20px; height: 20px; background-color: #003931; border: 1px solid #ccc; border-radius: 3px;"></div> | Reliable Green | `#003931` | `0, 57, 49` | العناوين H2، النصوص الفرعية، الحدود |
+| <div style="width: 20px; height: 20px; background-color: #005147; border: 1px solid #ccc; border-radius: 3px;"></div> | Dark Saudi Green | `#005147` | `0, 81, 71` | النصوص الثانوية، الأيقونات غير النشطة |
+| <div style="width: 20px; height: 20px; background-color: #00F000; border: 1px solid #ccc; border-radius: 3px;"></div> | Vibrant Green | `#00F000` | `0, 240, 0` | الأزرار الرئيسية، التأكيدات، الأيقونات النشطة |
 
 ### الألوان الثانوية (Secondary Colours)
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#EEFDEC](https://via.placeholder.com/20/EEFDEC/000000?text=+) | Light Mint Green | `#EEFDEC` | `238, 253, 236` | خلفيات التنبيهات المعلوماتية |
-| ![#C8FCC0](https://via.placeholder.com/20/C8FCC0/000000?text=+) | Soft Green | `#C8FCC0` | `200, 252, 192` | خلفيات التنبيهات الناعمة |
-| ![#A0FB8E](https://via.placeholder.com/20/A0FB8E/000000?text=+) | Fresh Green | `#A0FB8E` | `160, 251, 142` | خلفيات التنبيهات التحذيرية |
-| ![#73F64B](https://via.placeholder.com/20/73F64B/000000?text=+) | Bright Green | `#73F64B` | `115, 246, 75` | التأكيدات الساطعة |
-| ![#36C639](https://via.placeholder.com/20/36C639/FFFFFF?text=+) | Strong Green | `#36C639` | `54, 198, 57` | الأزرار الثانوية |
-| ![#149931](https://via.placeholder.com/20/149931/FFFFFF?text=+) | Deep Green | `#149931` | `20, 153, 49` | النصوص العميقة |
-| ![#000000](https://via.placeholder.com/20/000000/FFFFFF?text=+) | Black | `#000000` | `0, 0, 0` | النصوص الرئيسية، الفقرات |
+| <div style="width: 20px; height: 20px; background-color: #EEFDEC; border: 1px solid #ccc; border-radius: 3px;"></div> | Light Mint Green | `#EEFDEC` | `238, 253, 236` | خلفيات التنبيهات المعلوماتية |
+| <div style="width: 20px; height: 20px; background-color: #C8FCC0; border: 1px solid #ccc; border-radius: 3px;"></div> | Soft Green | `#C8FCC0` | `200, 252, 192` | خلفيات التنبيهات الناعمة |
+| <div style="width: 20px; height: 20px; background-color: #A0FB8E; border: 1px solid #ccc; border-radius: 3px;"></div> | Fresh Green | `#A0FB8E` | `160, 251, 142` | خلفيات التنبيهات التحذيرية |
+| <div style="width: 20px; height: 20px; background-color: #73F64B; border: 1px solid #ccc; border-radius: 3px;"></div> | Bright Green | `#73F64B` | `115, 246, 75` | التأكيدات الساطعة |
+| <div style="width: 20px; height: 20px; background-color: #36C639; border: 1px solid #ccc; border-radius: 3px;"></div> | Strong Green | `#36C639` | `54, 198, 57` | الأزرار الثانوية |
+| <div style="width: 20px; height: 20px; background-color: #149931; border: 1px solid #ccc; border-radius: 3px;"></div> | Deep Green | `#149931` | `20, 153, 49` | النصوص العميقة |
+| <div style="width: 20px; height: 20px; background-color: #000000; border: 1px solid #ccc; border-radius: 3px;"></div> | Black | `#000000` | `0, 0, 0` | النصوص الرئيسية، الفقرات |
 
 ### 📝 تفاصيل الاستخدام في Salam Theme
 
 #### **النصوص والعناوين:**
 - **H1 (العناوين الرئيسية)**: `#000000` (Black)
-- **H2 (العناوين الفرعية)**: `#003931` (Reliable Green)
+- **H2 (العناوين الفرعية)**: `#003931` (Reliable Green) مع **Stroke أبيض** للتأكيد
 - **H3-H6 (العناوين الصغيرة)**: `#005147` (Dark Saudi Green)
 - **Paragraph (الفقرات)**: `#000000` (Black)
 - **Secondary Text (النصوص الثانوية)**: `#005147` (Dark Saudi Green)
+- **Section Titles (عناوين الأقسام)**: `#003931` (Reliable Green) مع **Stroke أبيض** - يستخدم كلاس `section-title`
+
 
 #### **الأزرار والتفاعل:**
 - **Primary Button**: `#00F000` (Vibrant Green) - خلفية
 - **Primary Button Text**: `#005147` (Dark Saudi Green) - نص
-- **Secondary Button**: `#FFFFFF` (Cloud White) - خلفية
+- **Secondary Button**: `#005147` (Dark Saudi Green) - خلفية
 - **Secondary Button Border**: `#00F000` (Vibrant Green) - حدود
 - **Secondary Button Text**: `#003931` (Reliable Green) - نص
 
 #### **البطاقات والخلفيات:**
 - **Card Background**: `#FFFFFF` (Cloud White) مع شفافية
 - **Card Border**: `#003931` (Reliable Green)
-- **Page Background**: خلفية متدرجة `linear-gradient(180deg, #003931 0%, #005147 25%, #36C639 55%, #73F64B 100%)`
+- **Secondary Card Background**: `#EEFDEC` (Light Mint Green)
+- **Secondary Card Border**: `#003931` (Reliable Green)
+- **Main Page Background**: خلفية متدرجة `linear-gradient(180deg, #003931 0%, #005147 25%, #36C639 55%, #73F64B 100%)`
+- **Section Title Styling**: كلاس `section-title` مع `color: #003931` و `text-shadow` أبيض للتأكيد
 
 #### **التنبيهات:**
+- **Card Background**: `#FFFFFF` (Cloud White) مع شفافية
+- **Card Border**: `#003931` (Reliable Green)
 - **Success Alert**: `#00F000` (Vibrant Green)
 - **Info Alert Background**: `#EEFDEC` (Light Mint Green)
 - **Warning Alert Background**: `#A0FB8E` (Fresh Green)
@@ -62,6 +69,7 @@
 #### **الأيقونات:**
 - **Active Icon**: `#00F000` (Vibrant Green)
 - **Inactive Icon**: `#005147` (Dark Saudi Green)
+- **Section Title Icons**: `#FFFFFF` (Cloud White) - نفس لون النص مع Stroke
 
 #### **الروابط:**
 - **Quick Link**: `#FFFFFF` (Cloud White) - خلفية
@@ -73,92 +81,6 @@
 - **Input Field Border**: `#003931` (Reliable Green)
 - **Input Field Focus**: `#00F000` (Vibrant Green) - حدود
 
-#### **دعم الصفحات والمكونات المحدثة:**
-- **صفحة الأخبار والتحديثات** (`/news`): ✅ مدعومة بالكامل
-  - **بطاقات الأخبار**: خلفية بيضاء `bg-white` مع حدود `border-[#003931]`
-  - **أيقونات القسم**: أخضر ساطع `text-[#00F000]` للأخبار، أخضر قوي `text-[#36C639]` لوسائل التواصل
-  - **النصوص**: عناوين `text-[#003931]` ونصوص ثانوية `text-[#005147]`
-  - **أزرار وسائل التواصل**: ألوان ثيم سلام مخصصة لكل منصة
-    - **X (Twitter)**: خلفية `bg-[#003931]` مع تحويم `hover:border-[#00F000]`
-    - **LinkedIn**: خلفية `bg-[#36C639]` مع تأثيرات خضراء
-    - **Snapchat**: خلفية `bg-[#73F64B]` متناسقة مع اللوحة
-  - **قسم "تابعنا"**: بطاقة بيضاء مع حدود خضراء وظلال محسنة
-- **صفحة العاملين والفريق** (`/staff`): ✅ مدعومة بالكامل ومتصلة بـ API
-  - **رأس الصفحة**: أيقونة `text-[#36C639]`، عنوان `text-[#003931]`، نص فرعي أبيض
-  - **شريط البحث**: خلفية بيضاء `bg-white` مع حدود `border-[#003931]`
-  - **placeholder البحث**: `placeholder-[#005147]` لتباين لطيف
-  - **تركيز البحث**: `focus:ring-[#00F000]` مع تأثيرات انتقالية
-  - **بطاقات العاملين**: خلفية شبه شفافة `bg-white/95` مع حدود `border-[#003931]`
-  - **تحويم البطاقات**: `hover:border-[#00F000]/60` مع ظلال `hover:shadow-[#00F000]/20`
-  - **صور العاملين الرمزية**: خلفية `bg-[#EEFDEC]` مع حدود `border-[#00F000]`
-  - **أسماء العاملين**: `text-[#003931]` (أخضر داكن واضح)
-  - **مناصب العاملين**: `text-[#00F000]` (أخضر ساطع مميز)
-  - **معلومات الاتصال**: `text-[#005147]` (أخضر متوسط)
-  - **أيقونات الاتصال**: 
-    - **البريد الإلكتروني**: `text-[#36C639]`
-    - **الهاتف**: `text-[#00F000]`
-  - **حالات التحميل/البحث**: رسائل `text-[#005147]` مع أيقونات متحركة
-  - **تكامل API**: متصل بـ `/api/employees` مع دعم البحث متعدد اللغات
-- **صفحة إدارة الموظفين** (`/employees`): ✅ مدعومة بالكامل ومتصلة بـ API
-  - **رأس الصفحة**: أيقونة `text-[#36C639]`، عنوان `text-[#003931]`، نص فرعي أبيض
-  - **شريط البحث والتحكم**: خلفية بيضاء مع حدود `border-[#003931]`
-  - **أزرار التصفية**: خلفية `bg-[#EEFDEC]` مع نشط `bg-[#00F000] text-[#003931]`
-  - **بطاقات الموظفين**: خلفية بيضاء `bg-white` مع حدود `border-[#003931]`
-  - **صور الموظفين الرمزية**: خلفية `bg-[#36C639]` لتمييز الهوية
-  - **حالات الموظفين**: 
-    - **نشط**: `bg-[#00F000] text-[#003931]`
-    - **غير نشط**: `bg-[#73F64B] text-[#003931]`
-    - **إجازة**: `bg-[#36C639] text-white`
-  - **شارات المهارات**: خلفية `bg-[#EEFDEC] text-[#003931]`
-  - **عداد المشاريع**: `text-[#00F000]` لإبراز الإنجازات
-  - **النصوص**: عناوين `text-[#003931]` ونصوص ثانوية `text-[#005147]`
-  - **تكامل API**: متصل بقاعدة البيانات مع fallback للبيانات التجريبية
-- **صفحة الألعاب التعليمية** (`/games`): ✅ مدعومة بالكامل
-  - **رأس الصفحة**: أيقونة `text-[#36C639]`، عنوان `text-[#003931]`، نص فرعي أبيض
-  - **بطاقات الألعاب**: خلفية بيضاء `bg-white` مع حدود `border-[#003931]`
-  - **أيقونات الألعاب**: ألوان مخصصة لكل نوع لعبة
-    - **الألعاب الدفاعية**: `text-[#00F000]` مع خلفية `bg-[#EEFDEC]`
-    - **الألعاب التحليلية**: `text-[#36C639]` مع خلفية `bg-[#EEFDEC]`
-    - **الألعاب التنافسية**: `text-[#73F64B]` مع خلفية `bg-[#EEFDEC]`
-  - **شارات الصعوبة**: خلفية `bg-[#EEFDEC]` مع نص `text-[#003931]`
-  - **أزرار اللعب**: ألوان متدرجة من لوحة سلام حسب نوع اللعبة
-  - **قسم الفوائد**: خلفية بيضاء مع حدود `border-[#00F000]`
-  - **أيقونات الفوائد**: توزيع ألوان سلام على الفوائد الثلاث
-  - **النصوص**: عناوين `text-[#003931]` ونصوص ثانوية `text-[#005147]`
-- **صفحة الحوكمة والمخاطر والامتثال** (`/governance`): ✅ مدعومة بالكامل ومحسنة
-  - **رأس الصفحة**: أيقونة `text-[#36C639]`، عنوان `text-[#003931]`، نص فرعي أبيض
-  - **تبويب التنقل**: خلفية بيضاء `bg-white` مع حدود `border-[#003931]`
-  - **الأزرار النشطة**: خلفية خضراء ساطعة `bg-[#00F000]` مع نص أبيض
-  - **الأزرار غير النشطة**: نص `text-[#005147]` مع تحويم `text-[#003931]`
-  - **بطاقات الإحصائيات**: خلفية بيضاء مع ظلال، أرقام ملونة بـ `text-[#00F000]`, `text-[#36C639]`, `text-[#73F64B]`
-  - **بطاقات المحتوى**: خلفية بيضاء مع تحويم أخضر فاتح `bg-[#EEFDEC]`
-  - **أيقونات السياسات**: خلفية `bg-[#00F000]` مع أيقونات `text-[#003931]`
-  - **شارات الحالة**: خلفية `bg-[#EEFDEC]` مع نص `text-[#003931]` وحدود خضراء
-  - **أزرار العرض**: خلفية `bg-[#EEFDEC]` مع نص `text-[#003931]`
-  - **أزرار التحميل**: خلفية `bg-[#00F000]` مع نص `text-[#003931]`
-  - **قسم الملاحظة المهمة**: حدود `border-[#00F000]` مع أيقونة وألوان متناسقة
-  - **النصوص**: عناوين `text-[#003931]` ونصوص ثانوية `text-[#005147]`
-- **صفحة التميز وإدارة المشاريع** (`/excellent`): ✅ مدعومة بالكامل
-  - **المشاريع**: دعم كامل للمظهر والألوان
-  - **المراحل**: تصميم متكامل مع ثيم سلام
-  - **المهام والمهام الفرعية**: أشرطة تقدم وأزرار تفاعلية
-  - **أشرطة التقدم**: ألوان متدرجة من لوحة سلام
-  - **المودالات**: تصميم موحد مع الثيم
-- **صفحة إدارة الحوكمة والمخاطر والامتثال** (`/grc`): ✅ مدعومة بالكامل
-- **صفحة الأسئلة الشائعة** (`/qa`): ✅ مدعومة بالكامل
-- **صفحة تقارير الاستبيانات** (`/surveys/report`): ✅ مدعومة بالكامل
-- **مكون إدارة التقارير** (`admin.tsx`): ✅ مدعوم بالكامل
-- **مودال مبدل الخطوط** (`FontSwitcher.tsx`): ✅ مدعوم بالكامل
-- **مودال مبدل اللغة** (`LanguageSwitcher.tsx`): ✅ مدعوم بالكامل
-- **مودال مبدل الثيمات** (`ThemeSwitcher.tsx`): ✅ مدعوم بالكامل
-- **مودال الإعدادات** (`SwitchersDropdown.tsx`): ✅ مدعوم بالكامل
-- **مودال "المزيد" في شريط التنقل** (`Navigation.tsx`): ✅ مدعوم بالكامل
-  - **القائمة المنسدلة**: خلفية بيضاء مع حدود خضراء
-  - **العناصر النشطة**: `bg-[#00F000]` مع `text-[#003931]`
-  - **العناصر غير النشطة**: `text-[#005147]` مع تحويم `hover:bg-[#EEFDEC]`
-  - **القائمة المحمولة**: تصميم متناسق مع نفس الألوان
-- **الخلفية المتدرجة**: مطبقة على جميع صفحات النظام
-- **التبديل الديناميكي**: يعمل تلقائياً مع باقي الثيمات
 
 #### **ألوان المودالز في ثيم سلام:**
 - **خلفية المودال**: `#FFFFFF` (Cloud White) مع شفافية 95%
@@ -168,6 +90,13 @@
 - **العنصر غير النشط**: نص `#005147` (Dark Saudi Green)
 - **مؤشر التحديد**: `#00F000` (Vibrant Green)
 
+#### **CSS Classes المستخدمة:**
+- **`.section-title`**: للعناوين الرئيسية مع Stroke أبيض
+  - `color: #003931` (Reliable Green)
+  - `font-size: 1.5rem` (متناسق مع heading-2)
+  - `font-weight: bold`
+  - `text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff`
+
 ---
 
 ## 🌙 Default Theme
@@ -176,18 +105,18 @@
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#39ff14](https://via.placeholder.com/20/39ff14/000000?text=+) | Cyber Green | `#39ff14` | `57, 255, 20` | الأزرار الرئيسية، التأكيدات، الحدود |
-| ![#0a0a0a](https://via.placeholder.com/20/0a0a0a/FFFFFF?text=+) | Dark Background | `#0a0a0a` | `10, 10, 10` | خلفية الصفحة الرئيسية |
-| ![#1a1a1a](https://via.placeholder.com/20/1a1a1a/FFFFFF?text=+) | Card Background | `#1a1a1a` | `26, 26, 26` | خلفيات البطاقات |
-| ![#ffffff](https://via.placeholder.com/20/ffffff/000000?text=+) | White Text | `#ffffff` | `255, 255, 255` | النصوص الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #39ff14; border: 1px solid #ccc; border-radius: 3px;"></div> | Cyber Green | `#39ff14` | `57, 255, 20` | الأزرار الرئيسية، التأكيدات، الحدود |
+| <div style="width: 20px; height: 20px; background-color: #0a0a0a; border: 1px solid #ccc; border-radius: 3px;"></div> | Dark Background | `#0a0a0a` | `10, 10, 10` | خلفية الصفحة الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #1a1a1a; border: 1px solid #ccc; border-radius: 3px;"></div> | Card Background | `#1a1a1a` | `26, 26, 26` | خلفيات البطاقات |
+| <div style="width: 20px; height: 20px; background-color: #ffffff; border: 1px solid #ccc; border-radius: 3px;"></div> | White Text | `#ffffff` | `255, 255, 255` | النصوص الرئيسية |
 
 ### الألوان الثانوية
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#2d2d2d](https://via.placeholder.com/20/2d2d2d/FFFFFF?text=+) | Border Color | `#2d2d2d` | `45, 45, 45` | حدود البطاقات والعناصر |
-| ![#404040](https://via.placeholder.com/20/404040/FFFFFF?text=+) | Hover Color | `#404040` | `64, 64, 64` | تأثيرات التحويم |
-| ![#00ff00](https://via.placeholder.com/20/00ff00/000000?text=+) | Accent Green | `#00ff00` | `0, 255, 0` | التأكيدات الساطعة |
+| <div style="width: 20px; height: 20px; background-color: #2d2d2d; border: 1px solid #ccc; border-radius: 3px;"></div> | Border Color | `#2d2d2d` | `45, 45, 45` | حدود البطاقات والعناصر |
+| <div style="width: 20px; height: 20px; background-color: #404040; border: 1px solid #ccc; border-radius: 3px;"></div> | Hover Color | `#404040` | `64, 64, 64` | تأثيرات التحويم |
+| <div style="width: 20px; height: 20px; background-color: #00ff00; border: 1px solid #ccc; border-radius: 3px;"></div> | Accent Green | `#00ff00` | `0, 255, 0` | التأكيدات الساطعة |
 
 ### 📝 تفاصيل الاستخدام في Default Theme
 
@@ -221,18 +150,18 @@
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#f8fafc](https://via.placeholder.com/20/f8fafc/000000?text=+) | Light Background | `#f8fafc` | `248, 250, 252` | خلفية الصفحة الرئيسية |
-| ![#e2e8f0](https://via.placeholder.com/20/e2e8f0/000000?text=+) | Card Background | `#e2e8f0` | `226, 232, 240` | خلفيات البطاقات |
-| ![#cbd5e1](https://via.placeholder.com/20/cbd5e1/000000?text=+) | Border Color | `#cbd5e1` | `203, 213, 225` | حدود البطاقات والعناصر |
-| ![#1e293b](https://via.placeholder.com/20/1e293b/FFFFFF?text=+) | Dark Text | `#1e293b` | `30, 41, 59` | النصوص الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #f8fafc; border: 1px solid #ccc; border-radius: 3px;"></div> | Light Background | `#f8fafc` | `248, 250, 252` | خلفية الصفحة الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #e2e8f0; border: 1px solid #ccc; border-radius: 3px;"></div> | Card Background | `#e2e8f0` | `226, 232, 240` | خلفيات البطاقات |
+| <div style="width: 20px; height: 20px; background-color: #cbd5e1; border: 1px solid #ccc; border-radius: 3px;"></div> | Border Color | `#cbd5e1` | `203, 213, 225` | حدود البطاقات والعناصر |
+| <div style="width: 20px; height: 20px; background-color: #1e293b; border: 1px solid #ccc; border-radius: 3px;"></div> | Dark Text | `#1e293b` | `30, 41, 59` | النصوص الرئيسية |
 
 ### الألوان الثانوية
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#475569](https://via.placeholder.com/20/475569/FFFFFF?text=+) | Secondary Text | `#475569` | `71, 85, 105` | النصوص الثانوية |
-| ![#64748b](https://via.placeholder.com/20/64748b/FFFFFF?text=+) | Muted Text | `#64748b` | `100, 116, 139` | النصوص المخففة |
-| ![#10b981](https://via.placeholder.com/20/10b981/FFFFFF?text=+) | Green Accent | `#10b981` | `16, 185, 129` | الأزرار والتأكيدات |
+| <div style="width: 20px; height: 20px; background-color: #475569; border: 1px solid #ccc; border-radius: 3px;"></div> | Secondary Text | `#475569` | `71, 85, 105` | النصوص الثانوية |
+| <div style="width: 20px; height: 20px; background-color: #64748b; border: 1px solid #ccc; border-radius: 3px;"></div> | Muted Text | `#64748b` | `100, 116, 139` | النصوص المخففة |
+| <div style="width: 20px; height: 20px; background-color: #10b981; border: 1px solid #ccc; border-radius: 3px;"></div> | Green Accent | `#10b981` | `16, 185, 129` | الأزرار والتأكيدات |
 
 ### 📝 تفاصيل الاستخدام في Light Theme
 
@@ -267,18 +196,18 @@
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#0f172a](https://via.placeholder.com/20/0f172a/FFFFFF?text=+) | Dark Background | `#0f172a` | `15, 23, 42` | خلفية الصفحة الرئيسية |
-| ![#1e293b](https://via.placeholder.com/20/1e293b/FFFFFF?text=+) | Card Background | `#1e293b` | `30, 41, 59` | خلفيات البطاقات |
-| ![#334155](https://via.placeholder.com/20/334155/FFFFFF?text=+) | Border Color | `#334155` | `51, 65, 85` | حدود البطاقات والعناصر |
-| ![#f1f5f9](https://via.placeholder.com/20/f1f5f9/000000?text=+) | Light Text | `#f1f5f9` | `241, 245, 249` | النصوص الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #0f172a; border: 1px solid #ccc; border-radius: 3px;"></div> | Dark Background | `#0f172a` | `15, 23, 42` | خلفية الصفحة الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #1e293b; border: 1px solid #ccc; border-radius: 3px;"></div> | Card Background | `#1e293b` | `30, 41, 59` | خلفيات البطاقات |
+| <div style="width: 20px; height: 20px; background-color: #334155; border: 1px solid #ccc; border-radius: 3px;"></div> | Border Color | `#334155` | `51, 65, 85` | حدود البطاقات والعناصر |
+| <div style="width: 20px; height: 20px; background-color: #f1f5f9; border: 1px solid #ccc; border-radius: 3px;"></div> | Light Text | `#f1f5f9` | `241, 245, 249` | النصوص الرئيسية |
 
 ### الألوان الثانوية
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#64748b](https://via.placeholder.com/20/64748b/FFFFFF?text=+) | Secondary Text | `#64748b` | `100, 116, 139` | النصوص الثانوية |
-| ![#475569](https://via.placeholder.com/20/475569/FFFFFF?text=+) | Muted Text | `#475569` | `71, 85, 105` | النصوص المخففة |
-| ![#06b6d4](https://via.placeholder.com/20/06b6d4/FFFFFF?text=+) | Cyan Accent | `#06b6d4` | `6, 182, 212` | الأزرار والتأكيدات |
+| <div style="width: 20px; height: 20px; background-color: #64748b; border: 1px solid #ccc; border-radius: 3px;"></div> | Secondary Text | `#64748b` | `100, 116, 139` | النصوص الثانوية |
+| <div style="width: 20px; height: 20px; background-color: #475569; border: 1px solid #ccc; border-radius: 3px;"></div> | Muted Text | `#475569` | `71, 85, 105` | النصوص المخففة |
+| <div style="width: 20px; height: 20px; background-color: #06b6d4; border: 1px solid #ccc; border-radius: 3px;"></div> | Cyan Accent | `#06b6d4` | `6, 182, 212` | الأزرار والتأكيدات |
 
 ### 📝 تفاصيل الاستخدام في Midnight Theme
 
@@ -313,18 +242,18 @@
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#1a1a1a](https://via.placeholder.com/20/1a1a1a/FFFFFF?text=+) | Dark Background | `#1a1a1a` | `26, 26, 26` | خلفية الصفحة الرئيسية |
-| ![#2d2d2d](https://via.placeholder.com/20/2d2d2d/FFFFFF?text=+) | Card Background | `#2d2d2d` | `45, 45, 45` | خلفيات البطاقات |
-| ![#404040](https://via.placeholder.com/20/404040/FFFFFF?text=+) | Border Color | `#404040` | `64, 64, 64` | حدود البطاقات والعناصر |
-| ![#e5e5e5](https://via.placeholder.com/20/e5e5e5/000000?text=+) | Light Text | `#e5e5e5` | `229, 229, 229` | النصوص الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #1a1a1a; border: 1px solid #ccc; border-radius: 3px;"></div> | Dark Background | `#1a1a1a` | `26, 26, 26` | خلفية الصفحة الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #2d2d2d; border: 1px solid #ccc; border-radius: 3px;"></div> | Card Background | `#2d2d2d` | `45, 45, 45` | خلفيات البطاقات |
+| <div style="width: 20px; height: 20px; background-color: #404040; border: 1px solid #ccc; border-radius: 3px;"></div> | Border Color | `#404040` | `64, 64, 64` | حدود البطاقات والعناصر |
+| <div style="width: 20px; height: 20px; background-color: #e5e5e5; border: 1px solid #ccc; border-radius: 3px;"></div> | Light Text | `#e5e5e5` | `229, 229, 229` | النصوص الرئيسية |
 
 ### الألوان الثانوية
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#a0a0a0](https://via.placeholder.com/20/a0a0a0/FFFFFF?text=+) | Secondary Text | `#a0a0a0` | `160, 160, 160` | النصوص الثانوية |
-| ![#808080](https://via.placeholder.com/20/808080/FFFFFF?text=+) | Muted Text | `#808080` | `128, 128, 128` | النصوص المخففة |
-| ![#d4af37](https://via.placeholder.com/20/d4af37/000000?text=+) | Gold Accent | `#d4af37` | `212, 175, 55` | الأزرار والتأكيدات |
+| <div style="width: 20px; height: 20px; background-color: #a0a0a0; border: 1px solid #ccc; border-radius: 3px;"></div> | Secondary Text | `#a0a0a0` | `160, 160, 160` | النصوص الثانوية |
+| <div style="width: 20px; height: 20px; background-color: #808080; border: 1px solid #ccc; border-radius: 3px;"></div> | Muted Text | `#808080` | `128, 128, 128` | النصوص المخففة |
+| <div style="width: 20px; height: 20px; background-color: #d4af37; border: 1px solid #ccc; border-radius: 3px;"></div> | Gold Accent | `#d4af37` | `212, 175, 55` | الأزرار والتأكيدات |
 
 ### 📝 تفاصيل الاستخدام في Novel Theme
 
@@ -359,18 +288,18 @@
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#000000](https://via.placeholder.com/20/000000/FFFFFF?text=+) | Pure Black | `#000000` | `0, 0, 0` | خلفية الصفحة الرئيسية |
-| ![#0a0a0a](https://via.placeholder.com/20/0a0a0a/FFFFFF?text=+) | Dark Background | `#0a0a0a` | `10, 10, 10` | خلفيات البطاقات |
-| ![#1a1a1a](https://via.placeholder.com/20/1a1a1a/FFFFFF?text=+) | Card Background | `#1a1a1a` | `26, 26, 26` | خلفيات البطاقات |
-| ![#00ff00](https://via.placeholder.com/20/00ff00/000000?text=+) | Matrix Green | `#00ff00` | `0, 255, 0` | الأزرار الرئيسية، التأكيدات |
+| <div style="width: 20px; height: 20px; background-color: #000000; border: 1px solid #ccc; border-radius: 3px;"></div> | Pure Black | `#000000` | `0, 0, 0` | خلفية الصفحة الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #0a0a0a; border: 1px solid #ccc; border-radius: 3px;"></div> | Dark Background | `#0a0a0a` | `10, 10, 10` | خلفيات البطاقات |
+| <div style="width: 20px; height: 20px; background-color: #1a1a1a; border: 1px solid #ccc; border-radius: 3px;"></div> | Card Background | `#1a1a1a` | `26, 26, 26` | خلفيات البطاقات |
+| <div style="width: 20px; height: 20px; background-color: #00ff00; border: 1px solid #ccc; border-radius: 3px;"></div> | Matrix Green | `#00ff00` | `0, 255, 0` | الأزرار الرئيسية، التأكيدات |
 
 ### الألوان الثانوية
 
 | اللون | الاسم | Hex | RGB | الاستخدام |
 |-------|-------|-----|-----|-----------|
-| ![#39ff14](https://via.placeholder.com/20/39ff14/000000?text=+) | Bright Green | `#39ff14` | `57, 255, 20` | التأكيدات الساطعة، الحدود |
-| ![#00cc00](https://via.placeholder.com/20/00cc00/000000?text=+) | Dark Green | `#00cc00` | `0, 204, 0` | النصوص الثانوية |
-| ![#ffffff](https://via.placeholder.com/20/ffffff/000000?text=+) | White Text | `#ffffff` | `255, 255, 255` | النصوص الرئيسية |
+| <div style="width: 20px; height: 20px; background-color: #39ff14; border: 1px solid #ccc; border-radius: 3px;"></div> | Bright Green | `#39ff14` | `57, 255, 20` | التأكيدات الساطعة، الحدود |
+| <div style="width: 20px; height: 20px; background-color: #00cc00; border: 1px solid #ccc; border-radius: 3px;"></div> | Dark Green | `#00cc00` | `0, 204, 0` | النصوص الثانوية |
+| <div style="width: 20px; height: 20px; background-color: #ffffff; border: 1px solid #ccc; border-radius: 3px;"></div> | White Text | `#ffffff` | `255, 255, 255` | النصوص الرئيسية |
 
 ### 📝 تفاصيل الاستخدام في Cyber Theme
 
