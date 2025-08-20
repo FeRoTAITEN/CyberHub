@@ -1,13 +1,10 @@
 'use client';
 
 import Navigation from '@/components/Navigation';
-import { 
-  NewspaperIcon, 
-  GlobeAltIcon, 
+import {
+  NewspaperIcon,
   CalendarIcon,
-  HeartIcon,
-  ChatBubbleLeftIcon,
-  ArrowTopRightOnSquareIcon
+  GlobeAltIcon
 } from '@heroicons/react/24/outline';
 import { useLang, useTheme } from '../ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';

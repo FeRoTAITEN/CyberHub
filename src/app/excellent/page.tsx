@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { useLang, useTheme } from '../ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';
@@ -15,18 +15,15 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   CloudArrowUpIcon,
-  CalendarIcon,
   UserGroupIcon,
   PencilIcon,
-  EyeIcon,
   CheckCircleIcon,
   ChartPieIcon,
   StarIcon,
-  CogIcon,
   ClockIcon,
   XMarkIcon,
   ChevronUpIcon,
-  ChevronLeftIcon,
+  ChevronLeftIcon
 } from '@heroicons/react/24/outline';
 
 interface Project {
@@ -122,7 +119,6 @@ export default function ExcellentPage() {
   const [importing, setImporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [showImportModal, setShowImportModal] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
@@ -144,16 +140,6 @@ export default function ExcellentPage() {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error' | 'warning' | 'info'>('success');
   
-  // Progress Counters State
-  const [progressCounters, setProgressCounters] = useState({
-    projects: 0,
-    phases: 0,
-    tasks: 0,
-    subtasks: 0,
-    completed: 0,
-    inProgress: 0,
-    notStarted: 0
-  });
   const [editingTask, setEditingTask] = useState({
     name: '',
     description: '',
@@ -232,7 +218,8 @@ export default function ExcellentPage() {
 
   // State for scroll position preservation
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [isUpdating, setIsUpdating] = useState(false);
+
+
 
   // Load projects and employees on component mount
   useEffect(() => {
@@ -283,7 +270,7 @@ export default function ExcellentPage() {
         setProjects(data);
         // Calculate progress stats after loading projects
         setTimeout(() => {
-          calculateProgressStats();
+    
           // Restore scroll position after data is loaded
           restoreScrollPosition();
         }, 100);
@@ -338,88 +325,10 @@ export default function ExcellentPage() {
 
   // Update Progress Stats
   const updateProgressStats = () => {
-    setTimeout(() => calculateProgressStats(), 100);
+
   };
 
-  // Calculate Progress Statistics
-  const calculateProgressStats = useCallback(() => {
-    let totalPhases = 0;
-    let totalTasks = 0;
-    let totalSubtasks = 0;
-    let completedTasks = 0;
-    let inProgressTasks = 0;
-    let notStartedTasks = 0;
-
-    projects.forEach(project => {
-      totalPhases += project.phases?.length || 0;
-      
-      // Count project-level tasks
-      totalTasks += project.tasks?.length || 0;
-      
-      project.tasks?.forEach(task => {
-        totalSubtasks += task.subtasks?.length || 0;
-        
-        // Count task status
-        if (task.progress === 100) {
-          completedTasks++;
-        } else if (task.progress > 0) {
-          inProgressTasks++;
-        } else {
-          notStartedTasks++;
-        }
-        
-        // Count subtask status
-        task.subtasks?.forEach(subtask => {
-          if (subtask.progress === 100) {
-            completedTasks++;
-          } else if (subtask.progress > 0) {
-            inProgressTasks++;
-          } else {
-            notStartedTasks++;
-          }
-        });
-      });
-      
-      // Count phase-level tasks
-      project.phases?.forEach(phase => {
-        totalTasks += phase.tasks?.length || 0;
-        
-        phase.tasks?.forEach(task => {
-          totalSubtasks += task.subtasks?.length || 0;
-          
-          // Count task status
-          if (task.progress === 100) {
-            completedTasks++;
-          } else if (task.progress > 0) {
-            inProgressTasks++;
-          } else {
-            notStartedTasks++;
-          }
-          
-          // Count subtask status
-          task.subtasks?.forEach(subtask => {
-            if (subtask.progress === 100) {
-              completedTasks++;
-            } else if (subtask.progress > 0) {
-              inProgressTasks++;
-            } else {
-              notStartedTasks++;
-            }
-          });
-        });
-      });
-    });
-
-    setProgressCounters({
-      projects: projects.length,
-      phases: totalPhases,
-      tasks: totalTasks,
-      subtasks: totalSubtasks,
-      completed: completedTasks,
-      inProgress: inProgressTasks,
-      notStarted: notStartedTasks
-    });
-  }, [projects]);
+  // Calculate Progress Statistics - removed unused function
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -442,7 +351,7 @@ export default function ExcellentPage() {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        await response.json(); // Response is not used
         showCustomAlert(t('excellent.project_imported'), 'success');
         setShowImportModal(false);
         setSelectedFile(null);
@@ -1050,7 +959,7 @@ export default function ExcellentPage() {
           const errorData = await response.json();
           errorMessage = errorData.error || 'Unknown error';
           console.error('Failed to create task:', errorMessage);
-        } catch (parseError) {
+        } catch {
           console.error('Failed to create task and parse error response');
         }
         showCustomAlert(`Failed to create task: ${errorMessage}`, 'error');
@@ -1093,96 +1002,7 @@ export default function ExcellentPage() {
 
 
 
-  const isOverdue = (endDate: string) => {
-    return new Date(endDate) < new Date();
-  };
 
-  const getDaysLeft = (endDate: string) => {
-    const end = new Date(endDate);
-    const now = new Date();
-    const diffTime = end.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  // Helper function to calculate total tasks count in a project
-  const getTotalTasksCount = (project: Project): number => {
-    let totalTasks = 0;
-    
-    // Count tasks directly in project (not in phases)
-    totalTasks += project.tasks?.length || 0;
-    
-    // Count tasks in subtasks (project level)
-    project.tasks?.forEach(task => {
-      totalTasks += task.subtasks?.length || 0;
-    });
-    
-    // Count tasks in phases
-    project.phases?.forEach(phase => {
-      totalTasks += phase.tasks?.length || 0;
-      // Count subtasks within phase tasks
-      phase.tasks?.forEach(task => {
-        totalTasks += task.subtasks?.length || 0;
-      });
-    });
-    
-    return totalTasks;
-  };
-
-  // Helper function to calculate tasks count (without subtasks) in a project
-  const getTasksCount = (project: Project): number => {
-    let tasksCount = 0;
-    
-    // Count tasks directly in project (not in phases)
-    tasksCount += project.tasks?.length || 0;
-    
-    // Count tasks in phases
-    project.phases?.forEach(phase => {
-      tasksCount += phase.tasks?.length || 0;
-    });
-    
-    return tasksCount;
-  };
-
-  // Helper function to calculate subtasks count in a project
-  const getSubtasksCount = (project: Project): number => {
-    let subtasksCount = 0;
-    
-    // Count subtasks in project level tasks
-    project.tasks?.forEach(task => {
-      subtasksCount += task.subtasks?.length || 0;
-    });
-    
-    // Count subtasks in phase tasks
-    project.phases?.forEach(phase => {
-      phase.tasks?.forEach(task => {
-        subtasksCount += task.subtasks?.length || 0;
-      });
-    });
-    
-    return subtasksCount;
-  };
-
-  // Helper function to calculate tasks count in a phase
-  const getPhaseTasksCount = (phase: Phase): number => {
-    return phase.tasks?.length || 0;
-  };
-
-  // Helper function to calculate subtasks count in a phase
-  const getPhaseSubtasksCount = (phase: Phase): number => {
-    let subtasksCount = 0;
-    
-    phase.tasks?.forEach(task => {
-      subtasksCount += task.subtasks?.length || 0;
-    });
-    
-    return subtasksCount;
-  };
-
-  // Helper function to calculate subtasks count for a specific task
-  const getTaskSubtasksCount = (task: Task): number => {
-    return task.subtasks?.length || 0;
-  };
 
   // Helper function to find a task in a project (including subtasks)
   const findTaskInProject = (project: Project, taskId: number): Task | null => {
@@ -1722,7 +1542,7 @@ export default function ExcellentPage() {
   // Theme-aware styling
   const isSalam = theme === 'salam';
   const isLight = theme === 'light';
-  const isDark = !isSalam && !isLight;
+
 
   // Theme colors based on current theme
   const colors = {
@@ -1973,22 +1793,63 @@ export default function ExcellentPage() {
     }
   };
 
-  // Smart update function that preserves scroll position
-  const smartUpdateProjects = async (updateFunction: () => Promise<void>) => {
-    saveScrollPosition();
-    setIsUpdating(true);
+
+
+  // Helper functions are no longer needed
+
+  // Helper function to calculate tasks count (without subtasks) in a project
+  const getTasksCount = (project: Project): number => {
+    let tasksCount = 0;
     
-    try {
-      await updateFunction();
-      // Don't reload all projects, just update the specific item
-      restoreScrollPosition();
-    } catch (error) {
-      console.error('Error in smart update:', error);
-      // Only reload if there's an error
-      await loadProjects();
-    } finally {
-      setIsUpdating(false);
-    }
+    // Count tasks directly in project (not in phases)
+    tasksCount += project.tasks?.length || 0;
+    
+    // Count tasks in phases
+    project.phases?.forEach(phase => {
+      tasksCount += phase.tasks?.length || 0;
+    });
+    
+    return tasksCount;
+  };
+
+  // Helper function to calculate subtasks count in a project
+  const getSubtasksCount = (project: Project): number => {
+    let subtasksCount = 0;
+    
+    // Count subtasks in project level tasks
+    project.tasks?.forEach(task => {
+      subtasksCount += task.subtasks?.length || 0;
+    });
+    
+    // Count subtasks in phase tasks
+    project.phases?.forEach(phase => {
+      phase.tasks?.forEach(task => {
+        subtasksCount += task.subtasks?.length || 0;
+      });
+    });
+    
+    return subtasksCount;
+  };
+
+  // Helper function to calculate tasks count in a phase
+  const getPhaseTasksCount = (phase: Phase): number => {
+    return phase.tasks?.length || 0;
+  };
+
+  // Helper function to calculate subtasks count in a phase
+  const getPhaseSubtasksCount = (phase: Phase): number => {
+    let subtasksCount = 0;
+    
+    phase.tasks?.forEach(task => {
+      subtasksCount += task.subtasks?.length || 0;
+    });
+    
+    return subtasksCount;
+  };
+
+  // Helper function to calculate subtasks count for a specific task
+  const getTaskSubtasksCount = (task: Task): number => {
+    return task.subtasks?.length || 0;
   };
 
   return (
@@ -2009,17 +1870,7 @@ export default function ExcellentPage() {
         </div>
         
 
-        {/* Smart Loading Indicator */}
-        {isUpdating && (
-          <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-sm font-medium">
-                {lang === 'ar' ? 'جاري التحديث...' : 'Updating...'}
-              </span>
-            </div>
-          </div>
-        )}
+
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-6 content-animate">

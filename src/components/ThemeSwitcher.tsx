@@ -140,7 +140,6 @@ const ThemeSwitcher = ({ onThemeChange, currentTheme }: ThemeSwitcherProps) => {
     setIsOpen(false);
   };
 
-  const currentThemeData = themes.find(theme => theme.code === currentTheme);
   const colors = themeColors[currentTheme as keyof typeof themeColors] || themeColors.default;
 
   useEffect(() => {

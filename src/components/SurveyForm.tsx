@@ -365,7 +365,21 @@ const ExpiredState = ({ colors, lang }: { colors: any; lang: string }) => (
 );
 
 interface SurveyFormProps {
-  survey: any;
+  survey: {
+    id: number;
+    title_en: string;
+    title_ar: string;
+    questions: Array<{
+      id: number;
+      question_type: string;
+      label_en: string;
+      label_ar: string;
+      required: boolean;
+      order: number;
+      rating_options?: any;
+      rating_scale?: string;
+    }>;
+  } | null;
   loading: boolean;
   expired: boolean;
   submitted: boolean;
@@ -373,7 +387,7 @@ interface SurveyFormProps {
   form: { name: string; department: string; [key: string]: any };
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
-  isPermanent?: boolean;
+  isPermanent: boolean;
 }
 
 export default function SurveyForm({
@@ -540,7 +554,7 @@ export default function SurveyForm({
             animate={{ opacity: 1, y: 0 }} 
             transition={{ delay: 0.2 }}
           >
-            {survey?.title?.[lang]}
+            {lang === 'ar' ? survey?.title_ar : survey?.title_en}
           </motion.h2>
           
           {/* Permanent Link Badge */}
@@ -698,19 +712,19 @@ export default function SurveyForm({
                                 {/* Question Column - Arabic (Left) */}
                                 <div className="space-y-2">
                                   <h4 className={`text-base font-semibold ${colors.textPrimary} leading-relaxed`}>
-                                    {lang === 'ar' ? q.label_ar : q.label_en}
+                                    {(lang as string) === 'ar' ? q.label_ar : q.label_en}
                                     {q.required && <span className="text-red-400 ml-1 font-bold">*</span>}
                                   </h4>
                                   {q.required && (
                                     <div className="mt-2">
                                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-600/20 border border-red-600/50 text-red-300`}>
-                                        {lang === 'ar' ? 'مطلوب' : 'Required'}
+                                        {(lang as string) === 'ar' ? 'مطلوب' : 'Required'}
                                       </span>
                                     </div>
                                   )}
                                   {q.question_type === "rating" && (
                                     <p className={`text-sm ${colors.textTertiary} font-medium`}>
-                                      {lang === 'ar' ? 'يرجى اختيار مستوى واحد من الخيارات أدناه' : 'Please select one level from the options below'}
+                                      {(lang as string) === 'ar' ? 'يرجى اختيار مستوى واحد من الخيارات أدناه' : 'Please select one level from the options below'}
                                     </p>
                                   )}
                                 </div>
@@ -775,7 +789,7 @@ export default function SurveyForm({
                                   ))}
                                 </div>
                                 <div className={`text-xs text-center mt-2 ${colors.textTertiary} font-medium`}>
-                                  {lang === 'ar' ? 'ملاحظات العملاء' : 'Customer feedback'}
+                                  {(lang as string) === 'ar' ? 'ملاحظات العملاء' : 'Customer feedback'}
                                 </div>
                                 {errors[q.id] && (
                                   <motion.p 
@@ -809,7 +823,7 @@ export default function SurveyForm({
                                         className={`w-4 h-4 text-green-600 ${colors.inputBg} ${colors.inputBorder} rounded focus:ring-green-500 focus:ring-2`}
                                       />
                                       <span className={`ml-2 text-sm font-medium ${colors.textPrimary}`}>
-                                        {lang === 'ar' ? 'نعم' : 'Yes'}
+                                        {(lang as string) === 'ar' ? 'نعم' : 'Yes'}
                                       </span>
                                     </label>
                                     <label className="flex items-center cursor-pointer">
@@ -823,7 +837,7 @@ export default function SurveyForm({
                                         className={`w-4 h-4 text-green-600 ${colors.inputBg} ${colors.inputBorder} rounded focus:ring-green-500 focus:ring-2`}
                                       />
                                       <span className={`ml-2 text-sm font-medium ${colors.textPrimary}`}>
-                                        {lang === 'ar' ? 'لا' : 'No'}
+                                        {(lang as string) === 'ar' ? 'لا' : 'No'}
                                       </span>
                                     </label>
                                   </div>
@@ -863,19 +877,19 @@ export default function SurveyForm({
                                 {/* Question Column - English (Left) */}
                                 <div className="space-y-2">
                                   <h4 className={`text-base font-semibold ${colors.textPrimary} leading-relaxed`}>
-                                    {lang === 'ar' ? q.label_ar : q.label_en}
+                                    {(lang as string) === 'ar' ? q.label_ar : q.label_en}
                                     {q.required && <span className="text-red-400 ml-1 font-bold">*</span>}
                                   </h4>
                                   {q.required && (
                                     <div className="mt-2">
                                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-600/20 border border-red-600/50 text-red-300`}>
-                                        {lang === 'ar' ? 'مطلوب' : 'Required'}
+                                        {(lang as string) === 'ar' ? 'مطلوب' : 'Required'}
                                       </span>
                                     </div>
                                   )}
                                   {q.question_type === "rating" && (
                                     <p className={`text-sm ${colors.textTertiary} font-medium`}>
-                                      {lang === 'ar' ? 'يرجى اختيار مستوى واحد من الخيارات أدناه' : 'Please select one level from the options below'}
+                                      {(lang as string) === 'ar' ? 'يرجى اختيار مستوى واحد من الخيارات أدناه' : 'Please select one level from the options below'}
                                     </p>
                                   )}
                                 </div>
@@ -885,13 +899,13 @@ export default function SurveyForm({
                                 {q.question_type === "text" && (
                                   <div className="space-y-2">
                                     <label className={`block text-sm font-medium ${colors.labelText} ${colors.labelBg} px-2 py-1 rounded-md`}>
-                                      {lang === 'ar' ? 'اجابة مفتوحة:' : 'Open Answer:'}
+                                      {(lang as string) === 'ar' ? 'اجابة مفتوحة:' : 'Open Answer:'}
                                     </label>
                                     <textarea
                                       id={q.id}
                                       name={q.id}
                                       className={`w-full px-3 py-2 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 ${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} ${colors.inputPlaceholder} resize-none ${errors[q.id] ? 'border-red-500 ring-red-500' : ''}`}
-                                      placeholder={lang === 'ar' ? 'اكتب إجابتك هنا...' : 'Write your answer here...'}
+                                      placeholder={(lang as string) === 'ar' ? 'اكتب إجابتك هنا...' : 'Write your answer here...'}
                                       value={form[q.id] || ""}
                                       onChange={onFormChange}
                                       rows={4}
@@ -913,7 +927,7 @@ export default function SurveyForm({
                                 {q.question_type === "rating" && q.rating_scale && (
                                   <div className="space-y-3">
                                     <div className="grid grid-cols-5 gap-1 md:gap-2">
-                                      {lang === 'ar' 
+                                      {(lang as string) === 'ar' 
                                         ? [5, 4, 3, 2, 1].map((value) => (
                                             <label key={value} className="flex flex-col items-center cursor-pointer group">
                                               <input
@@ -961,7 +975,7 @@ export default function SurveyForm({
                                       }
                                     </div>
                                     <div className={`text-xs text-center mt-2 ${colors.textTertiary} font-medium`}>
-                                      {lang === 'ar' ? 'ملاحظات العملاء' : 'Customer feedback'}
+                                      {(lang as string) === 'ar' ? 'ملاحظات العملاء' : 'Customer feedback'}
                                     </div>
                                     {errors[q.id] && (
                                       <motion.p 
@@ -980,7 +994,7 @@ export default function SurveyForm({
                                   <div className="space-y-4">
                                     <div>
                                       <label className={`block text-sm font-medium ${colors.labelText} ${colors.labelBg} px-2 py-1 rounded-md mb-2`}>
-                                        {lang === 'ar' ? 'التعليقات | Comments' : 'Comments | التعليقات'}
+                                        {(lang as string) === 'ar' ? 'التعليقات | Comments' : 'Comments | التعليقات'}
                                       </label>
                                       <div className="flex gap-4">
                                         <label className="flex items-center cursor-pointer">
@@ -994,7 +1008,7 @@ export default function SurveyForm({
                                             className={`w-4 h-4 text-green-600 ${colors.inputBg} ${colors.inputBorder} rounded focus:ring-green-500 focus:ring-2`}
                                           />
                                           <span className={`ml-2 text-sm font-medium ${colors.textPrimary}`}>
-                                            {lang === 'ar' ? 'نعم' : 'Yes'}
+                                            {(lang as string) === 'ar' ? 'نعم' : 'Yes'}
                                           </span>
                                         </label>
                                         <label className="flex items-center cursor-pointer">
@@ -1008,19 +1022,19 @@ export default function SurveyForm({
                                             className={`w-4 h-4 text-green-600 ${colors.inputBg} ${colors.inputBorder} rounded focus:ring-green-500 focus:ring-2`}
                                           />
                                           <span className={`ml-2 text-sm font-medium ${colors.textPrimary}`}>
-                                            {lang === 'ar' ? 'لا' : 'No'}
+                                            {(lang as string) === 'ar' ? 'لا' : 'No'}
                                           </span>
                                         </label>
                                       </div>
                                     </div>
                                     <div>
                                       <label className={`block text-sm font-medium ${colors.labelText} ${colors.labelBg} px-2 py-1 rounded-md mb-2`}>
-                                        {lang === 'ar' ? 'اجابة مفتوحة:' : 'Open Answer:'}
+                                        {(lang as string) === 'ar' ? 'اجابة مفتوحة:' : 'Open Answer:'}
                                       </label>
                                       <textarea
                                         name={`${q.id}_comment`}
                                         className={`w-full px-3 py-2 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 ${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} ${colors.inputPlaceholder} resize-none`}
-                                        placeholder={lang === 'ar' ? 'أضف تعليقك هنا...' : 'Add your comment here...'}
+                                        placeholder={(lang as string) === 'ar' ? 'أضف تعليقك هنا...' : 'Add your comment here...'}
                                         value={form[`${q.id}_comment`] || ""}
                                         onChange={onFormChange}
                                         rows={3}
@@ -1071,7 +1085,7 @@ export default function SurveyForm({
             {/* Submit Button Section */}
             <motion.div 
               variants={itemVariants} 
-              custom={survey?.questions?.length + 2} 
+              custom={(survey?.questions?.length || 0) + 2} 
               initial="hidden" 
               animate="visible" 
               className="flex justify-center"

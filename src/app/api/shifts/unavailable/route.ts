@@ -3,13 +3,16 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const employeeId = searchParams.get('employeeId');
     const date = searchParams.get('date');
 
-    let whereClause: any = {};
+    const whereClause: {
+      employee_id?: number;
+      date?: Date;
+    } = {};
 
     if (employeeId) {
       whereClause.employee_id = parseInt(employeeId);

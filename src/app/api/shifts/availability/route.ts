@@ -4,14 +4,20 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // GET /api/shifts/availability - Get all availability records
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
+    const employeeId = searchParams.get('employeeId');
     const date = searchParams.get('date');
-    const employeeId = searchParams.get('employee_id');
-    const reason = searchParams.get('reason');
+    const month = searchParams.get('month');
+    const year = searchParams.get('year');
 
-    let whereClause: any = {};
+    const whereClause: {
+      employee_id?: number;
+      date?: Date;
+      month?: number;
+      year?: number;
+    } = {};
 
     if (date) {
       whereClause.date = new Date(date);
@@ -21,8 +27,12 @@ export async function GET(req: NextRequest) {
       whereClause.employee_id = parseInt(employeeId);
     }
 
-    if (reason) {
-      whereClause.reason = reason;
+    if (month) {
+      whereClause.month = parseInt(month);
+    }
+
+    if (year) {
+      whereClause.year = parseInt(year);
     }
 
     const availability = await prisma.memberAvailability.findMany({

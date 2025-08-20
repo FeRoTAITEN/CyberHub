@@ -10,7 +10,15 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const department = searchParams.get('department');
 
-    const where: any = {};
+    const where: {
+      OR?: Array<{
+        name?: { contains: string; mode: 'insensitive' };
+        name_ar?: { contains: string; mode: 'insensitive' };
+        email?: { contains: string; mode: 'insensitive' };
+        job_title?: { contains: string; mode: 'insensitive' };
+      }>;
+      department_id?: number;
+    } = {};
     
     if (search) {
       where.OR = [
@@ -50,7 +58,19 @@ export async function GET(request: NextRequest) {
 // POST /api/employees - Create a new employee
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: {
+      name: string;
+      name_ar?: string;
+      email: string;
+      job_title?: string;
+      job_title_ar?: string;
+      department_id: string;
+      phone?: string;
+      location?: string;
+      hire_date?: string;
+      gender?: string;
+      is_active?: boolean;
+    } = await request.json();
     
     const { name, name_ar, email, job_title, job_title_ar, department_id, phone, location, hire_date, gender, is_active } = body;
 

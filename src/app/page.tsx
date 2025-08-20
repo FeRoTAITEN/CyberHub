@@ -1,34 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Alert from "@/components/Alert";
 import {
-  ShieldCheckIcon,
   UserGroupIcon,
-  DocumentTextIcon,
-  ChartBarIcon,
+  CogIcon,
+  StarIcon,
+  TrophyIcon,
+  UserIcon,
   ArrowRightIcon,
+  DocumentTextIcon,
   ExclamationTriangleIcon,
-  InformationCircleIcon,
-  CalendarIcon,
-  GlobeAltIcon,
-  LightBulbIcon,
   ClockIcon,
   ClipboardDocumentCheckIcon,
-  UserIcon,
-  BriefcaseIcon,
-  BuildingOffice2Icon,
-  EnvelopeIcon,
-  DevicePhoneMobileIcon,
-  AcademicCapIcon,
-  TrophyIcon,
-  StarIcon,
-} from "@heroicons/react/24/outline";
+  ChartBarIcon
+} from '@heroicons/react/24/outline';
 import Link from "next/link";
 import { useLang, useTheme } from "./ClientLayout";
 import { useTranslation } from "@/lib/useTranslation";
-import Image from "next/image";
+// import Image from "next/image"; // Unused import
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
@@ -56,44 +47,7 @@ const tasksData = [
   { id: 5, title: 'Training Session', status: 'Completed' },
 ];
 
-const coursesData = [
-  {
-    id: 1,
-    name: {
-      ar: 'مقدمة في الأمن السيبراني',
-      en: 'Introduction to Cybersecurity',
-    },
-    description: {
-      ar: 'تعرف على أساسيات الأمن السيبراني وأهميته.',
-      en: 'Learn the basics of cybersecurity and its importance.',
-    },
-    status: 'completed',
-  },
-  {
-    id: 2,
-    name: {
-      ar: 'إدارة كلمات المرور',
-      en: 'Password Management',
-    },
-    description: {
-      ar: 'كيفية إنشاء وإدارة كلمات مرور قوية.',
-      en: 'How to create and manage strong passwords.',
-    },
-    status: 'pending',
-  },
-  {
-    id: 3,
-    name: {
-      ar: 'التوعية بالتصيد الاحتيالي',
-      en: 'Phishing Awareness',
-    },
-    description: {
-      ar: 'تعلم كيفية اكتشاف رسائل التصيد الاحتيالي.',
-      en: 'Learn how to spot phishing emails.',
-    },
-    status: 'pending',
-  },
-];
+
 
 const achievementsData = [
   {
@@ -159,21 +113,7 @@ const themeCardStyles = {
   },
 };
 
-// Hack effect utility for scrambling text
-const HACK_CHARS = '@#$%&*0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-function scrambleText(target: string, progress: number): string {
-  let out = '';
-  for (let i = 0; i < target.length; i++) {
-    if (i < progress) {
-      out += target[i];
-    } else if (target[i] === ' ') {
-      out += ' ';
-    } else {
-      out += HACK_CHARS[Math.floor(Math.random() * HACK_CHARS.length)];
-    }
-  }
-  return out;
-}
+// Hack effect utility for scrambling text - removed unused function
 
 export default function HomePage() {
   const { lang } = useLang();
@@ -279,7 +219,7 @@ export default function HomePage() {
       title: t("nav.qa"),
       description:
         lang === "ar" ? "الأسئلة الشائعة" : "Frequently Asked Questions",
-      icon: LightBulbIcon,
+      icon: CogIcon,
       href: "/qa",
       color: isSalam ? salamColors.primaryButton : "bg-yellow-600",
       hoverColor: isSalam ? salamColors.primaryButton : "hover:bg-yellow-700",
@@ -382,7 +322,7 @@ export default function HomePage() {
             
             {/* Quick Action Buttons */}
             <div className="flex flex-wrap justify-center gap-4 mb-16">
-              {quickLinks.map((link, index) => (
+              {quickLinks.map((link) => (
                 <Link
                   key={link.title}
                   href={link.href}

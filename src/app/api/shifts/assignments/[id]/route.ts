@@ -6,10 +6,10 @@ const prisma = new PrismaClient();
 // DELETE /api/shifts/assignments/[id] - Delete a specific shift assignment
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -59,10 +59,10 @@ export async function DELETE(
 // GET /api/shifts/assignments/[id] - Get a specific shift assignment
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -103,10 +103,10 @@ export async function GET(
 // PUT /api/shifts/assignments/[id] - Update a specific shift assignment
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { status, assigned_by } = body;
 

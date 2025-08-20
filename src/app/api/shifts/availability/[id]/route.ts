@@ -6,10 +6,10 @@ const prisma = new PrismaClient();
 // DELETE /api/shifts/availability/[id] - Delete a specific availability record
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -58,10 +58,10 @@ export async function DELETE(
 // GET /api/shifts/availability/[id] - Get a specific availability record
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -101,10 +101,10 @@ export async function GET(
 // PUT /api/shifts/availability/[id] - Update a specific availability record
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { reason, reason_ar, notes } = body;
 

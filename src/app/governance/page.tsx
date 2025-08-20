@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import {
+  ShieldCheckIcon,
+  ArrowDownTrayIcon,
   DocumentTextIcon,
   CalendarIcon,
-  ArrowDownTrayIcon,
-  EyeIcon,
-  ShieldCheckIcon,
-  ClipboardDocumentListIcon,
-} from "@heroicons/react/24/outline";
+  EyeIcon
+} from '@heroicons/react/24/outline';
 import { useLang, useTheme } from "../ClientLayout";
 import { useTranslation } from "@/lib/useTranslation";
 
@@ -435,16 +434,6 @@ export default function GovernancePage() {
                     lang === "ar" ? "space-x-reverse space-x-6" : "space-x-6"
                   }`}
                 >
-                  <div
-                    className={`flex items-center ${
-                      lang === "ar" ? "space-x-reverse space-x-2" : "space-x-2"
-                    }`}
-                  >
-                    <ArrowDownTrayIcon className={`w-4 h-4 ${colors.textSecondary}`} />
-                    <span className="font-medium">
-                      {item.downloads} {t("grc.downloads")}
-                    </span>
-                  </div>
                   <div
                     className={`flex items-center ${
                       lang === "ar" ? "space-x-reverse space-x-2" : "space-x-2"

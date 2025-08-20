@@ -10,7 +10,13 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const search = searchParams.get('search');
 
-    const where: any = {};
+    const where: {
+      status?: string;
+      OR?: Array<{
+        name?: { contains: string; mode: 'insensitive' };
+        description?: { contains: string; mode: 'insensitive' };
+      }>;
+    } = {};
     
     if (status && status !== 'all') {
       where.status = status;
@@ -140,7 +146,19 @@ export async function GET(request: NextRequest) {
 // POST /api/projects - Create a new project
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: {
+      name: string;
+      description?: string;
+      status?: string;
+      priority?: string;
+      baseline_start?: string;
+      baseline_finish?: string;
+      actual_start?: string;
+      actual_finish?: string;
+      progress?: number;
+      budget?: number;
+      manager_id?: string;
+    } = await request.json();
     
     const { name, description, manager_id } = body;
 

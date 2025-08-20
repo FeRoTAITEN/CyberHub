@@ -12,88 +12,9 @@ import { useTheme } from '../ClientLayout';
 import Navigation from '@/components/Navigation';
 
 // Mock Data
-const employees = [
-  {
-    id: 1,
-    name: "أحمد محمد",
-    email: "ahmed@company.com",
-    phone: "+966501234567",
-    position: "مطور Full Stack",
-    department: "التطوير",
-    projects: 3,
-    salary: "15,000 ريال",
-    status: "متاح",
-    skills: ["React", "Node.js", "TypeScript", "MongoDB"],
-    joinDate: "2023-01-15"
-  },
-  {
-    id: 2,
-    name: "فاطمة علي",
-    email: "fatima@company.com",
-    phone: "+966502345678",
-    position: "مصممة UI/UX",
-    department: "التصميم",
-    projects: 2,
-    salary: "12,000 ريال",
-    status: "مشغول",
-    skills: ["Figma", "Adobe XD", "Photoshop", "Illustrator"],
-    joinDate: "2023-03-20"
-  },
-  {
-    id: 3,
-    name: "محمد حسن",
-    email: "mohammed@company.com",
-    phone: "+966503456789",
-    position: "مدير مشاريع",
-    department: "الإدارة",
-    projects: 4,
-    salary: "18,000 ريال",
-    status: "متاح",
-    skills: ["Agile", "Scrum", "Jira", "Trello"],
-    joinDate: "2022-11-10"
-  },
-  {
-    id: 4,
-    name: "سارة أحمد",
-    email: "sara@company.com",
-    phone: "+966504567890",
-    position: "مديرة موارد بشرية",
-    department: "الموارد البشرية",
-    projects: 1,
-    salary: "14,000 ريال",
-    status: "إجازة",
-    skills: ["التوظيف", "التدريب", "التقييم", "الرواتب"],
-    joinDate: "2023-06-05"
-  },
-  {
-    id: 5,
-    name: "علي محمود",
-    email: "ali@company.com",
-    phone: "+966505678901",
-    position: "مطور Backend",
-    department: "التطوير",
-    projects: 2,
-    salary: "16,000 ريال",
-    status: "متاح",
-    skills: ["Python", "Django", "PostgreSQL", "Docker"],
-    joinDate: "2023-02-28"
-  },
-  {
-    id: 6,
-    name: "نورا محمد",
-    email: "nora@company.com",
-    phone: "+966506789012",
-    position: "مصممة جرافيك",
-    department: "التصميم",
-    projects: 3,
-    salary: "11,000 ريال",
-    status: "مشغول",
-    skills: ["Photoshop", "Illustrator", "InDesign", "After Effects"],
-    joinDate: "2023-04-12"
-  }
-];
+// Mock Data - removed unused constant
 
-const departments = ["الكل", "التطوير", "التصميم", "الإدارة", "الموارد البشرية"];
+// Removed unused departments constant
 const statuses = ["الكل", "متاح", "مشغول", "إجازة"];
 
 export default function EmployeesPage() {
@@ -103,7 +24,28 @@ export default function EmployeesPage() {
   const [selectedStatus, setSelectedStatus] = useState("الكل");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [realEmployees, setRealEmployees] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<Array<{
+    id: number;
+    name: string;
+    name_ar?: string;
+    email: string;
+    job_title?: string;
+    job_title_ar?: string;
+    jobTitle?: string;
+    department_id: number;
+    phone?: string;
+    location?: string;
+    hire_date?: string;
+    gender?: string;
+    is_active?: boolean;
+    department?: {
+      id: number;
+      name: string;
+    } | string;
+    projects?: Array<any> | number;
+    salary?: string;
+    status?: string;
+  }>>([]);
   const [departments, setDepartments] = useState(["الكل"]);
   const [loading, setLoading] = useState(true);
   
@@ -183,7 +125,7 @@ export default function EmployeesPage() {
         
         if (employeesRes.ok) {
           const employeesData = await employeesRes.json();
-          setRealEmployees(employeesData);
+          setEmployees(employeesData);
         }
         
         if (departmentsRes.ok) {
@@ -194,7 +136,7 @@ export default function EmployeesPage() {
       } catch (error) {
         console.error('Error fetching data:', error);
         // Fallback to mock data
-        setRealEmployees(employees);
+        setEmployees(employees);
       } finally {
         setLoading(false);
       }
@@ -228,7 +170,7 @@ export default function EmployeesPage() {
   };
 
   // Use real employees data if available, otherwise fallback to mock data
-  const currentEmployees = realEmployees.length > 0 ? realEmployees : employees;
+  const currentEmployees = employees.length > 0 ? employees : employees;
   
   const filteredEmployees = currentEmployees.filter((employee: any) => {
     const name = employee.name || employee.name_ar || '';
@@ -467,13 +409,17 @@ export default function EmployeesPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="p-3 text-center text-slate-100">{employee.position}</td>
-                      <td className="p-3 text-center text-slate-100">{employee.department}</td>
-                      <td className="p-3 text-center text-blue-500 font-semibold">{employee.projects}</td>
-                      <td className="p-3 text-center text-slate-100">{employee.salary}</td>
+                      <td className="p-3 text-center text-slate-100">{employee.job_title || employee.jobTitle}</td>
+                      <td className="p-3 text-center text-slate-100">
+                        {typeof employee.department === 'string' ? employee.department : employee.department?.name}
+                      </td>
+                      <td className="p-3 text-center text-blue-500 font-semibold">
+                        {Array.isArray(employee.projects) ? employee.projects.length : employee.projects || 0}
+                      </td>
+                      <td className="p-3 text-center text-slate-100">{employee.salary || 'غير محدد'}</td>
                       <td className="p-3 text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(employee.status)}`}>
-                          {employee.status}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(employee.status || 'active')}`}>
+                          {employee.status || 'نشط'}
                         </span>
                       </td>
                       <td className="p-3 text-center">

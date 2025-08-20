@@ -12,11 +12,15 @@ interface LanguageSwitcherProps {
   theme?: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam';
 }
 
-const LanguageSwitcher = ({ onLanguageChange, currentLanguage, dropdownStyle, theme }: LanguageSwitcherProps) => {
+export default function LanguageSwitcher({ 
+  currentLanguage, 
+  onLanguageChange, 
+  theme 
+}: LanguageSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { lang } = useLang();
   const { t } = useTranslation(lang);
-  const ref = useRef<HTMLDivElement>(null);
 
   const languages = [
     { code: 'en', flag: '🇺🇸' },
@@ -98,13 +102,13 @@ const LanguageSwitcher = ({ onLanguageChange, currentLanguage, dropdownStyle, th
     setIsOpen(false);
   };
 
-  const currentLang = languages.find(lang => lang.code === currentLanguage);
+  // const currentLang = languages.find(lang => lang.code === currentLanguage); // Unused variable
   const colors = themeColors[theme as keyof typeof themeColors] || themeColors.default;
 
   useEffect(() => {
     if (!isOpen) return;
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -113,7 +117,7 @@ const LanguageSwitcher = ({ onLanguageChange, currentLanguage, dropdownStyle, th
   }, [isOpen]);
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="lang-switch group p-2 rounded-lg hover:bg-white/10 transition-all duration-200"
@@ -155,6 +159,4 @@ const LanguageSwitcher = ({ onLanguageChange, currentLanguage, dropdownStyle, th
       )}
     </div>
   );
-};
-
-export default LanguageSwitcher; 
+}; 

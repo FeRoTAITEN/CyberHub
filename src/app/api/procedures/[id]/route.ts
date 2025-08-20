@@ -24,7 +24,7 @@ export async function GET(
     const procedure = await prisma.procedure.findUnique({
       where: { id },
       include: {
-        archived_versions: {
+        versions: {
           orderBy: {
             created_at: 'desc'
           }
@@ -98,26 +98,15 @@ export async function PUT(
       }
 
       // Handle file upload if provided
-      let fileUrl = currentProcedure.file_url;
-      let fileSize = currentProcedure.file_size;
+      let filePath = currentProcedure.file_path;
       let version = currentProcedure.version;
       
       // Always archive the current version when updating (whether file or data)
-      await prisma.procedure.create({
+      await prisma.procedureVersion.create({
         data: {
-          title_en: currentProcedure.title_en,
-          title_ar: currentProcedure.title_ar,
-          description_en: currentProcedure.description_en,
-          description_ar: currentProcedure.description_ar,
+          procedure_id: currentProcedure.id,
           version: currentProcedure.version,
-          file_size: currentProcedure.file_size,
-          file_url: currentProcedure.file_url,
-          downloads: currentProcedure.downloads,
-          views: currentProcedure.views,
-          status: 'archived',
-          is_visible: false,
-          parent_id: currentProcedure.id,
-          created_by: currentProcedure.created_by,
+          file_path: currentProcedure.file_path,
         }
       });
       
@@ -148,7 +137,7 @@ export async function PUT(
           // Generate unique filename
           const timestamp = Date.now();
           const fileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-          const filePath = `public/uploads/procedures/${fileName}`;
+          const fullFilePath = `public/uploads/procedures/${fileName}`;
           
           // Ensure directory exists
           const uploadDir = path.join(process.cwd(), 'public/uploads/procedures');
@@ -156,10 +145,9 @@ export async function PUT(
             fs.mkdirSync(uploadDir, { recursive: true });
           }
           
-          fs.writeFileSync(path.join(process.cwd(), filePath), buffer);
+          fs.writeFileSync(path.join(process.cwd(), fullFilePath), buffer);
           
-          fileSize = `${Math.round(file.size / 1024)} KB`;
-          fileUrl = `/uploads/procedures/${fileName}`;
+          filePath = `/uploads/procedures/${fileName}`;
           
           // Increment version by 0.1 if file is updated
           const versionMatch = version.match(/v(\d+)\.(\d+)/);
@@ -188,12 +176,9 @@ export async function PUT(
         data: {
           title_en: titleEn,
           title_ar: titleAr,
-          description_en: descriptionEn,
-          description_ar: descriptionAr,
-          file_size: fileSize,
-          file_url: fileUrl,
+          description: descriptionEn, // Using description field instead of description_en
+          file_path: filePath,
           version,
-          updated_by: 1, // TODO: Get from auth
         }
       });
 
@@ -216,9 +201,7 @@ export async function PUT(
         data: {
           title_en: titleEn,
           title_ar: titleAr,
-          description_en: descriptionEn,
-          description_ar: descriptionAr,
-          updated_by: 1, // TODO: Get from auth
+          description: descriptionEn, // Using description field instead of description_en
         }
       });
 

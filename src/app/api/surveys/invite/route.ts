@@ -4,9 +4,10 @@ import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { survey_id, invited_by } = await req.json();
+    const body = await request.json();
+    const { survey_id } = body;
     if (!survey_id) {
       return NextResponse.json({ success: false, error: "Missing survey_id." }, { status: 400 });
     }
@@ -21,8 +22,8 @@ export async function POST(req: NextRequest) {
       }
     });
     return NextResponse.json({ success: true, invite });
-  } catch (e) {
-    console.error('Error creating invite:', e);
+  } catch {
+    console.error('Error creating invite');
     return NextResponse.json({ success: false, error: "Failed to create invite." }, { status: 500 });
   }
 } 
@@ -35,7 +36,7 @@ export async function DELETE(req: NextRequest) {
     }
     await prisma.surveyInvite.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, error: "Failed to delete invite." }, { status: 500 });
   }
 } 

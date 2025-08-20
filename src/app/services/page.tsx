@@ -3,7 +3,6 @@
 import Navigation from '@/components/Navigation';
 import { useLang } from '../ClientLayout';
 import { useTheme } from '../ClientLayout';
-import { useTranslation } from '@/lib/useTranslation';
 import { ChartBarIcon } from '@heroicons/react/24/outline';
 
 // Service data in both languages
@@ -100,7 +99,6 @@ const servicesData = {
 
 export default function ServicesPage() {
   const { lang } = useLang();
-  const { t } = useTranslation(lang);
   const { theme } = useTheme();
   const dir = lang === 'ar' ? 'rtl' : 'ltr';
   const services = servicesData[lang] || servicesData.en;

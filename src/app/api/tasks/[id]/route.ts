@@ -111,7 +111,22 @@ export async function PUT(
   try {
     const { id } = await params;
     const taskId = parseInt(id);
-    const body = await request.json();
+    const body: {
+      name: string;
+      description?: string;
+      status?: string;
+      priority?: string;
+      progress?: number;
+      phase_id?: number;
+      parent_task_id?: number;
+      assigned_employee_id?: string;
+      duration?: number;
+      baseline_start?: string;
+      baseline_finish?: string;
+      actual_start?: string;
+      actual_finish?: string;
+      xml_uid?: string;
+    } = await request.json();
     
     const { 
       progress, 

@@ -6,7 +6,16 @@ const prisma = new PrismaClient();
 // POST /api/phases - Create a new phase
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: {
+      name: string;
+      description?: string;
+      project_id: string;
+      status?: string;
+      baseline_start?: string;
+      baseline_finish?: string;
+      actual_start?: string;
+      actual_finish?: string;
+    } = await request.json();
     
     const {
       name,
@@ -65,7 +74,18 @@ export async function POST(request: NextRequest) {
     const nextOrder = (maxOrder._max.order || 0) + 1;
 
     // Create the phase
-    const phaseData: any = {
+    const phaseData: {
+      name: string;
+      description?: string;
+      status: string;
+      progress: number;
+      order: number;
+      project_id: number;
+      baseline_start?: Date;
+      baseline_finish?: Date;
+      actual_start?: Date;
+      actual_finish?: Date;
+    } = {
       name,
       description,
       status: status || 'active',

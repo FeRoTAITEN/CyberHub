@@ -6,7 +6,22 @@ const prisma = new PrismaClient();
 // POST /api/tasks - Create a new task
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: {
+      name: string;
+      description?: string;
+      project_id: string;
+      phase_id?: string;
+      parent_task_id?: string;
+      status?: string;
+      priority?: string;
+      progress?: number;
+      duration?: string;
+      xml_uid?: string;
+      baseline_start?: string;
+      baseline_finish?: string;
+      actual_start?: string;
+      actual_finish?: string;
+    } = await request.json();
     
     const {
       name,

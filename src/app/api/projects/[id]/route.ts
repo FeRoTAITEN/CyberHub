@@ -34,7 +34,19 @@ export async function PUT(
   try {
     const { id } = await params;
     const projectId = parseInt(id);
-    const body = await request.json();
+    const body: {
+      name: string;
+      description?: string;
+      status?: string;
+      priority?: string;
+      baseline_start?: string;
+      baseline_finish?: string;
+      actual_start?: string;
+      actual_finish?: string;
+      progress?: number;
+      budget?: number;
+      manager_id?: string;
+    } = await request.json();
 
     if (isNaN(projectId)) {
       return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
@@ -69,7 +81,16 @@ export async function PUT(
     }
 
     // Update the project
-    const updateData: any = {
+    const updateData: {
+      name: string;
+      description?: string;
+      status?: string;
+      baseline_start?: Date;
+      baseline_finish?: Date;
+      actual_start?: Date;
+      actual_finish?: Date;
+      manager_id?: number | null;
+    } = {
       name,
       description,
       status,

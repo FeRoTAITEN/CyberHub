@@ -9,92 +9,62 @@ async function main() {
     {
       title_en: 'Incident Response Procedure',
       title_ar: 'إجراء الاستجابة للحوادث',
-      description_en: 'Step-by-step procedure for handling security incidents and breaches',
-      description_ar: 'إجراء خطوة بخطوة للتعامل مع الحوادث والاختراقات الأمنية',
+      description: 'Step-by-step procedure for handling security incidents and breaches',
       version: 'v2.1',
-      file_size: '1.6 MB',
-      file_url: '/uploads/procedures/incident-response.pdf',
+      file_path: '/uploads/procedures/incident-response.pdf',
       downloads: 67,
       views: 145,
-      status: 'active',
-      is_visible: true,
-      created_by: 1,
-      updated_by: 1
+      is_visible: true
     },
     {
       title_en: 'Access Control Procedure',
       title_ar: 'إجراء التحكم في الوصول',
-      description_en: 'Procedures for managing user access to systems and data',
-      description_ar: 'إجراءات إدارة وصول المستخدمين للأنظمة والبيانات',
+      description: 'Procedures for managing user access to systems and data',
       version: 'v1.8',
-      file_size: '1.2 MB',
-      file_url: '/uploads/procedures/access-control.pdf',
+      file_path: '/uploads/procedures/access-control.pdf',
       downloads: 89,
       views: 234,
-      status: 'active',
-      is_visible: true,
-      created_by: 1,
-      updated_by: 1
+      is_visible: true
     },
     {
       title_en: 'Data Backup and Recovery',
       title_ar: 'النسخ الاحتياطي واستعادة البيانات',
-      description_en: 'Procedures for backing up critical data and disaster recovery',
-      description_ar: 'إجراءات النسخ الاحتياطي للبيانات الحرجة والتعافي من الكوارث',
+      description: 'Procedures for backing up critical data and disaster recovery',
       version: 'v1.5',
-      file_size: '2.3 MB',
-      file_url: '/uploads/procedures/backup-recovery.pdf',
+      file_path: '/uploads/procedures/backup-recovery.pdf',
       downloads: 45,
       views: 112,
-      status: 'active',
-      is_visible: true,
-      created_by: 1,
-      updated_by: 1
+      is_visible: true
     },
     {
       title_en: 'Vulnerability Assessment',
       title_ar: 'تقييم نقاط الضعف',
-      description_en: 'Procedures for conducting security vulnerability assessments',
-      description_ar: 'إجراءات إجراء تقييمات نقاط الضعف الأمنية',
+      description: 'Procedures for conducting security vulnerability assessments',
       version: 'v1.3',
-      file_size: '1.7 MB',
-      file_url: '/uploads/procedures/vulnerability-assessment.pdf',
+      file_path: '/uploads/procedures/vulnerability-assessment.pdf',
       downloads: 34,
       views: 78,
-      status: 'active',
-      is_visible: true,
-      created_by: 1,
-      updated_by: 1
+      is_visible: true
     },
     {
       title_en: 'Change Management Procedure',
       title_ar: 'إجراء إدارة التغيير',
-      description_en: 'Procedures for managing changes to IT systems and infrastructure',
-      description_ar: 'إجراءات إدارة التغييرات في أنظمة وتقنية المعلومات',
+      description: 'Procedures for managing changes to IT systems and infrastructure',
       version: 'v1.9',
-      file_size: '1.4 MB',
-      file_url: '/uploads/procedures/change-management.pdf',
+      file_path: '/uploads/procedures/change-management.pdf',
       downloads: 56,
       views: 134,
-      status: 'active',
-      is_visible: true,
-      created_by: 1,
-      updated_by: 1
+      is_visible: true
     },
     {
       title_en: 'Security Awareness Training',
       title_ar: 'تدريب التوعية الأمنية',
-      description_en: 'Procedures for conducting security awareness training programs',
-      description_ar: 'إجراءات إجراء برامج تدريب التوعية الأمنية',
+      description: 'Procedures for conducting security awareness training programs',
       version: 'v1.2',
-      file_size: '1.1 MB',
-      file_url: '/uploads/procedures/security-training.pdf',
+      file_path: '/uploads/procedures/security-training.pdf',
       downloads: 78,
       views: 189,
-      status: 'active',
-      is_visible: true,
-      created_by: 1,
-      updated_by: 1
+      is_visible: true
     }
   ];
 

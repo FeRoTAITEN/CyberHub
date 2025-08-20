@@ -8,19 +8,28 @@ function sanitize(str: string) {
   return str.replace(/[<>"'\\]/g, "");
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
+    const body: {
+      survey_id: number;
+      responder_name: string;
+      responder_department: string;
+      answers: Array<{
+        question_id: number;
+        answer: string;
+        question_label: string;
+      }>;
+    } = await request.json();
     
-    const { token, name, department, answers } = body;
+    const { survey_id, responder_name, responder_department, answers } = body;
     
-    if (!token || !name || !department || !Array.isArray(answers)) {
+    if (!survey_id || !responder_name || !responder_department || !Array.isArray(answers)) {
       return NextResponse.json({ success: false, error: "Missing required information." }, { status: 400 });
     }
     
     // Find survey by permanent token
     const survey = await prisma.survey.findUnique({
-      where: { permanent_token: token },
+      where: { id: survey_id },
       include: { questions: true }
     });
     
@@ -56,11 +65,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Sanitize inputs
-    const safeName = sanitize(name);
-    const safeDepartment = sanitize(department);
+    const safeName = sanitize(responder_name);
+    const safeDepartment = sanitize(responder_department);
     
     // Save response and answers
-    const response = await prisma.surveyResponse.create({
+    await prisma.surveyResponse.create({
       data: {
         survey_id: survey.id,
         responder_name: safeName,
@@ -79,7 +88,7 @@ export async function POST(req: NextRequest) {
     });
     
     return NextResponse.json({ success: true });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, error: "Invalid request." }, { status: 400 });
   }
 } 

@@ -2,23 +2,18 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
-import { 
-  QuestionMarkCircleIcon,
-  MagnifyingGlassIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  DocumentTextIcon,
+import {
   ShieldCheckIcon,
+  AcademicCapIcon,
   LockClosedIcon,
+  CogIcon,
   ComputerDesktopIcon,
+  UserGroupIcon,
   UserIcon,
-  GlobeAltIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
+  DocumentTextIcon,
   ChartBarIcon
 } from '@heroicons/react/24/outline';
 import { useLang, useTheme } from '../ClientLayout';
-import { useTranslation } from '@/lib/useTranslation';
 
 // Load questions from external JSON file
 type QAItem = {
@@ -32,26 +27,24 @@ type QAItem = {
 
 // فئات الأسئلة
 const categories = [
-  { id: 'all', name: { en: 'All Questions', ar: 'جميع الأسئلة' }, icon: QuestionMarkCircleIcon },
+  { id: 'all', name: { en: 'All Questions', ar: 'جميع الأسئلة' }, icon: ShieldCheckIcon },
   { id: 'general', name: { en: 'General Security', ar: 'الأمان العام' }, icon: ShieldCheckIcon },
   { id: 'passwords', name: { en: 'Passwords', ar: 'كلمات المرور' }, icon: LockClosedIcon },
-  { id: 'phishing', name: { en: 'Phishing', ar: 'التصيد الاحتيالي' }, icon: ExclamationTriangleIcon },
+  { id: 'phishing', name: { en: 'Phishing', ar: 'التصيد الاحتيالي' }, icon: CogIcon },
   { id: 'malware', name: { en: 'Malware', ar: 'البرمجيات الخبيثة' }, icon: ComputerDesktopIcon },
-  { id: 'vpn', name: { en: 'VPN & Privacy', ar: 'VPN والخصوصية' }, icon: GlobeAltIcon },
+  { id: 'vpn', name: { en: 'VPN & Privacy', ar: 'VPN والخصوصية' }, icon: UserGroupIcon },
   { id: 'social', name: { en: 'Social Media', ar: 'وسائل التواصل' }, icon: UserIcon },
-  { id: 'encryption', name: { en: 'Encryption', ar: 'التشفير' }, icon: DocumentTextIcon },
-  { id: 'incident', name: { en: 'Incident Response', ar: 'الاستجابة للحوادث' }, icon: CheckCircleIcon },
+  { id: 'encryption', name: { en: 'Encryption', ar: 'التشفير' }, icon: CogIcon },
+  { id: 'incident', name: { en: 'Incident Response', ar: 'الاستجابة للحوادث' }, icon: AcademicCapIcon },
   { id: 'backup', name: { en: 'Backup & Recovery', ar: 'النسخ الاحتياطي' }, icon: DocumentTextIcon },
   { id: 'compliance', name: { en: 'Compliance', ar: 'الامتثال' }, icon: ShieldCheckIcon }
 ];
 
 export default function QAPage() {
   const { lang } = useLang();
-  const { t } = useTranslation(lang);
   const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [expandedItems, setExpandedItems] = useState<number[]>([]);
   const [qaData, setQaData] = useState<QAItem[] | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -80,13 +73,7 @@ export default function QAPage() {
     });
   }, [qaData, searchTerm, selectedCategory, lang]);
 
-  const toggleExpanded = (id: number) => {
-    setExpandedItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    );
-  };
+
 
   // إحصائيات Q&A
   const stats = [
@@ -121,7 +108,7 @@ export default function QAPage() {
         {/* Header Section */}
         <div className="page-header">
           <div className="page-header-icon icon-animate">
-            <QuestionMarkCircleIcon className="w-12 h-12 text-white" />
+            <ShieldCheckIcon className="w-12 h-12 text-white" />
           </div>
           <h1 className="page-title title-animate">
             {lang === 'ar' ? 'الأسئلة الشائعة' : 'Q&A'}
@@ -165,14 +152,14 @@ export default function QAPage() {
             <h2 className={`heading-2 mb-4 flex items-center gap-2 ${
               isSalam ? 'text-green-800' : ''
             }`}>
-              <MagnifyingGlassIcon className={`w-5 h-5 ${
+              <ShieldCheckIcon className={`w-5 h-5 ${
                 isSalam ? 'text-green-600' : 'text-green-400'
               }`} />
               <span>{lang === 'ar' ? 'بحث وفلاتر' : 'Search & Filters'}</span>
             </h2>
             {/* Search Bar */}
             <div className="relative mb-6">
-              <MagnifyingGlassIcon className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+              <ShieldCheckIcon className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
                 isSalam ? 'text-green-500' : 'text-slate-400'
               }`} />
               <input
@@ -264,7 +251,7 @@ export default function QAPage() {
               <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
                 isSalam ? 'bg-green-600' : 'bg-green-500'
               }`}>
-                <QuestionMarkCircleIcon className="w-6 h-6 text-white" />
+                <ShieldCheckIcon className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
                 <h3 className={`text-2xl font-bold mb-4 ${

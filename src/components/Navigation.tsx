@@ -4,28 +4,25 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  HomeIcon, 
-  UserGroupIcon, 
-  DocumentTextIcon, 
-  NewspaperIcon, 
   ShieldCheckIcon, 
+  UserGroupIcon, 
   ChartBarIcon,
+  DocumentTextIcon,
+  ClockIcon,
+  HomeIcon,
+  NewspaperIcon,
   QuestionMarkCircleIcon,
   PlayIcon,
-  Bars3Icon,
-  XMarkIcon,
+  ClipboardDocumentCheckIcon,
   ChevronDownIcon,
-  LanguageIcon,
-  Cog6ToothIcon,
-  UserIcon,
-  ClockIcon,
-  ClipboardDocumentCheckIcon
+  XMarkIcon,
+  Bars3Icon
 } from '@heroicons/react/24/outline';
 import { useLang, useTheme } from '@/app/ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';
-import LanguageSwitcher from './LanguageSwitcher';
-import ThemeSwitcher from './ThemeSwitcher';
-import FontSwitcher from './FontSwitcher';
+// import LanguageSwitcher from './LanguageSwitcher'; // Unused component
+// import ThemeSwitcher from './ThemeSwitcher'; // Unused component
+// import FontSwitcher from './FontSwitcher'; // Unused component
 import Image from 'next/image';
 import SwitchersDropdown from './SwitchersDropdown';
 import UserMenu from './UserMenu';
@@ -54,8 +51,8 @@ const Navigation = () => {
 
   // Theme-aware styling
   const isSalam = theme === 'salam';
-  const isLight = theme === 'light';
-  const isDark = !isSalam && !isLight;
+  // const isLight = theme === 'light'; // Unused variable
+  // const isDark = !isSalam && !isLight; // Unused variable
 
   // Theme colors for More dropdown
   const themeColors = {
@@ -186,7 +183,7 @@ const Navigation = () => {
           {/* Center: Navigation Items */}
           <div className={`hidden md:flex items-center gap-4 ${lang === 'ar' ? 'mr-6' : 'ml-6'}`}>
             {/* أول 4 عناصر */}
-            {visibleItems.map((item, idx) => {
+            {visibleItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Link

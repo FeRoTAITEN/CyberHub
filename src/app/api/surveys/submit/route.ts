@@ -8,20 +8,29 @@ function sanitize(str: string) {
   return str.replace(/[<>"'\\]/g, "");
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
+    const body: {
+      invite_id: number;
+      responder_name: string;
+      responder_department: string;
+      answers: Array<{
+        question_id: number;
+        answer: string;
+        question_label: string;
+      }>;
+    } = await request.json();
     
-    const { token, name, department, answers } = body;
+    const { invite_id, responder_name, responder_department, answers } = body;
     
-    if (!token || !name || !department || !Array.isArray(answers)) {
+    if (!invite_id || !responder_name || !responder_department || !Array.isArray(answers)) {
       return NextResponse.json({ success: false, error: "Missing required information." }, { status: 400 });
     }
     
-    // Find invite by token
+    // Find survey invite by token
     const invite = await prisma.surveyInvite.findUnique({
-      where: { token },
-      include: {
+      where: { id: invite_id },
+      include: { 
         survey: {
           include: { questions: true }
         }
@@ -67,11 +76,11 @@ export async function POST(req: NextRequest) {
 
 
     // Sanitize inputs
-    const safeName = sanitize(name);
-    const safeDepartment = sanitize(department);
+    const safeName = sanitize(responder_name);
+    const safeDepartment = sanitize(responder_department);
     // Save response and answers
     
-    const response = await prisma.surveyResponse.create({
+    await prisma.surveyResponse.create({
       data: {
         invite_id: invite.id,
         survey_id: invite.survey_id,
@@ -96,7 +105,7 @@ export async function POST(req: NextRequest) {
       data: { used: true, used_at: new Date() }
     });
     return NextResponse.json({ success: true });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, error: "Invalid request." }, { status: 400 });
   }
 } 

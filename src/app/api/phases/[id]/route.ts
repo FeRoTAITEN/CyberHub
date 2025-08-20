@@ -11,7 +11,15 @@ export async function PUT(
   try {
     const { id } = await params;
     const phaseId = parseInt(id);
-    const body = await request.json();
+    const body: {
+      name: string;
+      description?: string;
+      status?: string;
+      baseline_start?: string;
+      baseline_finish?: string;
+      actual_start?: string;
+      actual_finish?: string;
+    } = await request.json();
 
     if (isNaN(phaseId)) {
       return NextResponse.json({ error: 'Invalid phase ID' }, { status: 400 });
@@ -36,7 +44,15 @@ export async function PUT(
     }
 
     // Update the phase
-    const updateData: any = {
+    const updateData: {
+      name: string;
+      description?: string;
+      status: string;
+      baseline_start?: Date;
+      baseline_finish?: Date;
+      actual_start?: Date;
+      actual_finish?: Date;
+    } = {
       name,
       description,
       status: status || 'active',

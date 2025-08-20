@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
     console.log('Generated permanent token:', permanent_token);
 
     // Update the survey with the permanent token
-    const updatedSurvey = await prisma.survey.update({
+    await prisma.survey.update({
       where: { id: surveyId },
-      data: { permanent_token }
+      data: { permanent_token: permanent_token }
     });
 
     console.log('Updated survey successfully');
@@ -94,7 +94,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Remove the permanent token
-    const updatedSurvey = await prisma.survey.update({
+    await prisma.survey.update({
       where: { id: surveyId },
       data: { permanent_token: null }
     });

@@ -1,7 +1,11 @@
 'use client';
 
 import Navigation from '@/components/Navigation';
-import { UserGroupIcon, ShieldCheckIcon, EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline';
+import { 
+  UserGroupIcon,
+  EnvelopeIcon,
+  DevicePhoneMobileIcon
+} from '@heroicons/react/24/outline';
 import { useLang, useTheme } from '../ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';
 import Image from 'next/image';
@@ -12,7 +16,23 @@ export default function StaffPage() {
   const { theme } = useTheme();
   const { t } = useTranslation(lang);
   const [search, setSearch] = useState('');
-  const [employees, setEmployees] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<Array<{
+    id: number;
+    name: string;
+    name_ar?: string;
+    email: string;
+    phone?: string;
+    position?: string;
+    position_ar?: string;
+    job_title?: string;
+    job_title_ar?: string;
+    department?: {
+      id: number;
+      name: string;
+      description?: string;
+    };
+    is_active: boolean;
+  }>>([]);
   const [loading, setLoading] = useState(true);
   
   const isSalam = theme === 'salam';
@@ -78,8 +98,8 @@ export default function StaffPage() {
   }, []);
 
   const filteredStaff = employees.filter(member => {
-    const name = (lang === 'ar' ? member.name_ar || member.name : member.name || '').toLowerCase();
-    const position = (lang === 'ar' ? member.job_title_ar || member.job_title : member.job_title || '').toLowerCase();
+    const name = (lang === 'ar' ? (member.name_ar || member.name || '') : (member.name || '')).toLowerCase();
+    const position = (lang === 'ar' ? (member.job_title_ar || member.job_title || '') : (member.job_title || '')).toLowerCase();
     const q = search.toLowerCase();
     return name.includes(q) || position.includes(q);
   });
@@ -156,7 +176,7 @@ export default function StaffPage() {
                   </div>
                   {member.phone && (
                     <div className={`flex items-center gap-2 ${themeColors.contactText} text-sm`}>
-                      <PhoneIcon className={`w-5 h-5 ${themeColors.phoneIcon}`} />
+                      <DevicePhoneMobileIcon className={`w-5 h-5 ${themeColors.phoneIcon}`} />
                       <span>{member.phone}</span>
                     </div>
                   )}

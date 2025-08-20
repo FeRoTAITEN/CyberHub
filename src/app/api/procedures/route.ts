@@ -12,7 +12,10 @@ export async function GET(request: NextRequest) {
     const includeArchived = searchParams.get('includeArchived') === 'true';
     const onlyVisible = searchParams.get('onlyVisible') !== 'false';
 
-    const whereClause: any = {};
+    const whereClause: {
+      is_archived?: boolean;
+      is_visible?: boolean;
+    } = {};
     
     if (!includeArchived) {
       whereClause.is_archived = false;
@@ -65,11 +68,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate version - always start with 1.0 for new procedures
-    const version = 'v1.0';
+    const procedureVersion = 'v1.0';
 
     // Handle file upload
     let fileUrl = null;
-    let fileSize = '0 KB';
     
     if (file && file.size > 0) {
       // Validate file type
@@ -109,7 +111,6 @@ export async function POST(request: NextRequest) {
         fs.writeFileSync(path.join(process.cwd(), filePath), buffer);
         
         fileUrl = `/uploads/procedures/${fileName}`;
-        fileSize = `${Math.round(file.size / 1024)} KB`;
       } catch (uploadError) {
         console.error('File upload error:', uploadError);
         return NextResponse.json(
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
         title_en: titleEn,
         title_ar: titleAr,
         description: descriptionEn, // Using only one description field as per schema
-        version: version,
+        version: procedureVersion,
         file_path: fileUrl, // Using file_path as per schema
       }
     });

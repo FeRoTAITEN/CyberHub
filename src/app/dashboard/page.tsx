@@ -126,6 +126,13 @@ const themeCardStyles = {
     secondary: 'text-cyan-300',
     avatar: 'bg-[#0a1826] border-green-400',
   },
+  salam: {
+    card: 'bg-[#003931] border border-[#36C639]',
+    name: 'text-[#36C639]',
+    department: 'text-white',
+    secondary: 'text-[#36C639]',
+    avatar: 'bg-[#003931] border-[#36C639]',
+  },
 };
 
 // Hack effect utility for scrambling text
@@ -145,13 +152,115 @@ function scrambleText(target: string, progress: number): string {
   return out;
 }
 
-export default function DashboardPage() {
+export default function Dashboard() {
   const { theme } = useTheme();
   const { lang } = useLang();
-  const dir = lang === 'ar' ? 'rtl' : 'ltr';
-  const styles = themeCardStyles[theme] || themeCardStyles.default;
+  
+  // State for each line's progress
+  const [nameProgress, setNameProgress] = useState(0);
+  const [showPosition, setShowPosition] = useState(false);
+  const [positionProgress, setPositionProgress] = useState(0);
+  const [showDepartment, setShowDepartment] = useState(false);
+  const [departmentProgress, setDepartmentProgress] = useState(0);
+  const [showEmail, setShowEmail] = useState(false);
+  const [emailProgress, setEmailProgress] = useState(0);
+  const [showPhone, setShowPhone] = useState(false);
+  const [phoneProgress, setPhoneProgress] = useState(0);
 
-  const rowDir = lang === 'ar' ? 'flex-row-reverse' : 'flex-row';
+  // Effect for name animation
+  useEffect(() => {
+    setNameProgress(0);
+    setShowPosition(false);
+    setPositionProgress(0);
+    setShowDepartment(false);
+    setDepartmentProgress(0);
+    setShowEmail(false);
+    setEmailProgress(0);
+    setShowPhone(false);
+    setPhoneProgress(0);
+    
+    if (!employee.name) return;
+    
+    let i = 0;
+    function step() {
+      if (i <= employee.name.length) {
+        setNameProgress(i);
+        i++;
+        setTimeout(step, 70);
+      } else {
+        setShowPosition(true);
+      }
+    }
+    step();
+  }, []);
+
+  // Effect for position animation
+  useEffect(() => {
+    if (!showPosition) return;
+    
+    let i = 0;
+    function step() {
+      if (i <= employee.position.length) {
+        setPositionProgress(i);
+        i++;
+        setTimeout(step, 55);
+      } else {
+        setShowDepartment(true);
+      }
+    }
+    step();
+  }, [showPosition]);
+
+  // Effect for department animation
+  useEffect(() => {
+    if (!showDepartment) return;
+    
+    let i = 0;
+    function step() {
+      if (i <= employee.department.length) {
+        setDepartmentProgress(i);
+        i++;
+        setTimeout(step, 55);
+      } else {
+        setShowEmail(true);
+      }
+    }
+    step();
+  }, [showDepartment]);
+
+  // Effect for email animation
+  useEffect(() => {
+    if (!showEmail) return;
+    
+    let i = 0;
+    function step() {
+      if (i <= employee.email.length) {
+        setEmailProgress(i);
+        i++;
+        setTimeout(step, 55);
+      } else {
+        setShowPhone(true);
+      }
+    }
+    step();
+  }, [showEmail]);
+
+  // Effect for phone animation
+  useEffect(() => {
+    if (!showPhone) return;
+    
+    let i = 0;
+    function step() {
+      if (i <= employee.phone.length) {
+        setPhoneProgress(i);
+        i++;
+        setTimeout(step, 55);
+      }
+    }
+    step();
+  }, [showPhone]);
+
+  const styles = themeCardStyles[theme] || themeCardStyles.default;
 
   const completedTasks = tasksData.filter((t) => t.status === 'Completed').length;
   const totalTasks = tasksData.length;
@@ -176,150 +285,47 @@ export default function DashboardPage() {
           {/* User Info and Achievements Cards - visually identical to other cards in all themes */}
           <aside className="md:col-span-1 flex flex-col items-center justify-start gap-6">
             {/* User Info Card - strict card style, no extra effects, now with typographie hack effect */}
-            <div className={`card card-hover ${styles.card} p-8 rounded-xl w-full flex flex-col items-center text-center`} dir={dir}>
+            <div className={`card card-hover ${styles.card} p-8 rounded-xl w-full flex flex-col items-center text-center`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
               {/* User avatar with theme-driven background and border, no extra effects */}
               <div className={`rounded-full p-3 border-2 mb-4 ${styles.card}`}>
                 <UserIcon className="w-16 h-16 text-base-content" />
               </div>
               {/* Typographie hack effect for user info */}
-              {(() => {
-                const name = employee.name;
-                const position = employee.position;
-                const department = employee.department;
-                const email = employee.email;
-                const phone = employee.phone;
-                // State for each line's progress
-                const [nameProgress, setNameProgress] = useState(0);
-                const [showPosition, setShowPosition] = useState(false);
-                const [positionProgress, setPositionProgress] = useState(0);
-                const [showDepartment, setShowDepartment] = useState(false);
-                const [departmentProgress, setDepartmentProgress] = useState(0);
-                const [showEmail, setShowEmail] = useState(false);
-                const [emailProgress, setEmailProgress] = useState(0);
-                const [showPhone, setShowPhone] = useState(false);
-                const [phoneProgress, setPhoneProgress] = useState(0);
-                // Hack effect for name
-                useEffect(() => {
-                  setNameProgress(0);
-                  setShowPosition(false);
-                  setPositionProgress(0);
-                  setShowDepartment(false);
-                  setDepartmentProgress(0);
-                  setShowEmail(false);
-                  setEmailProgress(0);
-                  setShowPhone(false);
-                  setPhoneProgress(0);
-                  if (!name) return;
-                  let i = 0;
-                  function step() {
-                    if (i <= name.length) {
-                      setNameProgress(i);
-                      i++;
-                      setTimeout(step, 70);
-                    } else {
-                      setShowPosition(true);
-                    }
-                  }
-                  step();
-                }, [name]);
-                // Hack effect for position
-                useEffect(() => {
-                  if (!showPosition) return;
-                  let i = 0;
-                  function step() {
-                    if (i <= position.length) {
-                      setPositionProgress(i);
-                      i++;
-                      setTimeout(step, 55);
-                    } else {
-                      setShowDepartment(true);
-                    }
-                  }
-                  step();
-                }, [showPosition, position]);
-                // Hack effect for department
-                useEffect(() => {
-                  if (!showDepartment) return;
-                  let i = 0;
-                  function step() {
-                    if (i <= department.length) {
-                      setDepartmentProgress(i);
-                      i++;
-                      setTimeout(step, 55);
-                    } else {
-                      setShowEmail(true);
-                    }
-                  }
-                  step();
-                }, [showDepartment, department]);
-                // Hack effect for email
-                useEffect(() => {
-                  if (!showEmail) return;
-                  let i = 0;
-                  function step() {
-                    if (i <= email.length) {
-                      setEmailProgress(i);
-                      i++;
-                      setTimeout(step, 55);
-                    } else {
-                      setShowPhone(true);
-                    }
-                  }
-                  step();
-                }, [showEmail, email]);
-                // Hack effect for phone
-                useEffect(() => {
-                  if (!showPhone) return;
-                  let i = 0;
-                  function step() {
-                    if (i <= phone.length) {
-                      setPhoneProgress(i);
-                      i++;
-                      setTimeout(step, 55);
-                    }
-                  }
-                  step();
-                }, [showPhone, phone]);
-                return (
-                  <>
-                    {/* Name with hack effect, largest and most prominent */}
-                    <div className={`text-2xl font-bold mb-2 flex items-center gap-2 ${styles.name}`} style={{ minHeight: 36 }}>
-                      {scrambleText(name, nameProgress)}
+              {/* Name with hack effect, largest and most prominent */}
+              <div className={`text-2xl font-bold mb-2 flex items-center gap-2 ${styles.name}`} style={{ minHeight: 36 }}>
+                {scrambleText(employee.name, nameProgress)}
               </div>
-                    {/* Position, medium size, secondary color */}
-                    {showPosition && (
-                      <div className={`text-lg font-semibold mb-2 flex items-center gap-2 ${styles.secondary}`} style={{ minHeight: 30 }}>
-                        <BriefcaseIcon className="w-5 h-5 text-base-content" />
-                        {scrambleText(position, positionProgress)}
-              </div>
-                    )}
-                    {/* Department, smaller, department color */}
-                    {showDepartment && (
-                      <div className={`text-base mb-2 flex items-center gap-2 ${styles.department}`} style={{ minHeight: 28 }}>
-                        <BuildingOffice2Icon className="w-5 h-5 text-base-content" />
-                        {scrambleText(department, departmentProgress)}
-              </div>
-                    )}
-                    {/* Email, normal size, secondary color */}
-                    {showEmail && (
-                      <div className={`text-base mb-2 flex items-center gap-2 ${styles.secondary}`} style={{ minHeight: 28 }}>
-                        <EnvelopeIcon className="w-5 h-5 text-base-content" />
-                        {scrambleText(email, emailProgress)}
-              </div>
-                    )}
-                    {/* Phone, normal size, secondary color */}
-                    {showPhone && (
-                      <div className={`text-base flex items-center gap-2 ${styles.secondary}`} style={{ minHeight: 28 }}>
-                        <DevicePhoneMobileIcon className="w-5 h-5 text-base-content" />
-                        {scrambleText(phone, phoneProgress)}
-              </div>
-                    )}
-                  </>
-                );
-              })()}
+              {/* Position, medium size, secondary color */}
+              {showPosition && (
+                <div className={`text-lg font-semibold mb-2 flex items-center gap-2 ${styles.secondary}`} style={{ minHeight: 30 }}>
+                  <BriefcaseIcon className="w-5 h-5 text-base-content" />
+                  {scrambleText(employee.position, positionProgress)}
+                </div>
+              )}
+              {/* Department, smaller, department color */}
+              {showDepartment && (
+                <div className={`text-base mb-2 flex items-center gap-2 ${styles.department}`} style={{ minHeight: 28 }}>
+                  <BuildingOffice2Icon className="w-5 h-5 text-base-content" />
+                  {scrambleText(employee.department, departmentProgress)}
+                </div>
+              )}
+              {/* Email, normal size, secondary color */}
+              {showEmail && (
+                <div className={`text-base mb-2 flex items-center gap-2 ${styles.secondary}`} style={{ minHeight: 28 }}>
+                  <EnvelopeIcon className="w-5 h-5 text-base-content" />
+                  {scrambleText(employee.email, emailProgress)}
+                </div>
+              )}
+              {/* Phone, normal size, secondary color */}
+              {showPhone && (
+                <div className={`text-base flex items-center gap-2 ${styles.secondary}`} style={{ minHeight: 28 }}>
+                  <DevicePhoneMobileIcon className="w-5 h-5 text-base-content" />
+                  {scrambleText(employee.phone, phoneProgress)}
+                </div>
+              )}
             </div>
             {/* Achievements Card - strict card style, no extra effects */}
-            <div className={`card card-hover ${styles.card} p-8 rounded-xl w-full flex flex-col items-start`} dir={dir}>
+            <div className={`card card-hover ${styles.card} p-8 rounded-xl w-full flex flex-col items-start`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
               <div className="flex items-center gap-2 mb-4">
                 <TrophyIcon className="w-7 h-7 text-base-content" />
                 <h3 className="text-lg font-bold">

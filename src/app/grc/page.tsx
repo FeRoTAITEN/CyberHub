@@ -47,7 +47,6 @@ export default function GRCPage() {
   
   // Theme-aware styling
   const isSalam = theme === 'salam';
-  const isDark = theme === 'default' || theme === 'cyber' || theme === 'midnight' || theme === 'novel';
   
   // Tab state management
   const [activeMainTab, setActiveMainTab] = useState<'dashboard' | 'governance' | 'risk' | 'compliance'>('dashboard');

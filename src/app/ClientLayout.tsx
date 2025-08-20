@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, createContext, useContext, useEffect } from 'react';
-import { useTranslation } from '@/lib/useTranslation';
 
 export const LangContext = createContext<{ lang: 'en' | 'ar'; setLang: (l: 'en' | 'ar') => void }>({ lang: 'en', setLang: () => {} });
 export const ThemeContext = createContext<{ theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam'; setTheme: (t: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam') => void }>({ theme: 'default', setTheme: () => {} });
@@ -131,7 +130,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     
     // تحديد أن التطبيق تم تحميله
     setIsLoaded(true);
-  }, []); // dependency array فارغ لضمان التنفيذ مرة واحدة فقط
+  }, [lang, theme, font]); // Added missing dependencies
+
+  // تطبيق الخط واللغة والثيم على document.documentElement
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.documentElement.style.fontFamily = font;
+      document.documentElement.lang = lang;
+      document.documentElement.className = theme;
+    }
+  }, [font, lang, theme]);
+
+
 
   // عرض loading حتى يتم تحميل القيم
   if (!isLoaded) {
@@ -146,8 +156,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </div>
     );
   }
-
-  const { t } = useTranslation(lang);
 
   return (
     <LangContext.Provider value={{ lang, setLang }}>

@@ -11,9 +11,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const includeArchived = searchParams.get('includeArchived') === 'true';
     const onlyVisible = searchParams.get('onlyVisible') !== 'false';
-    const type = searchParams.get('type'); // New parameter for filtering by type
 
-    const whereClause: any = {};
+    const whereClause: {
+      status?: { not: string };
+      is_visible?: boolean;
+    } = {};
     
     if (!includeArchived) {
       whereClause.status = { not: 'archived' };

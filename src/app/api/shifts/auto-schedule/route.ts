@@ -16,11 +16,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get all active employees
+
+    
+    // Get all employees
     const employees = await prisma.employee.findMany({
+      where: { is_active: true },
       include: {
-        department: true
-      }
+        department: true,
+        shiftAssignments: {
+          where: {
+            date: {
+              gte: new Date(year, month - 1, 1),
+              lt: new Date(year, month, 1)
+            }
+          },
+        },
+      },
     });
 
     if (employees.length === 0) {
@@ -60,7 +71,6 @@ export async function POST(req: NextRequest) {
 
     // Calculate days in month
     const daysInMonth = new Date(year, month, 0).getDate();
-    const firstDayOfMonth = new Date(year, month - 1, 1).getDay();
 
     // Clear existing assignments for the month
     await prisma.shiftAssignment.deleteMany({
@@ -72,7 +82,12 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const assignments = [];
+    const assignments: Array<{
+      date: Date;
+      shift_id: number;
+      employee_id: number;
+      assigned_by: number;
+    }> = [];
     const allEmployees = [...maleEmployees, ...femaleEmployees];
 
     // Create employee groups for rotation
@@ -122,7 +137,7 @@ export async function POST(req: NextRequest) {
 }
 
 // Helper function to create employee groups
-function createEmployeeGroups(allEmployees: any[], maleEmployees: any[], femaleEmployees: any[]) {
+function createEmployeeGroups(allEmployees: Array<{id: number; gender: string | null}>, maleEmployees: Array<{id: number; gender: string | null}>, femaleEmployees: Array<{id: number; gender: string | null}>) {
   const groups = [];
   
   // Group 1: Male employees for night shift rotation
@@ -153,14 +168,44 @@ function createEmployeeGroups(allEmployees: any[], maleEmployees: any[], femaleE
 // Helper function to assign employees to shifts for a specific day
 async function assignEmployeesToShifts(
   date: Date,
-  employeeGroups: any[],
+  employeeGroups: Array<{
+    name: string;
+    employees: Array<{
+      id: number;
+      gender: string | null;
+    }>;
+    maleEmployees: Array<{
+      id: number;
+      gender: string | null;
+    }>;
+    femaleEmployees: Array<{
+      id: number;
+      gender: string | null;
+    }>;
+  }>,
   weekNumber: number,
-  morningShift: any,
-  eveningShift: any,
-  nightShift: any,
+  morningShift: {
+    id: number;
+    min_members: number;
+  },
+  eveningShift: {
+    id: number;
+    min_members: number;
+  },
+  nightShift: {
+    id: number;
+    min_members: number;
+  },
   assigned_by: number
 ) {
-  const assignments = [];
+  const assignments: Array<{
+    id: number;
+    date: Date;
+    shift_id: number;
+    employee_id: number;
+    assigned_by: number;
+    status: string;
+  }> = [];
   
   // Determine which group is active this week
   const activeGroup = employeeGroups[weekNumber % employeeGroups.length];
@@ -173,11 +218,11 @@ async function assignEmployeesToShifts(
   
   const unavailableIds = unavailableEmployees.map(u => u.employee_id);
   const availableEmployees = activeGroup.employees.filter(
-    (emp: any) => !unavailableIds.includes(emp.id)
+    (emp: {id: number; gender: string | null}) => !unavailableIds.includes(emp.id)
   );
   
   // Assign to night shift (males only)
-  const availableMales = availableEmployees.filter((emp: any) => emp.gender === 'male');
+  const availableMales = availableEmployees.filter((emp: {id: number; gender: string | null}) => emp.gender === 'male');
   const nightAssignments = Math.min(nightShift.min_members, availableMales.length);
   
   for (let i = 0; i < nightAssignments; i++) {
@@ -196,7 +241,7 @@ async function assignEmployeesToShifts(
   
   // Assign remaining employees to morning and evening shifts
   const remainingEmployees = availableEmployees.filter(
-    (emp: any) => !assignments.some(a => a.employee_id === emp.id)
+    (emp: {id: number; gender: string | null}) => !assignments.some(a => a.employee_id === emp.id)
   );
   
   // Distribute remaining employees between morning and evening

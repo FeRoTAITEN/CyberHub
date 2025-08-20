@@ -2,24 +2,20 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Navigation from '@/components/Navigation';
-import { 
-  MagnifyingGlassIcon,
+import {
+  ShieldCheckIcon,
   EnvelopeIcon,
-  LinkIcon,
-  DocumentIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ArrowLeftIcon,
+  DocumentTextIcon,
+  DevicePhoneMobileIcon,
   PlayIcon,
-  PauseIcon,
+  CheckCircleIcon,
+  ArrowLeftIcon,
   TrophyIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  EyeIcon,
-  FingerPrintIcon
+  MagnifyingGlassIcon,
+  PauseIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 import { useLang } from '../../ClientLayout';
-import { useTranslation } from '@/lib/useTranslation';
 import Link from 'next/link';
 
 // بيانات الحالات
@@ -71,7 +67,7 @@ const cases = [
     id: 2,
     title: { en: 'Malicious File Investigation', ar: 'تحقيق في ملف خبيث' },
     description: { en: 'Analyze a suspicious file for potential malware', ar: 'حلل ملف مشبوه للبحث عن برمجيات خبيثة محتملة' },
-    icon: DocumentIcon,
+    icon: DocumentTextIcon,
     color: 'red',
     evidence: [
       {
@@ -114,7 +110,7 @@ const cases = [
     id: 3,
     title: { en: 'Network Traffic Analysis', ar: 'تحليل حركة الشبكة' },
     description: { en: 'Investigate unusual network activity for security threats', ar: 'تحقق من نشاط الشبكة غير العادي للبحث عن التهديدات الأمنية' },
-    icon: LinkIcon,
+    icon: DevicePhoneMobileIcon,
     color: 'purple',
     evidence: [
       {
@@ -157,7 +153,6 @@ const cases = [
 
 export default function SecurityDetectiveGame() {
   const { lang } = useLang();
-  const { t } = useTranslation(lang);
   const [currentCase, setCurrentCase] = useState(0);
   const [score, setScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
@@ -464,7 +459,7 @@ export default function SecurityDetectiveGame() {
         {/* Evidence Analysis */}
         <div className="card p-6 mb-6 content-animate">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <FingerPrintIcon className="w-5 h-5" />
+            <ShieldCheckIcon className="w-5 h-5" />
             {lang === 'ar' ? 'تحليل الأدلة' : 'Evidence Analysis'}
           </h3>
 

@@ -1,30 +1,18 @@
 "use client";
 
-import Navigation from "@/components/Navigation";
 import {
   ShieldCheckIcon,
-  EyeIcon,
-  UserGroupIcon,
-  CogIcon,
-  ChartBarIcon,
-  DocumentTextIcon,
-  ComputerDesktopIcon,
-  LockClosedIcon,
-  StarIcon,
-  TrophyIcon,
+  UserIcon,
   AcademicCapIcon,
-  HeartIcon,
-  SparklesIcon,
-  GlobeAltIcon,
-} from "@heroicons/react/24/outline";
-import { useLang, useTheme } from "../ClientLayout";
-import { useTranslation } from "@/lib/useTranslation";
-import Image from "next/image";
+  CogIcon
+} from '@heroicons/react/24/outline';
+// import { motion } from 'framer-motion'; // Unused import
+import { useLang, useTheme } from '@/components/ClientLayout';
+import Navigation from '@/components/Navigation';
 
 export default function AboutPage() {
   const { lang } = useLang();
   const { theme } = useTheme();
-  const { t } = useTranslation(lang);
   
   // تحديد ما إذا كان الثيم Salam أم لا
   const isSalam = theme === 'salam';
@@ -112,7 +100,7 @@ export default function AboutPage() {
         lang === "ar"
           ? "تكريم قسم الأمن السيبراني كأفضل قسم في مجال الأمن السيبراني على مستوى المملكة"
           : "Honoring the Cybersecurity Sector as the best Sector in cybersecurity at the Kingdom level",
-      icon: TrophyIcon,
+      icon: ShieldCheckIcon,
       color: "bg-yellow-600",
     },
     {
@@ -144,7 +132,7 @@ export default function AboutPage() {
         lang === "ar"
           ? "تكريم الابتكارات الأمنية المطبقة في حماية البنية التحتية"
           : "Honoring security innovations applied in infrastructure protection",
-      icon: SparklesIcon,
+      icon: ShieldCheckIcon,
       color: "bg-purple-600",
     },
     {
@@ -174,7 +162,7 @@ export default function AboutPage() {
         lang === "ar"
           ? "حماية الأنظمة والشبكات والبنية التحتية التقنية للشركة"
           : "Protecting systems, networks, and technical infrastructure",
-      icon: ComputerDesktopIcon,
+      icon: ShieldCheckIcon,
       color: "bg-blue-600",
     },
     {
@@ -184,7 +172,7 @@ export default function AboutPage() {
         lang === "ar"
           ? "إدارة هويات المستخدمين والتحكم في الصلاحيات والوصول"
           : "Managing user identities and controlling permissions",
-      icon: LockClosedIcon,
+      icon: ShieldCheckIcon,
       color: "bg-green-600",
     },
     {
@@ -193,7 +181,7 @@ export default function AboutPage() {
         lang === "ar"
           ? "مراقبة مستمرة للأنظمة للكشف عن التهديدات الأمنية"
           : "Continuous system monitoring to detect security threats",
-      icon: ChartBarIcon,
+      icon: ShieldCheckIcon,
       color: "bg-purple-600",
     },
     {
@@ -211,7 +199,7 @@ export default function AboutPage() {
         lang === "ar"
           ? "تدريب الموظفين على أفضل الممارسات الأمنية"
           : "Training employees on security best practices",
-      icon: UserGroupIcon,
+      icon: UserIcon,
       color: "bg-yellow-600",
     },
     {
@@ -220,7 +208,7 @@ export default function AboutPage() {
         lang === "ar"
           ? "وضع وتحديث السياسات والإجراءات الأمنية"
           : "Developing and updating security policies and procedures",
-      icon: DocumentTextIcon,
+      icon: ShieldCheckIcon,
       color: "bg-green-600",
     },
   ];
@@ -306,7 +294,7 @@ export default function AboutPage() {
               <div className="flex-shrink-0">
                 <div className={`w-48 h-48 rounded-full overflow-hidden border-4 ${isSalam ? 'border-[#003931]/30' : 'border-green-500/30'}`}>
                   <div className={`w-full h-full ${isSalam ? 'bg-[#EEFDEC]' : 'bg-slate-700'} flex items-center justify-center`}>
-                    <UserGroupIcon className={`w-20 h-20 ${isSalam ? 'text-[#36C639]' : 'text-slate-400'}`} />
+                    <UserIcon className={`w-20 h-20 ${isSalam ? 'text-[#36C639]' : 'text-slate-400'}`} />
                   </div>
                 </div>
               </div>
@@ -349,7 +337,7 @@ export default function AboutPage() {
                   lang === "ar" ? "ml-4" : "mr-4"
                 }`}
               >
-                <EyeIcon className="w-6 h-6 text-white" />
+                <ShieldCheckIcon className="w-6 h-6 text-white" />
               </div>
               <h2 className={`heading-3 ${isSalam ? 'text-[#003931]' : ''}`}>
                 {lang === "ar" ? "رؤيتنا" : "Our Vision"}
@@ -402,7 +390,7 @@ export default function AboutPage() {
                 <div className="text-center mb-6">
                   <div className={`w-32 h-32 rounded-full overflow-hidden border-4 ${isSalam ? 'border-[#003931]/30' : 'border-green-500/30'} mx-auto mb-4`}>
                     <div className={`w-full h-full ${isSalam ? 'bg-[#EEFDEC]' : 'bg-slate-700'} flex items-center justify-center`}>
-                      <UserGroupIcon className={`w-16 h-16 ${isSalam ? 'text-[#36C639]' : 'text-slate-400'}`} />
+                      <UserIcon className={`w-16 h-16 ${isSalam ? 'text-[#36C639]' : 'text-slate-400'}`} />
                     </div>
                   </div>
                   <h3 className={`text-xl font-bold mb-2 ${isSalam ? 'text-[#003931]' : 'text-white'}`}>
@@ -500,7 +488,7 @@ export default function AboutPage() {
                 style={{ animationDelay: `${0.1 * (index + 1)}s` }}
               >
                 <div className={`w-16 h-16 ${isSalam ? 'bg-[#EEFDEC]' : 'bg-slate-700'} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                  <UserGroupIcon className={`w-8 h-8 ${isSalam ? 'text-[#36C639]' : 'text-green-400'}`} />
+                  <UserIcon className={`w-8 h-8 ${isSalam ? 'text-[#36C639]' : 'text-green-400'}`} />
                 </div>
                 <h3 className={`text-lg font-semibold mb-2 ${isSalam ? 'text-[#003931]' : 'text-white'}`}>
                   {team.title}
@@ -553,7 +541,7 @@ export default function AboutPage() {
             </div>
             <div className="text-center stagger-animate">
               <div className={`w-16 h-16 ${isSalam ? 'bg-[#36C639]' : 'bg-green-600'} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                <UserGroupIcon className="w-8 h-8 text-white" />
+                <UserIcon className="w-8 h-8 text-white" />
               </div>
               <h3 className={`text-lg font-semibold mb-2 ${isSalam ? 'text-[#003931]' : 'text-white'}`}>
                 {lang === "ar" ? "التعاون" : "Collaboration"}
@@ -566,7 +554,7 @@ export default function AboutPage() {
             </div>
             <div className="text-center stagger-animate">
               <div className={`w-16 h-16 ${isSalam ? 'bg-[#36C639]' : 'bg-green-600'} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                <EyeIcon className="w-8 h-8 text-white" />
+                <ShieldCheckIcon className="w-8 h-8 text-white" />
               </div>
               <h3 className={`text-lg font-semibold mb-2 ${isSalam ? 'text-[#003931]' : 'text-white'}`}>
                 {lang === "ar" ? "الشفافية" : "Transparency"}

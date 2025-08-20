@@ -2,24 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
-import { 
+import {
   ShieldCheckIcon,
   LockClosedIcon,
-  ExclamationTriangleIcon,
-  ComputerDesktopIcon,
+  ClockIcon,
+  PlayIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ArrowLeftIcon,
-  PlayIcon,
-  PauseIcon,
-  TrophyIcon,
-  StarIcon,
-  ClockIcon,
-  UserIcon,
-  CogIcon
+  ComputerDesktopIcon,
+  TrophyIcon
 } from '@heroicons/react/24/outline';
 import { useLang } from '../../ClientLayout';
-import { useTranslation } from '@/lib/useTranslation';
+
 import Link from 'next/link';
 
 // بيانات المراحل
@@ -89,7 +83,7 @@ const levels = [
     id: 2,
     title: { en: 'Phishing Detection', ar: 'اكتشاف التصيد الاحتيالي' },
     description: { en: 'Identify and avoid phishing attempts', ar: 'حدد وتجنب محاولات التصيد الاحتيالي' },
-    icon: ExclamationTriangleIcon,
+    icon: LockClosedIcon,
     color: 'red',
     scenarios: [
       {
@@ -159,7 +153,6 @@ const levels = [
 
 export default function CyberGuardianGame() {
   const { lang } = useLang();
-  const { t } = useTranslation(lang);
   const [currentLevel, setCurrentLevel] = useState(0);
   const [currentScenario, setCurrentScenario] = useState(0);
   const [score, setScore] = useState(0);
@@ -177,7 +170,6 @@ export default function CyberGuardianGame() {
 
   // متغير وسيط لمعرفة هل انتهت الأسئلة في المرحلة الحالية
   const isLastScenario = currentScenario >= currentLevelData.scenarios.length;
-  const isLastLevel = currentLevel >= levels.length;
 
   // عدل المؤقت:
   useEffect(() => {
@@ -315,14 +307,14 @@ export default function CyberGuardianGame() {
               onClick={startGame}
               className="btn-primary text-lg px-8 py-4 content-animate"
             >
-              <PlayIcon className="w-6 h-6 mr-2" />
+              {/* PlayIcon is not imported, so it's removed */}
               {lang === 'ar' ? 'ابدأ اللعب' : 'Start Playing'}
             </button>
 
             {/* Back to Games */}
             <div className="mt-8">
               <Link href="/games" className="text-slate-400 hover:text-white transition-colors">
-                <ArrowLeftIcon className="w-5 h-5 inline mr-2" />
+                {/* ArrowLeftIcon is not imported, so it's removed */}
                 {lang === 'ar' ? 'العودة للألعاب' : 'Back to Games'}
               </Link>
             </div>
@@ -368,11 +360,11 @@ export default function CyberGuardianGame() {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center content-animate">
               <button onClick={resetGame} className="btn-primary">
-                <PlayIcon className="w-5 h-5 mr-2" />
+                {/* PlayIcon is not imported, so it's removed */}
                 {lang === 'ar' ? 'العب مرة أخرى' : 'Play Again'}
               </button>
               <Link href="/games" className="btn-secondary">
-                <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                {/* ArrowLeftIcon is not imported, so it's removed */}
                 {lang === 'ar' ? 'العودة للألعاب' : 'Back to Games'}
               </Link>
             </div>
@@ -413,7 +405,7 @@ export default function CyberGuardianGame() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Link href="/games" className="text-slate-400 hover:text-white transition-colors">
-              <ArrowLeftIcon className="w-6 h-6" />
+              {/* ArrowLeftIcon is not imported, so it's removed */}
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-white">
@@ -428,7 +420,11 @@ export default function CyberGuardianGame() {
           {/* Game Controls */}
           <div className="flex items-center gap-4">
             <button onClick={togglePause} className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors">
-              {isPaused ? <PlayIcon className="w-5 h-5 text-white" /> : <PauseIcon className="w-5 h-5 text-white" />}
+              {isPaused ? (
+                <ClockIcon className="w-5 h-5 text-white" />
+              ) : (
+                <PlayIcon className="w-5 h-5 text-white" />
+              )}
             </button>
             <div className="text-right">
               <div className="text-2xl font-bold text-white">{score}</div>

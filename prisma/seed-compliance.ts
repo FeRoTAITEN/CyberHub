@@ -75,13 +75,9 @@ async function main() {
   if (existingProjects === 0) {
     const sampleProject = await prisma.project.create({
       data: {
-        name_en: 'Sample Cybersecurity Project',
-        name_ar: 'مشروع أمن سيبراني تجريبي',
+        name: 'Sample Cybersecurity Project',
         description: 'A sample project to demonstrate the system capabilities',
-        start_date: new Date('2024-01-01'),
-        end_date: new Date('2024-12-31'),
         status: 'active',
-        priority: 'high',
         progress: 25,
         imported_from_xml: false,
       },
@@ -90,10 +86,7 @@ async function main() {
     // Create phases for the sample project
     const phase1 = await prisma.phase.create({
       data: {
-        name_en: 'Planning Phase',
-        name_ar: 'مرحلة التخطيط',
-        start_date: new Date('2024-01-01'),
-        end_date: new Date('2024-03-31'),
+        name: 'Planning Phase',
         status: 'completed',
         progress: 100,
         order: 1,
@@ -103,10 +96,7 @@ async function main() {
 
     const phase2 = await prisma.phase.create({
       data: {
-        name_en: 'Implementation Phase',
-        name_ar: 'مرحلة التنفيذ',
-        start_date: new Date('2024-04-01'),
-        end_date: new Date('2024-09-30'),
+        name: 'Implementation Phase',
         status: 'active',
         progress: 30,
         order: 2,
@@ -116,10 +106,7 @@ async function main() {
 
     const phase3 = await prisma.phase.create({
       data: {
-        name_en: 'Testing Phase',
-        name_ar: 'مرحلة الاختبار',
-        start_date: new Date('2024-10-01'),
-        end_date: new Date('2024-12-31'),
+        name: 'Testing Phase',
         status: 'on_hold',
         progress: 0,
         order: 3,
@@ -130,10 +117,7 @@ async function main() {
     // Create tasks for each phase
     const tasks = [
       {
-        name_en: 'Requirements Analysis',
-        name_ar: 'تحليل المتطلبات',
-        start_date: new Date('2024-01-01'),
-        end_date: new Date('2024-01-31'),
+        name: 'Requirements Analysis',
         status: 'completed',
         progress: 100,
         order: 1,
@@ -142,10 +126,7 @@ async function main() {
         project_id: sampleProject.id,
       },
       {
-        name_en: 'System Design',
-        name_ar: 'تصميم النظام',
-        start_date: new Date('2024-02-01'),
-        end_date: new Date('2024-02-28'),
+        name: 'System Design',
         status: 'completed',
         progress: 100,
         order: 2,
@@ -154,10 +135,7 @@ async function main() {
         project_id: sampleProject.id,
       },
       {
-        name_en: 'Database Setup',
-        name_ar: 'إعداد قاعدة البيانات',
-        start_date: new Date('2024-04-01'),
-        end_date: new Date('2024-04-30'),
+        name: 'Database Setup',
         status: 'completed',
         progress: 100,
         order: 1,
@@ -166,10 +144,7 @@ async function main() {
         project_id: sampleProject.id,
       },
       {
-        name_en: 'Backend Development',
-        name_ar: 'تطوير الخلفية',
-        start_date: new Date('2024-05-01'),
-        end_date: new Date('2024-07-31'),
+        name: 'Backend Development',
         status: 'active',
         progress: 60,
         order: 2,
@@ -178,10 +153,7 @@ async function main() {
         project_id: sampleProject.id,
       },
       {
-        name_en: 'Frontend Development',
-        name_ar: 'تطوير الواجهة',
-        start_date: new Date('2024-06-01'),
-        end_date: new Date('2024-08-31'),
+        name: 'Frontend Development',
         status: 'active',
         progress: 40,
         order: 3,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, createContext, useContext, useEffect } from 'react';
-import { useTranslation } from '@/lib/useTranslation';
+// import { useTranslation } from '@/lib/useTranslation'; // Unused import
 
 export const LangContext = createContext<{ lang: 'en' | 'ar'; setLang: (l: 'en' | 'ar') => void }>({ lang: 'en', setLang: () => {} });
 export const ThemeContext = createContext<{ theme: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam'; setTheme: (t: 'default' | 'light' | 'midnight' | 'novel' | 'cyber' | 'salam') => void }>({ theme: 'default', setTheme: () => {} });
@@ -131,7 +131,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     
     // Mark application as loaded
     setIsLoaded(true);
-  }, []); // Empty dependency array ensures execution only once
+  }, [lang, theme, font]); // Added missing dependencies
+
+  // Apply font, language, and theme to document.documentElement
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.documentElement.style.fontFamily = font;
+      document.documentElement.lang = lang;
+      document.documentElement.className = theme;
+    }
+  }, [font, lang, theme]);
+
+  // const { t } = useTranslation(lang); // Unused variable
 
   // Show loading until values are loaded
   if (!isLoaded) {
@@ -146,8 +157,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </div>
     );
   }
-
-  const { t } = useTranslation(lang);
 
   return (
     <LangContext.Provider value={{ lang, setLang }}>

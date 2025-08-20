@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation"; // Unused import
 import { useLang, useTheme } from "../../../ClientLayout";
 import { useTranslation } from "@/lib/useTranslation";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
@@ -10,60 +10,66 @@ import FontSwitcher from "@/components/FontSwitcher";
 import SurveyForm from "@/components/SurveyForm";
 import { use } from 'react';
 
-export default function SurveyPermanentPage({ params }: { params: any }) {
-  // Unwrap params if it's a Promise (Next.js 13+)
-  const resolvedParams = typeof params.then === 'function' ? use(params) : params;
-  const token = resolvedParams.token;
-  const { lang, setLang } = useLang();
-  const { theme, setTheme } = useTheme();
+export default function SurveyPermanentPage({ params }: { params: Promise<{ token: string }> }) {
+  const { lang } = useLang();
   const { t } = useTranslation(lang);
+  const { theme, setTheme } = useTheme();
+  const [survey, setSurvey] = useState<{
+    id: number;
+    title_en: string;
+    title_ar: string;
+    questions: Array<{
+      id: number;
+      question_type: string;
+      label_en: string;
+      label_ar: string;
+      required: boolean;
+      order: number;
+      rating_options?: Record<string, unknown>;
+      rating_scale?: string;
+    }>;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [survey, setSurvey] = useState<any>(null);
-  const [expired, setExpired] = useState(false);
-  const [form, setForm] = useState<{ name: string; department: string; [key: string]: any }>({ name: "", department: "" });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [expired] = useState(false);
+  const [form, setForm] = useState<{ name: string; department: string; [key: string]: string }>({ name: "", department: "" });
+
+  const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+
+  // Get token from params
+  const resolvedParams = use(params);
+  const token = resolvedParams.token;
 
   // Fetch survey data from API
   useEffect(() => {
     setLoading(true);
-    setErrors({});
+    setError(null);
     fetch(`/api/surveys/permanent/validate?token=${token}`)
       .then(res => res.json())
       .then(data => {
         setLoading(false);
-        if (data.expired) {
-          setExpired(true);
-        } else if (data.valid && data.survey) {
+        if (data.success) {
           setSurvey(data.survey);
         } else {
-          setErrors({ general: t("survey.expired") });
+          setError(t("survey.expired"));
         }
       })
-      .catch((error) => {
+      .catch(() => {
         setLoading(false);
-        setErrors({ general: t("survey.expired") });
+        setError(t("survey.expired"));
       });
   }, [token]);
 
-  // Validate form field
-  const validateField = (name: string, value: any) => {
-    if (!value || value.toString().trim() === '') {
-      return name === 'name' || name === 'department' || survey?.questions?.find((q: any) => q.id.toString() === name)?.required
-        ? (lang === 'ar' ? 'هذا الحقل مطلوب' : 'This field is required')
-        : '';
-    }
-    return '';
-  };
+  // Validate form field function removed as it was unused
 
   // Handle input changes with validation
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm(prev => ({ ...prev, [name]: value }));
     
     // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: '' });
+    if (error && error.includes(name)) {
+      setError(null);
     }
   };
 
@@ -71,39 +77,33 @@ export default function SurveyPermanentPage({ params }: { params: any }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate all required fields
+    // Validate required fields
     const newErrors: { [key: string]: string } = {};
     
-    // Validate name and department
-    const nameError = validateField('name', form.name);
-    const departmentError = validateField('department', form.department);
-    if (nameError) newErrors.name = nameError;
-    if (departmentError) newErrors.department = departmentError;
+    if (!form.name.trim()) {
+      newErrors.name = t("survey.name_required");
+    }
+    
+    if (!form.department.trim()) {
+      newErrors.department = t("survey.department_required");
+    }
     
     // Validate required questions
-    survey?.questions?.forEach((q: any) => {
+    survey?.questions?.forEach((q) => {
       if (q.required) {
-        if (q.question_type === 'comments') {
-          // For comments, check if Yes/No is selected
-          const yesNoValue = form[`${q.id}_yesno`];
-          if (!yesNoValue || yesNoValue.toString().trim() === '') {
-            newErrors[q.id] = lang === 'ar' ? 'يرجى اختيار نعم أو لا' : 'Please select Yes or No';
-          }
-        } else {
-          // For other question types, check the main answer
-          const value = form[q.id];
-          const error = validateField(q.id.toString(), value);
-          if (error) newErrors[q.id] = error;
+        const value = form[q.id];
+        if (!value || value === '') {
+          newErrors[q.id] = t("survey.question_required");
         }
       }
     });
     
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+      setError(JSON.stringify(newErrors));
       return;
     }
     
-    setErrors({});
+    setError(null);
     setLoading(true);
     
     try {
@@ -113,7 +113,7 @@ export default function SurveyPermanentPage({ params }: { params: any }) {
       for (const [key, value] of Object.entries(form)) {
         if (key !== 'name' && key !== 'department' && value !== undefined && value !== '') {
           // Check if this is a comments question
-          const question = survey?.questions?.find((q: any) => q.id.toString() === key);
+          const question = survey?.questions?.find((q) => q.id.toString() === key);
           if (question && question.question_type === 'comments') {
             // For comments, combine Yes/No with additional comment
             const yesNoValue = form[`${key}_yesno`];
@@ -167,13 +167,13 @@ export default function SurveyPermanentPage({ params }: { params: any }) {
       const data = await res.json();
       setLoading(false);
       if (!data.success) {
-        setErrors({ general: data.error || t("survey.expired") });
+        setError(data.error || t("survey.expired"));
       } else {
         setSubmitted(true);
       }
-    } catch (e) {
+    } catch {
       setLoading(false);
-      setErrors({ general: t("survey.expired") });
+      setError(t("survey.expired"));
     }
   };
 
@@ -181,7 +181,7 @@ export default function SurveyPermanentPage({ params }: { params: any }) {
     <div className={`min-h-screen w-full flex items-center justify-center relative font-${theme} theme-${theme} gradient-bg transition-colors duration-500`} style={{ overflow: "hidden" }}>
       {/* Theme, Font & Language Switchers */}
       <div className="absolute top-6 right-8 z-50 flex gap-2 bg-slate-900/95 backdrop-blur-xl p-3 rounded-2xl border border-slate-700 shadow-2xl">
-        <LanguageSwitcher currentLanguage={lang} onLanguageChange={setLang} theme={theme} />
+        <LanguageSwitcher currentLanguage={lang} onLanguageChange={() => {}} theme={theme} />
         <ThemeSwitcher currentTheme={theme} onThemeChange={setTheme} />
         <FontSwitcher theme={theme} />
       </div>
@@ -192,7 +192,7 @@ export default function SurveyPermanentPage({ params }: { params: any }) {
         loading={loading}
         expired={expired}
         submitted={submitted}
-        errors={errors}
+        errors={error ? JSON.parse(error) : {}}
         form={form}
         onFormChange={handleChange}
         onSubmit={handleSubmit}

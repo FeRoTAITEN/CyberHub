@@ -60,8 +60,6 @@ export async function POST(request: NextRequest) {
 
     // Extract project information
     const projectName = projectData.Name || projectData.Title || 'Imported Project';
-    const startDate = projectData.StartDate ? new Date(projectData.StartDate) : new Date();
-    const endDate = projectData.FinishDate ? new Date(projectData.FinishDate) : new Date();
     const completionPercent = projectData.PercentComplete ? parseFloat(projectData.PercentComplete) : 0;
     
     // Extract baseline and actual dates for project
@@ -96,8 +94,6 @@ export async function POST(request: NextRequest) {
       const taskUID = task.UID;
       const outlineLevel = parseInt(task.OutlineLevel || '1');
       const taskName = task.Name || 'Unnamed Task';
-      const taskStartDate = task.Start ? new Date(task.Start) : startDate;
-      const taskEndDate = task.Finish ? new Date(task.Finish) : endDate;
       const taskProgress = task.PercentComplete ? parseFloat(task.PercentComplete) : 0;
       const taskDuration = parseDuration(task.Duration);
       
@@ -106,9 +102,6 @@ export async function POST(request: NextRequest) {
       const baselineFinish = task.Baseline?.Finish ? new Date(task.Baseline.Finish) : null;
       const actualStart = task.ActualStart ? new Date(task.ActualStart) : null;
       const actualFinish = task.ActualFinish ? new Date(task.ActualFinish) : null;
-
-      let phaseId = null;
-      let parentTaskId = null;
 
       if (outlineLevel === 1) {
         // This is a phase
@@ -125,7 +118,6 @@ export async function POST(request: NextRequest) {
           },
         });
         phaseMap.set(taskUID, phase.id);
-        phaseId = phase.id;
       } else if (outlineLevel === 2) {
         // This is a task
                 const createdTask = await prisma.task.create({
@@ -277,7 +269,10 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper function to find parent phase UID
-function findParentPhaseUID(tasks: any[], currentTaskUID: string): string | null {
+function findParentPhaseUID(tasks: Array<{
+  UID: string;
+  OutlineLevel?: string;
+}>, currentTaskUID: string): string | null {
   const currentTask = tasks.find(t => t.UID === currentTaskUID);
   if (!currentTask) return null;
 
@@ -295,7 +290,10 @@ function findParentPhaseUID(tasks: any[], currentTaskUID: string): string | null
 }
 
 // Helper function to find parent task UID
-function findParentTaskUID(tasks: any[], currentTaskUID: string): string | null {
+function findParentTaskUID(tasks: Array<{
+  UID: string;
+  OutlineLevel?: string;
+}>, currentTaskUID: string): string | null {
   const currentTask = tasks.find(t => t.UID === currentTaskUID);
   if (!currentTask) return null;
 

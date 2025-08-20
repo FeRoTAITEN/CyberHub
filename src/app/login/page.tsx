@@ -8,7 +8,8 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import FontSwitcher from "@/components/FontSwitcher";
 import Image from "next/image";
-import { useLang, useTheme, useFont } from "../ClientLayout";
+import { useLang, useTheme } from "../ClientLayout";
+// No icons used in this file
 
 // Animated container variants
 const containerVariants = {

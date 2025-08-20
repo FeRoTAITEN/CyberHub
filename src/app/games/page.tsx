@@ -1,26 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+
 import Navigation from '@/components/Navigation';
-import { 
+import {
   ShieldCheckIcon,
-  MagnifyingGlassIcon,
-  PuzzlePieceIcon,
-  PlayIcon,
-  TrophyIcon,
-  StarIcon,
-  ClockIcon,
-  UserGroupIcon,
-  ChartBarIcon,
-  CogIcon,
-  ArrowRightIcon,
-  ExclamationTriangleIcon,
-  LockClosedIcon,
+  AcademicCapIcon,
+  BriefcaseIcon,
   ComputerDesktopIcon,
-  GlobeAltIcon
+  ClockIcon,
+  ArrowRightIcon,
+  ChartBarIcon,
+  ExclamationTriangleIcon,
+  TrophyIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 import { useLang, useTheme } from '../ClientLayout';
-import { useTranslation } from '@/lib/useTranslation';
 import Link from 'next/link';
 
 // بيانات الألعاب
@@ -60,7 +54,7 @@ const games = [
       en: 'Solve cybersecurity mysteries by analyzing suspicious emails, links, and files. Become a digital detective and uncover security threats.',
       ar: 'حل ألغاز الأمن السيبراني من خلال تحليل رسائل البريد الإلكتروني والروابط والملفات المشبوهة. كن محققاً رقمياً واكتشف التهديدات الأمنية.'
     },
-    icon: MagnifyingGlassIcon,
+    icon: AcademicCapIcon,
     difficulty: 'intermediate',
     duration: '8-15 min',
     players: '1',
@@ -85,7 +79,7 @@ const games = [
       en: 'Build and defend your digital fortress against cyber attacks. Choose security tools, configure firewalls, and test your defenses.',
       ar: 'ابنِ واحمِ حصنك الرقمي من الهجمات السيبرانية. اختر أدوات الأمان، وكون جدران الحماية، واختبر دفاعاتك.'
     },
-    icon: PuzzlePieceIcon,
+    icon: BriefcaseIcon,
     difficulty: 'advanced',
     duration: '12-20 min',
     players: '1-2',
@@ -107,7 +101,6 @@ const games = [
 export default function GamesPage() {
   const { lang } = useLang();
   const { theme } = useTheme();
-  const { t } = useTranslation(lang);
   
   const isSalam = theme === 'salam';
   
@@ -165,7 +158,7 @@ export default function GamesPage() {
         {/* Header Section */}
         <div className="page-header">
           <div className="page-header-icon icon-animate">
-            <PlayIcon className={`w-12 h-12 ${themeColors.headerIcon}`} />
+            <ComputerDesktopIcon className={`w-12 h-12 ${themeColors.headerIcon}`} />
           </div>
           <h1 className={`page-title title-animate ${themeColors.headerTitle}`}>
             {lang === 'ar' ? 'ألعاب الأمن السيبراني' : 'Cybersecurity Games'}
@@ -232,7 +225,7 @@ export default function GamesPage() {
                       <span>{game.duration}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <UserGroupIcon className="w-4 h-4" />
+                      <UserIcon className="w-4 h-4" />
                       <span>{game.players}</span>
                     </div>
                   </div>
@@ -240,7 +233,7 @@ export default function GamesPage() {
                   {/* Play Button */}
                   <Link href={`/games/${game.id}`}>
                     <button className={`w-full ${gameTheme.button} font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 group`}>
-                      <PlayIcon className="w-5 h-5" />
+                      <ComputerDesktopIcon className="w-5 h-5" />
                       <span>{lang === 'ar' ? 'ابدأ اللعب' : 'Start Playing'}</span>
                       <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>

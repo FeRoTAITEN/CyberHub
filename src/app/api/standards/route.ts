@@ -12,7 +12,10 @@ export async function GET(request: NextRequest) {
     const includeArchived = searchParams.get('includeArchived') === 'true';
     const onlyVisible = searchParams.get('onlyVisible') !== 'false';
 
-    const whereClause: any = {};
+    const whereClause: {
+      status?: { not: string };
+      is_visible?: boolean;
+    } = {};
     
     if (!includeArchived) {
       whereClause.status = { not: 'archived' };
@@ -65,7 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate version - always start with 1.0 for new standards
-    const version = 'v1.0';
+    const standardVersion = 'v1.0';
 
     // Handle file upload
     let fileUrl = null;
@@ -125,7 +128,7 @@ export async function POST(request: NextRequest) {
         title_ar: titleAr,
         description_en: descriptionEn,
         description_ar: descriptionAr,
-        version: version,
+        version: standardVersion,
         file_size: fileSize,
         file_url: fileUrl,
         created_by: 1, // Default admin user

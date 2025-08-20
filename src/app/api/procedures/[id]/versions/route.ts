@@ -22,7 +22,7 @@ export async function GET(
     const procedure = await prisma.procedure.findUnique({
       where: { id },
       include: {
-        archived_versions: {
+        versions: {
           orderBy: {
             created_at: 'desc'
           }
@@ -37,7 +37,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(procedure.archived_versions);
+    return NextResponse.json(procedure.versions);
   } catch (error) {
     console.error('Error fetching procedure versions:', error);
     return NextResponse.json(

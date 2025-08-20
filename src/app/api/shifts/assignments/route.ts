@@ -4,14 +4,20 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // GET /api/shifts/assignments - Get all shift assignments
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
+    const employeeId = searchParams.get('employeeId');
     const date = searchParams.get('date');
-    const employeeId = searchParams.get('employee_id');
-    const shiftId = searchParams.get('shift_id');
+    const month = searchParams.get('month');
+    const year = searchParams.get('year');
 
-    let whereClause: any = {};
+    const whereClause: {
+      employee_id?: number;
+      date?: Date;
+      month?: number;
+      year?: number;
+    } = {};
 
     if (date) {
       whereClause.date = new Date(date);
@@ -21,8 +27,9 @@ export async function GET(req: NextRequest) {
       whereClause.employee_id = parseInt(employeeId);
     }
 
-    if (shiftId) {
-      whereClause.shift_id = parseInt(shiftId);
+    if (month && year) {
+      whereClause.month = parseInt(month);
+      whereClause.year = parseInt(year);
     }
 
     const assignments = await prisma.shiftAssignment.findMany({

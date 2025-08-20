@@ -12,7 +12,18 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const limit = searchParams.get('limit');
 
-    const where: any = {};
+    const where: {
+      OR?: Array<{
+        name?: { contains: string; mode: 'insensitive' };
+        name_ar?: { contains: string; mode: 'insensitive' };
+        email?: { contains: string; mode: 'insensitive' };
+        job_title?: { contains: string; mode: 'insensitive' };
+        job_title_ar?: { contains: string; mode: 'insensitive' };
+      }>;
+      department_id?: number;
+      department?: { name: { contains: string; mode: 'insensitive' } };
+      is_active?: boolean;
+    } = {};
     
     // Search functionality
     if (search) {
@@ -50,7 +61,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Build query options
-    const queryOptions: any = {
+    const queryOptions: {
+      where: typeof where;
+      include: {
+        department: {
+          select: {
+            id: true;
+            name: true;
+            description: true;
+          };
+        };
+      };
+      orderBy: Array<{ is_active: 'desc' } | { name: 'asc' }>;
+      take?: number;
+    } = {
       where,
       include: {
         department: {
@@ -137,7 +161,19 @@ export async function GET(request: NextRequest) {
 // POST /api/staff - Add a new staff member
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: {
+      name: string;
+      name_ar?: string;
+      email: string;
+      job_title?: string;
+      job_title_ar?: string;
+      department_id: string;
+      phone?: string;
+      location?: string;
+      hire_date?: string;
+      gender?: string;
+      is_active?: boolean;
+    } = await request.json();
     
     const { 
       name, 

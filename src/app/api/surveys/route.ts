@@ -53,7 +53,7 @@ export async function GET() {
               if (ratingValue && ratingOptions[ratingValue - 1]) {
                 processedAnswer = ratingOptions[ratingValue - 1].label_en || processedAnswer;
               }
-            } catch (e) {
+            } catch {
               // If parsing fails, keep original answer
             }
           }
@@ -79,26 +79,38 @@ export async function GET() {
     }));
 
     return NextResponse.json({ success: true, surveys: processedSurveys });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, error: "Failed to fetch surveys." }, { status: 500 });
   }
 }
 
 // POST: Create a new survey with questions
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { title_en, title_ar, created_by, questions } = await req.json();
-    if (!title_en || !title_ar || !created_by || !Array.isArray(questions) || questions.length === 0) {
+    const body: {
+      title_en: string;
+      title_ar: string;
+      questions: Array<{
+        question_type: string;
+        label_en: string;
+        label_ar: string;
+        required: boolean;
+        order: number;
+        rating_options?: any;
+        rating_scale?: string;
+      }>;
+    } = await request.json();
+    if (!body.title_en || !body.title_ar || !body.questions || body.questions.length === 0) {
       return NextResponse.json({ success: false, error: "Missing required fields." }, { status: 400 });
     }
     const survey = await prisma.survey.create({
       data: {
-        title_en,
-        title_ar,
-        created_by,
+        title_en: body.title_en,
+        title_ar: body.title_ar,
+        created_by: 1, // Default admin user ID
         questions: {
-          create: questions.map((q: any, idx: number) => ({
-            question_type: q.type,
+          create: body.questions.map((q, idx) => ({
+            question_type: q.question_type,
             label_en: q.label_en,
             label_ar: q.label_ar,
             required: !!q.required,
@@ -112,9 +124,9 @@ export async function POST(req: NextRequest) {
     });
     
     return NextResponse.json({ success: true, survey });
-  } catch (e) {
-    console.error('Error creating survey:', e);
-    return NextResponse.json({ success: false, error: `Failed to create survey: ${e instanceof Error ? e.message : 'Unknown error'}` }, { status: 500 });
+  } catch {
+    console.error('Error creating survey');
+    return NextResponse.json({ success: false, error: 'Failed to create survey' }, { status: 500 });
   }
 }
 
@@ -126,7 +138,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing required fields." }, { status: 400 });
     }
     // Update survey title
-    const updatedSurvey = await prisma.survey.update({
+    await prisma.survey.update({
       where: { id },
       data: { title_en, title_ar }
     });
@@ -168,7 +180,7 @@ export async function PUT(req: NextRequest) {
       }
     }
     return NextResponse.json({ success: true });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, error: "Failed to update survey." }, { status: 500 });
   }
 }
@@ -190,7 +202,7 @@ export async function DELETE(req: NextRequest) {
     // Otherwise delete the entire survey
     await prisma.survey.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, error: "Failed to delete." }, { status: 500 });
   }
 } 

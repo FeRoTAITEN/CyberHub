@@ -2,24 +2,20 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Navigation from '@/components/Navigation';
-import { 
-  PuzzlePieceIcon,
+import {
   ShieldCheckIcon,
-  FireIcon,
-  ComputerDesktopIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ArrowLeftIcon,
-  PlayIcon,
-  PauseIcon,
-  TrophyIcon,
-  ClockIcon,
   CogIcon,
-  WrenchScrewdriverIcon,
-  ChartBarIcon
+  PlayIcon,
+  CheckCircleIcon,
+  ArrowLeftIcon,
+  TrophyIcon,
+  ChartBarIcon,
+  PuzzlePieceIcon,
+  PauseIcon,
+  FireIcon,
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 import { useLang } from '../../ClientLayout';
-import { useTranslation } from '@/lib/useTranslation';
 import Link from 'next/link';
 
 // بيانات المراحل
@@ -169,7 +165,6 @@ const levels = [
 
 export default function DigitalFortressGame() {
   const { lang } = useLang();
-  const { t } = useTranslation(lang);
   const [currentLevel, setCurrentLevel] = useState(0);
   const [score, setScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);

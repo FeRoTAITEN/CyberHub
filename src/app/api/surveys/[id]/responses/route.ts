@@ -19,14 +19,23 @@ export async function GET(
     }
 
     // Get survey with questions
-    const survey = await prisma.survey.findUnique({
+    const surveyData = await prisma.survey.findUnique({
       where: { id: surveyId },
       include: {
-        questions: true
+        questions: {
+          orderBy: { order: 'asc' },
+          include: {
+            answers: {
+              include: {
+                response: true
+              }
+            }
+          }
+        }
       }
     });
 
-    if (!survey) {
+    if (!surveyData) {
       return NextResponse.json({ 
         success: false, 
         error: 'Survey not found' 

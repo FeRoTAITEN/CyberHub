@@ -1,11 +1,57 @@
 'use client';
 
 import Navigation from '@/components/Navigation';
-import { ChartBarIcon, CalendarIcon, UserGroupIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, MagnifyingGlassIcon, FunnelIcon, ChevronLeftIcon, ChevronRightIcon, XMarkIcon, DocumentIcon, EyeIcon, CurrencyDollarIcon, InformationCircleIcon, LightBulbIcon } from '@heroicons/react/24/outline';
+import {
+  ChartBarIcon,
+  ExclamationTriangleIcon,
+  MagnifyingGlassIcon,
+  CheckCircleIcon,
+  CalendarIcon,
+  UserGroupIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  XMarkIcon,
+  InformationCircleIcon,
+  DocumentIcon,
+  CurrencyDollarIcon,
+  ClockIcon,
+  ShieldCheckIcon,
+  EyeIcon
+} from '@heroicons/react/24/outline';
 import { useLang } from '../ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';
 import { useState, useMemo } from 'react';
 import { useTheme } from '../ClientLayout';
+
+// Types
+interface TeamMember {
+  en: string;
+  ar: string;
+}
+
+interface Attachment {
+  name: { en: string; ar: string };
+  type: string;
+  size: string;
+}
+
+interface Project {
+  id: number;
+  name: { en: string; ar: string };
+  description: { en: string; ar: string };
+  status: string;
+  priority: string;
+  progress: number;
+  manager: { en: string; ar: string };
+  team: TeamMember[];
+  start: string;
+  end: string;
+  budget: number;
+  spent: number;
+  attachments: Attachment[];
+  objectives: TeamMember[];
+  risks: TeamMember[];
+}
 
 const projectsData = [
   {
@@ -172,7 +218,7 @@ const projectsData = [
 const statusConfig = {
   active: { color: 'bg-green-600', icon: ChartBarIcon, text: { en: 'Active', ar: 'نشط' } },
   planning: { color: 'bg-yellow-600', icon: ClockIcon, text: { en: 'Planning', ar: 'قيد التخطيط' } },
-  completed: { color: 'bg-slate-600', icon: CheckCircleIcon, text: { en: 'Completed', ar: 'مكتمل' } }
+  completed: { color: 'bg-slate-600', icon: ShieldCheckIcon, text: { en: 'Completed', ar: 'مكتمل' } }
 };
 
 const priorityConfig = {
@@ -197,7 +243,7 @@ export default function ProjectsPage() {
   const [itemsPerPage, setItemsPerPage] = useState(8); // عدد أقل للعرض السريع
   
   // Modal state
-  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showFullOverview, setShowFullOverview] = useState(false);
   const [showFullTextModal, setShowFullTextModal] = useState(false);
@@ -309,7 +355,7 @@ export default function ProjectsPage() {
     setCurrentPage(1);
   };
 
-  const openProjectDetails = (project: any) => {
+  const openProjectDetails = (project: Project) => {
     setSelectedProject(project);
     setShowModal(true);
   };
@@ -822,7 +868,7 @@ export default function ProjectsPage() {
                   <div>
                     <span className="text-sm font-semibold text-slate-400">{lang === 'ar' ? 'أعضاء الفريق:' : 'Team Members:'}</span>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {selectedProject.team.map((member: any, idx: number) => (
+                      {selectedProject.team.map((member: TeamMember, idx: number) => (
                         <span key={idx} className="px-3 py-1 bg-blue-600/10 text-blue-400 text-xs rounded-full font-semibold">
                           {member[lang]}
                         </span>
@@ -837,7 +883,7 @@ export default function ProjectsPage() {
                     {lang === 'ar' ? 'المرفقات' : 'Attachments'}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {selectedProject.attachments.map((att: any, idx: number) => (
+                    {selectedProject.attachments.map((att: Attachment, idx: number) => (
                       <div key={idx} className="flex items-center justify-between bg-slate-800 rounded-lg px-4 py-3">
                         <div className="flex items-center gap-3">
                           <DocumentIcon className="w-5 h-5 text-slate-400" />

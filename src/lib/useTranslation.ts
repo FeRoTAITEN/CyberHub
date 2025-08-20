@@ -8,12 +8,16 @@ const translations = { en, ar };
 export function useTranslation(lang: Lang) {
   function t(path: string): string {
     const keys = path.split('.');
-    let value: any = translations[lang];
+    let value: unknown = translations[lang];
     for (const key of keys) {
-      value = value?.[key];
+      if (typeof value === 'object' && value !== null && key in value) {
+        value = (value as Record<string, unknown>)[key];
+      } else {
+        return path;
+      }
       if (value === undefined) return path;
     }
-    return value;
+    return typeof value === 'string' ? value : path;
   }
   return { t };
 } 
