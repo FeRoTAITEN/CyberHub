@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Navigation from '@/components/Navigation';
 import { useLang, useTheme } from '../ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';
@@ -24,6 +24,9 @@ import {
   StarIcon,
   CogIcon,
   ClockIcon,
+  XMarkIcon,
+  ChevronUpIcon,
+  ChevronLeftIcon,
 } from '@heroicons/react/24/outline';
 
 interface Project {
@@ -126,9 +129,31 @@ export default function ExcellentPage() {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Delete modals for phases and tasks
+  const [showDeletePhaseModal, setShowDeletePhaseModal] = useState(false);
+  const [phaseToDelete, setPhaseToDelete] = useState<Phase | null>(null);
+  const [showDeleteTaskModal, setShowDeleteTaskModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showEditTaskModal, setShowEditTaskModal] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
+  
+  // Custom Alert Modal State
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'warning' | 'info'>('success');
+  
+  // Progress Counters State
+  const [progressCounters, setProgressCounters] = useState({
+    projects: 0,
+    phases: 0,
+    tasks: 0,
+    subtasks: 0,
+    completed: 0,
+    inProgress: 0,
+    notStarted: 0
+  });
   const [editingTask, setEditingTask] = useState({
     name: '',
     description: '',
@@ -205,6 +230,10 @@ export default function ExcellentPage() {
   const [dragTaskId, setDragTaskId] = useState<number | null>(null);
   const [tempProgress, setTempProgress] = useState<number | null>(null);
 
+  // State for scroll position preservation
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   // Load projects and employees on component mount
   useEffect(() => {
     loadProjects();
@@ -215,6 +244,13 @@ export default function ExcellentPage() {
   useEffect(() => {
     loadProjects();
   }, [statusFilter, searchTerm]);
+
+  // Debug modal state
+  useEffect(() => {
+    if (showDeleteConfirmModal) {
+      console.log('Delete modal opened for project:', projectToDelete);
+    }
+  }, [showDeleteConfirmModal, projectToDelete]);
 
   // Add mouse and touch event listeners for dragging
   useEffect(() => {
@@ -245,6 +281,12 @@ export default function ExcellentPage() {
         const data = await response.json();
         console.log('Projects loaded:', data);
         setProjects(data);
+        // Calculate progress stats after loading projects
+        setTimeout(() => {
+          calculateProgressStats();
+          // Restore scroll position after data is loaded
+          restoreScrollPosition();
+        }, 100);
       }
     } catch (error) {
       console.error('Error loading projects:', error);
@@ -270,13 +312,122 @@ export default function ExcellentPage() {
     if (file && file.name.toLowerCase().endsWith('.xml')) {
       setSelectedFile(file);
     } else {
-      alert(t('excellent.invalid_file'));
+      showCustomAlert(t('excellent.invalid_file'), 'error');
     }
+  };
+
+  const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.name.toLowerCase().endsWith('.xml')) {
+        setSelectedFile(file);
+      } else {
+        showCustomAlert(t('excellent.invalid_file'), 'error');
+      }
+    }
+  };
+
+  // Custom Alert Function
+  const showCustomAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success') => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowAlertModal(true);
+  };
+
+  // Update Progress Stats
+  const updateProgressStats = () => {
+    setTimeout(() => calculateProgressStats(), 100);
+  };
+
+  // Calculate Progress Statistics
+  const calculateProgressStats = useCallback(() => {
+    let totalPhases = 0;
+    let totalTasks = 0;
+    let totalSubtasks = 0;
+    let completedTasks = 0;
+    let inProgressTasks = 0;
+    let notStartedTasks = 0;
+
+    projects.forEach(project => {
+      totalPhases += project.phases?.length || 0;
+      
+      // Count project-level tasks
+      totalTasks += project.tasks?.length || 0;
+      
+      project.tasks?.forEach(task => {
+        totalSubtasks += task.subtasks?.length || 0;
+        
+        // Count task status
+        if (task.progress === 100) {
+          completedTasks++;
+        } else if (task.progress > 0) {
+          inProgressTasks++;
+        } else {
+          notStartedTasks++;
+        }
+        
+        // Count subtask status
+        task.subtasks?.forEach(subtask => {
+          if (subtask.progress === 100) {
+            completedTasks++;
+          } else if (subtask.progress > 0) {
+            inProgressTasks++;
+          } else {
+            notStartedTasks++;
+          }
+        });
+      });
+      
+      // Count phase-level tasks
+      project.phases?.forEach(phase => {
+        totalTasks += phase.tasks?.length || 0;
+        
+        phase.tasks?.forEach(task => {
+          totalSubtasks += task.subtasks?.length || 0;
+          
+          // Count task status
+          if (task.progress === 100) {
+            completedTasks++;
+          } else if (task.progress > 0) {
+            inProgressTasks++;
+          } else {
+            notStartedTasks++;
+          }
+          
+          // Count subtask status
+          task.subtasks?.forEach(subtask => {
+            if (subtask.progress === 100) {
+              completedTasks++;
+            } else if (subtask.progress > 0) {
+              inProgressTasks++;
+            } else {
+              notStartedTasks++;
+            }
+          });
+        });
+      });
+    });
+
+    setProgressCounters({
+      projects: projects.length,
+      phases: totalPhases,
+      tasks: totalTasks,
+      subtasks: totalSubtasks,
+      completed: completedTasks,
+      inProgress: inProgressTasks,
+      notStarted: notStartedTasks
+    });
+  }, [projects]);
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
   };
 
   const handleImportXML = async () => {
     if (!selectedFile) {
-      alert(t('excellent.no_xml_file'));
+      showCustomAlert(t('excellent.no_xml_file'), 'warning');
       return;
     }
 
@@ -292,17 +443,18 @@ export default function ExcellentPage() {
 
       if (response.ok) {
         const result = await response.json();
-        alert(t('excellent.project_imported'));
+        showCustomAlert(t('excellent.project_imported'), 'success');
         setShowImportModal(false);
         setSelectedFile(null);
         loadProjects();
+        updateProgressStats();
       } else {
         const error = await response.json();
-        alert(`${t('excellent.import_failed')}: ${error.error || 'Unknown error'}`);
+        showCustomAlert(`${t('excellent.import_failed')}: ${error.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
       console.error('Import error:', error);
-      alert(t('excellent.import_error'));
+      showCustomAlert(t('excellent.import_error'), 'error');
     } finally {
       setImporting(false);
     }
@@ -358,8 +510,10 @@ export default function ExcellentPage() {
   };
 
   const confirmDeleteProject = (project: Project) => {
+    console.log('confirmDeleteProject called with:', project);
     setProjectToDelete(project);
     setShowDeleteConfirmModal(true);
+    console.log('showDeleteConfirmModal set to true');
   };
 
   const handleEditProject = (project: Project) => {
@@ -410,12 +564,12 @@ export default function ExcellentPage() {
 
   const handleCreatePhase = async () => {
     if (!selectedProjectForPhase) {
-      alert('Please select a project for the new phase');
+      showCustomAlert('Please select a project for the new phase', 'warning');
       return;
     }
 
     if (!newPhase.name) {
-      alert('Please fill in all required fields: Name');
+      showCustomAlert('Please fill in all required fields: Name', 'warning');
       return;
     }
 
@@ -511,13 +665,18 @@ export default function ExcellentPage() {
       });
 
       if (response.ok) {
+        // Save scroll position before reloading
+        saveScrollPosition();
         loadProjects(); // Reload to get updated progress
+        updateProgressStats();
+        // Restore scroll position after reload
+        restoreScrollPosition();
       } else {
-        alert('Failed to update task progress');
+        showCustomAlert('Failed to update task progress', 'error');
       }
     } catch (error) {
       console.error('Error updating task:', error);
-      alert('Failed to update task progress');
+      showCustomAlert('Failed to update task progress', 'error');
     }
   };
 
@@ -529,7 +688,14 @@ export default function ExcellentPage() {
     
     // Calculate initial percentage
     const rect = e.currentTarget.getBoundingClientRect();
-    const percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    let percentage;
+    if (lang === 'ar') {
+      // For Arabic: reverse the direction (right to left)
+      percentage = Math.max(0, Math.min(100, ((rect.right - e.clientX) / rect.width) * 100));
+    } else {
+      // For English: normal direction (left to right)
+      percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    }
     setTempProgress(Math.round(percentage));
   };
 
@@ -540,7 +706,14 @@ export default function ExcellentPage() {
     if (!progressBar) return;
     
     const rect = progressBar.getBoundingClientRect();
-    const percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    let percentage;
+    if (lang === 'ar') {
+      // For Arabic: reverse the direction (right to left)
+      percentage = Math.max(0, Math.min(100, ((rect.right - e.clientX) / rect.width) * 100));
+    } else {
+      // For English: normal direction (left to right)
+      percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    }
     
     // Update visual progress immediately without API call
     setTempProgress(Math.round(percentage));
@@ -557,7 +730,14 @@ export default function ExcellentPage() {
     if (!progressBar) return;
     
     const rect = progressBar.getBoundingClientRect();
-    const percentage = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
+    let percentage;
+    if (lang === 'ar') {
+      // For Arabic: reverse the direction (right to left)
+      percentage = Math.max(0, Math.min(100, ((rect.right - touch.clientX) / rect.width) * 100));
+    } else {
+      // For English: normal direction (left to right)
+      percentage = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
+    }
     
     // Update visual progress immediately without API call
     setTempProgress(Math.round(percentage));
@@ -588,7 +768,11 @@ export default function ExcellentPage() {
       });
 
       if (response.ok) {
+        // Save scroll position before reloading
+        saveScrollPosition();
         loadProjects();
+        // Restore scroll position after reload
+        restoreScrollPosition();
       }
     } catch (error) {
       console.error('Error assigning employee:', error);
@@ -596,44 +780,108 @@ export default function ExcellentPage() {
   };
 
   const handleDeleteTask = async (taskId: number) => {
-    if (!confirm(t('excellent.confirm_delete_task'))) {
-      return;
+    // Find the task in the current projects
+    let currentTask: Task | null = null;
+    for (const project of projects) {
+      // Check project-level tasks
+      const foundTask = project.tasks?.find(t => t.id === taskId);
+      if (foundTask) {
+        currentTask = foundTask;
+        break;
+      }
+      // Check tasks in phases
+      for (const phase of project.phases || []) {
+        const foundTask = phase.tasks?.find(t => t.id === taskId);
+        if (foundTask) {
+          currentTask = foundTask;
+          break;
+        }
+        // Check subtasks
+        for (const task of phase.tasks || []) {
+          const foundSubtask = task.subtasks?.find(st => st.id === taskId);
+          if (foundSubtask) {
+            currentTask = foundSubtask;
+            break;
+          }
+        }
+        if (currentTask) break;
     }
+      if (currentTask) break;
+    }
+    
+    if (currentTask) {
+      setTaskToDelete(currentTask);
+      setShowDeleteTaskModal(true);
+    }
+  };
 
+  const confirmDeleteTask = async () => {
+    if (!taskToDelete) return;
+    
+    setIsDeleting(true);
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
+      const response = await fetch(`/api/tasks/${taskToDelete.id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
+        setShowDeleteTaskModal(false);
+        setTaskToDelete(null);
+        
+        // Save scroll position before reloading
+        saveScrollPosition();
         loadProjects();
+        // Restore scroll position after reload
+        restoreScrollPosition();
       } else {
-        alert('Failed to delete task');
+        showCustomAlert('Failed to delete task', 'error');
       }
     } catch (error) {
       console.error('Error deleting task:', error);
-      alert('Failed to delete task');
+      showCustomAlert('Failed to delete task', 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   const handleDeletePhase = async (phaseId: number) => {
-    if (!confirm(t('excellent.confirm_delete_phase'))) {
-      return;
+    // Find the phase in the current projects
+    let currentPhase: Phase | null = null;
+    for (const project of projects) {
+      const foundPhase = project.phases?.find(p => p.id === phaseId);
+      if (foundPhase) {
+        currentPhase = foundPhase;
+        break;
+      }
     }
+    
+    if (currentPhase) {
+      setPhaseToDelete(currentPhase);
+      setShowDeletePhaseModal(true);
+    }
+  };
 
+  const confirmDeletePhase = async () => {
+    if (!phaseToDelete) return;
+    
+    setIsDeleting(true);
     try {
-      const response = await fetch(`/api/phases/${phaseId}`, {
+      const response = await fetch(`/api/phases/${phaseToDelete.id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
+        setShowDeletePhaseModal(false);
+        setPhaseToDelete(null);
         loadProjects();
       } else {
-        alert('Failed to delete phase');
+        showCustomAlert('Failed to delete phase', 'error');
       }
     } catch (error) {
       console.error('Error deleting phase:', error);
-      alert('Failed to delete phase');
+      showCustomAlert('Failed to delete phase', 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -687,14 +935,13 @@ export default function ExcellentPage() {
     const handleCreateTask = async () => {
     // Validate required fields
     if (!newTask.name) {
-      alert('Please fill in all required fields: Name');
+      showCustomAlert('Please fill in all required fields: Name', 'warning');
       return;
     }
 
     // Validate project selection for new tasks
     if (!parentTask && !parentPhase && !parentProject && !selectedProjectForTask) {
-      alert('Please select a project for the new task');
-      return;
+      showCustomAlert('Please select a project for the new task', 'warning');
     }
 
     try {
@@ -766,7 +1013,7 @@ export default function ExcellentPage() {
       
       // Ensure we have a project_id
       if (!taskData.project_id) {
-        alert('Could not determine project for the task. Please try again.');
+        showCustomAlert('Could not determine project for the task. Please try again.', 'error');
         return;
       }
       
@@ -806,11 +1053,11 @@ export default function ExcellentPage() {
         } catch (parseError) {
           console.error('Failed to create task and parse error response');
         }
-        alert(`Failed to create task: ${errorMessage}`);
+        showCustomAlert(`Failed to create task: ${errorMessage}`, 'error');
       }
     } catch (error) {
       console.error('Error creating task:', error);
-      alert('Failed to create task. Please try again.');
+      showCustomAlert('Failed to create task. Please try again.', 'error');
     }
   };
 
@@ -1006,7 +1253,14 @@ export default function ExcellentPage() {
       if (!touch) return;
       
       const rect = e.currentTarget.getBoundingClientRect();
-      const percentage = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
+      let percentage;
+      if (lang === 'ar') {
+        // For Arabic: reverse the direction (right to left)
+        percentage = Math.max(0, Math.min(100, ((rect.right - touch.clientX) / rect.width) * 100));
+      } else {
+        // For English: normal direction (left to right)
+        percentage = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
+      }
       setTempProgress(Math.round(percentage));
     };
 
@@ -1035,22 +1289,30 @@ export default function ExcellentPage() {
       <div key={task.id} className={`border-l-2 ${colors.borderPrimary} ml-4`}>
         <div className={`p-3 ${colors.cardBgHover} border ${colors.borderPrimary} rounded-lg mb-2 transition-all duration-200`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
               {hasSubtasks && (
                 <button
                   onClick={() => toggleExpanded(`task-${task.id}`)}
                   className={`p-1 hover:${colors.cardBgHover} rounded ${colors.textPrimary}`}
                 >
                   {isExpanded ? (
-                    <ChevronDownIcon className="w-4 h-4" />
+                    lang === 'ar' ? (
+                      <ChevronUpIcon className="w-4 h-4" />
+                    ) : (
+                      <ChevronDownIcon className="w-4 h-4" />
+                    )
                   ) : (
-                    <ChevronRightIcon className="w-4 h-4" />
+                    lang === 'ar' ? (
+                      <ChevronLeftIcon className="w-4 h-4" />
+                    ) : (
+                      <ChevronRightIcon className="w-4 h-4" />
+                    )
                   )}
                 </button>
               )}
               
               <div className="flex-1">
-                <div className="flex items-center space-x-2">
+                <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
                   <h4 className={`font-medium ${colors.textPrimary}`}>
                     {task.name}
                   </h4>
@@ -1185,16 +1447,24 @@ export default function ExcellentPage() {
       <div key={phase.id} className="mb-6">
         <div className={`${colors.cardBgHover} border ${colors.borderPrimary} rounded-lg p-4 transition-all duration-200`}>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-2">
+            <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
               {hasTasks && (
                 <button
                   onClick={() => toggleExpanded(`phase-${phase.id}`)}
                   className={`p-1 hover:${colors.cardBgHover} rounded ${colors.textPrimary}`}
                 >
                   {isExpanded ? (
-                    <ChevronDownIcon className="w-4 h-4" />
+                    lang === 'ar' ? (
+                      <ChevronUpIcon className="w-4 h-4" />
+                    ) : (
+                      <ChevronDownIcon className="w-4 h-4" />
+                    )
                   ) : (
-                    <ChevronRightIcon className="w-4 h-4" />
+                    lang === 'ar' ? (
+                      <ChevronLeftIcon className="w-4 h-4" />
+                    ) : (
+                      <ChevronRightIcon className="w-4 h-4" />
+                    )
                   )}
                 </button>
               )}
@@ -1213,7 +1483,7 @@ export default function ExcellentPage() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
               <div className="text-right">
                 {/* Phase Baseline and Actual Dates */}
                 <div className="mt-2 space-y-1">
@@ -1298,16 +1568,24 @@ export default function ExcellentPage() {
       <div key={project.id} className={`${colors.cardBg} border ${colors.borderPrimary} rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-8`}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
+            <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
               {(hasPhases || hasTasks) && (
                 <button
                   onClick={() => toggleExpanded(`project-${project.id}`)}
                   className={`p-2 ${colors.cardBgHover} rounded-lg transition-colors ${colors.textPrimary}`}
                 >
                   {isExpanded ? (
-                    <ChevronDownIcon className="w-6 h-6" />
+                    lang === 'ar' ? (
+                      <ChevronUpIcon className="w-6 h-6" />
+                    ) : (
+                      <ChevronDownIcon className="w-6 h-6" />
+                    )
                   ) : (
-                    <ChevronRightIcon className="w-6 h-6" />
+                    lang === 'ar' ? (
+                      <ChevronLeftIcon className="w-6 h-6" />
+                    ) : (
+                      <ChevronRightIcon className="w-6 h-6" />
+                    )
                   )}
                 </button>
               )}
@@ -1467,7 +1745,7 @@ export default function ExcellentPage() {
     tabActiveText: isSalam ? 'text-[#003931]' : 'text-white',
     tabInactiveText: isSalam ? 'text-[#005147]' : isLight ? 'text-slate-600' : 'text-slate-400',
     tabInactiveHover: isSalam ? 'hover:bg-[#EEFDEC]' : isLight ? 'hover:bg-slate-100' : 'hover:bg-slate-800',
-    progressBg: isSalam ? 'bg-[#EEFDEC]' : isLight ? 'bg-gray-200' : 'bg-slate-700',
+            progressBg: isSalam ? 'bg-[#36C639]' : isLight ? 'bg-gray-200' : 'bg-slate-700',
     progressFill: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
     badgeSuccess: isSalam ? 'bg-[#00F000] text-[#003931]' : 'bg-green-500 text-white',
     badgeWarning: isSalam ? 'bg-[#73F64B] text-[#003931]' : 'bg-yellow-500 text-white',
@@ -1520,9 +1798,9 @@ export default function ExcellentPage() {
   };
 
   const renderProjectManagement = () => (
-    <div>
+    <div className="space-y-4">
         {/* Controls */}
-      <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg mb-8 content-animate`}>
+      <div className={`${colors.cardBg} border ${colors.borderPrimary} p-4 rounded-xl shadow-lg content-animate`}>
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               <div className="relative flex-1">
@@ -1575,8 +1853,8 @@ export default function ExcellentPage() {
         </div>
 
         {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-purple-500/50 hover:bg-gradient-to-br hover:from-purple-500/5 hover:to-transparent stagger-animate`}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-purple-500/50 hover:bg-gradient-to-br hover:from-purple-500/5 hover:to-transparent stagger-animate`}>
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm ${colors.textSecondary} mb-1`}>{t('excellent.total_projects')}</p>
@@ -1584,9 +1862,9 @@ export default function ExcellentPage() {
             </div>
             <ChartBarIcon className="w-8 h-8 text-green-400 group-hover:scale-110 transition-transform duration-200" />
           </div>
-          </div>
+        </div>
           
-        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-blue-500/50 hover:bg-gradient-to-br hover:from-blue-500/5 hover:to-transparent stagger-animate`}>
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-blue-500/50 hover:bg-gradient-to-br hover:from-blue-500/5 hover:to-transparent stagger-animate`}>
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm ${colors.textSecondary} mb-1`}>{t('excellent.active_projects')}</p>
@@ -1596,9 +1874,9 @@ export default function ExcellentPage() {
             </div>
             <CheckCircleIcon className="w-8 h-8 text-blue-400 group-hover:scale-110 transition-transform duration-200" />
           </div>
-          </div>
+        </div>
           
-        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-yellow-500/50 hover:bg-gradient-to-br hover:from-yellow-500/5 hover:to-transparent stagger-animate`}>
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-yellow-500/50 hover:bg-gradient-to-br hover:from-yellow-500/5 hover:to-transparent stagger-animate`}>
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm ${colors.textSecondary} mb-1`}>{t('excellent.completed_projects')}</p>
@@ -1608,14 +1886,14 @@ export default function ExcellentPage() {
             </div>
             <StarIcon className="w-8 h-8 text-yellow-400 group-hover:scale-110 transition-transform duration-200" />
           </div>
-          </div>
+        </div>
           
-        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-purple-500/50 hover:bg-gradient-to-br hover:from-purple-500/5 hover:to-transparent stagger-animate`}>
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-purple-500/50 hover:bg-gradient-to-br hover:from-purple-500/5 hover:to-transparent stagger-animate`}>
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm ${colors.textSecondary} mb-1`}>{t('excellent.avg_progress')}</p>
               <p className={`text-2xl font-bold ${colors.textPrimary} group-hover:text-purple-400 transition-colors duration-200`}>
-              {projects.length > 0 
+              {projects.length > 0
                 ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length)
                   : 0}%
               </p>
@@ -1623,22 +1901,20 @@ export default function ExcellentPage() {
             <ChartPieIcon className="w-8 h-8 text-purple-400 group-hover:scale-110 transition-transform duration-200" />
           </div>
         </div>
-        
-
-        </div>
+      </div>
 
         {/* Projects List */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {loading ? (
-            <div className="text-center py-12">
+            <div className="text-center py-8">
               <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className={`${colors.textSecondary}`}>{t('excellent.loading_projects')}</p>
             </div>
           ) : projects.length === 0 ? (
-            <div className="card text-center py-12">
+            <div className="card text-center py-8">
               <ChartBarIcon className={`w-16 h-16 ${colors.textSecondary} mx-auto mb-4`} />
               <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-2`}>{t('excellent.no_projects')}</h3>
-              <p className={`${colors.textSecondary} mb-6`}>{t('excellent.import_first')}</p>
+              <p className={`${colors.textSecondary} mb-4`}>{t('excellent.import_first')}</p>
               <button
                 onClick={() => setShowImportModal(true)}
                 className="btn-primary"
@@ -1669,7 +1945,7 @@ export default function ExcellentPage() {
         <ChartPieIcon className="w-16 h-16 text-blue-400 mx-auto mb-4" />
         <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-2`}>Performance Monitoring</h3>
         <p className={`${colors.textSecondary}`}>Performance monitoring and metrics tracking will be implemented here.</p>
-            </div>
+      </div>
     </div>
   );
 
@@ -1683,12 +1959,44 @@ export default function ExcellentPage() {
     </div>
   );
 
+  // Save scroll position before updates
+  const saveScrollPosition = () => {
+    setScrollPosition(window.scrollY);
+  };
+
+  // Restore scroll position after updates
+  const restoreScrollPosition = () => {
+    if (scrollPosition > 0) {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPosition);
+      }, 100);
+    }
+  };
+
+  // Smart update function that preserves scroll position
+  const smartUpdateProjects = async (updateFunction: () => Promise<void>) => {
+    saveScrollPosition();
+    setIsUpdating(true);
+    
+    try {
+      await updateFunction();
+      // Don't reload all projects, just update the specific item
+      restoreScrollPosition();
+    } catch (error) {
+      console.error('Error in smart update:', error);
+      // Only reload if there's an error
+      await loadProjects();
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen gradient-bg">
       <Navigation />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
-        <div className="page-header content-animate">
+        <div className="page-header content-animate mb-6">
           <div className="page-header-icon icon-animate">
             <StarIcon className="w-12 h-12 text-white" />
           </div>
@@ -1699,9 +2007,22 @@ export default function ExcellentPage() {
             {t('excellent.intro')}
           </p>
         </div>
+        
+
+        {/* Smart Loading Indicator */}
+        {isUpdating && (
+          <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-sm font-medium">
+                {lang === 'ar' ? 'جاري التحديث...' : 'Updating...'}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Tab Navigation */}
-        <div className="flex justify-center mb-8 content-animate">
+        <div className="flex justify-center mb-6 content-animate">
           <div className={`flex rounded-lg p-1 ${colors.cardBg} border ${colors.borderPrimary}`}>
             {tabs.map((tab) => {
               const IconComponent = tab.icon;
@@ -1794,52 +2115,195 @@ export default function ExcellentPage() {
 
       {/* Import XML Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
-            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>{t('excellent.import_xml')}</h3>
-            <p className={`${colors.textSecondary} mb-4`}>{t('excellent.import_xml_description')}</p>
-            <input
-              type="file"
-              accept=".xml"
-              onChange={handleFileSelect}
-              className={`block w-full text-sm ${colors.textSecondary} border ${colors.inputBorder} rounded-lg cursor-pointer ${colors.inputBg} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:${colors.primaryBg} file:${colors.tabActiveText} hover:file:${colors.primaryBgHover}`}
-            />
-            <div className="flex justify-end space-x-2 mt-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-8 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto`}>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className={`p-3 ${colors.iconBg} rounded-xl animate-pulse`}>
+                  <CloudArrowUpIcon className={`w-8 h-8 ${colors.primary}`} />
+                </div>
+                <div>
+                  <h3 className={`text-2xl font-bold ${colors.textPrimary}`}>{t('excellent.import_xml')}</h3>
+                  <p className={`text-sm ${colors.textSecondary}`}>
+                    {lang === 'ar' ? 'استيراد ملفات Microsoft Project XML' : 'Import Microsoft Project XML files'}
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setShowImportModal(false)}
-                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
+                className={`p-2 ${colors.cardBgHover} rounded-xl transition-colors ${colors.textSecondary} hover:${colors.textPrimary}`}
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* File Upload Area */}
+            <div 
+              className={`border-2 border-dashed ${colors.borderPrimary} rounded-xl p-8 text-center mb-6 transition-all duration-300 hover:border-green-500 hover:bg-green-50/5 cursor-pointer group`}
+              onDrop={handleFileDrop}
+              onDragOver={handleDragOver}
+            >
+              {!selectedFile ? (
+                <div>
+                  <CloudArrowUpIcon className={`w-16 h-16 ${colors.textSecondary} mx-auto mb-4 group-hover:scale-110 group-hover:${colors.primary} transition-all duration-300`} />
+                  <h4 className={`text-lg font-semibold ${colors.textPrimary} mb-2`}>
+                    {lang === 'ar' ? 'اسحب ملف XML هنا' : 'Drop your XML file here'}
+                  </h4>
+                  <p className={`text-sm ${colors.textSecondary} mb-4`}>
+                    {lang === 'ar' ? 'أو اضغط لاختيار ملف' : 'or click to browse files'}
+                  </p>
+                  <input
+                    type="file"
+                    accept=".xml"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="xml-file-input"
+                  />
+                  <label
+                    htmlFor="xml-file-input"
+                    className={`inline-flex items-center px-6 py-3 ${colors.primaryBg} text-white rounded-lg font-medium cursor-pointer hover:${colors.primaryBgHover} transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95`}
+                  >
+                    <DocumentArrowUpIcon className="w-5 h-5 mr-2" />
+                    {lang === 'ar' ? 'اختيار ملف XML' : 'Choose XML File'}
+                  </label>
+                </div>
+              ) : (
+                <div>
+                  <div className={`p-4 ${colors.iconBg} rounded-xl inline-block mb-4`}>
+                    <DocumentArrowUpIcon className={`w-12 h-12 ${colors.primary}`} />
+                  </div>
+                  <h4 className={`text-lg font-semibold ${colors.textPrimary} mb-2`}>
+                    {lang === 'ar' ? 'تم اختيار الملف' : 'File Selected'}
+                  </h4>
+                  <p className={`text-sm ${colors.textSecondary} mb-2`}>{selectedFile.name}</p>
+                  <p className={`text-xs ${colors.textSecondary}`}>
+                    {lang === 'ar' ? 'الحجم: ' : 'Size: '}
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                  <button
+                    onClick={() => setSelectedFile(null)}
+                    className={`mt-3 px-4 py-2 ${colors.cardBgHover} ${colors.textPrimary} rounded-lg text-sm hover:${colors.primary} transition-colors`}
+                  >
+                    {lang === 'ar' ? 'تغيير الملف' : 'Change File'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+
+
+            {/* File Requirements */}
+            <div className={`${colors.cardBgHover} rounded-xl p-4 mb-6`}>
+              <h5 className={`text-sm font-semibold ${colors.textPrimary} mb-2`}>
+                {lang === 'ar' ? 'متطلبات الملف:' : 'File Requirements:'}
+              </h5>
+              <ul className={`text-xs ${colors.textSecondary} space-y-1`}>
+                <li>• {lang === 'ar' ? 'صيغة الملف: Microsoft Project XML (.xml)' : 'File format: Microsoft Project XML (.xml)'}</li>
+                <li>• {lang === 'ar' ? 'الحد الأقصى لحجم الملف: 50 ميجابايت' : 'Maximum file size: 50 MB'}</li>
+                <li>• {lang === 'ar' ? 'الإصدارات المدعومة: Project 2003-2021' : 'Supported versions: Project 2003-2021'}</li>
+                <li>• {lang === 'ar' ? 'الترميز: UTF-8 موصى به' : 'Encoding: UTF-8 recommended'}</li>
+              </ul>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-end">
+              <button
+                onClick={() => setShowImportModal(false)}
+                className={`px-6 py-3 ${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} rounded-xl font-medium hover:${colors.cardBgHover} transition-all duration-200 flex-1 sm:flex-none hover:scale-105 active:scale-95`}
               >
                 {t('excellent.cancel')}
               </button>
               <button
                 onClick={handleImportXML}
-                disabled={importing}
-                className={`${colors.primaryBg} ${colors.tabActiveText} px-4 py-2 rounded-lg font-medium hover:${colors.primaryBgHover} transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
+                disabled={!selectedFile || importing}
+                className="px-6 py-3 bg-[#00f000] text-white rounded-xl font-medium hover:bg-[#00d400] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
               >
-                {importing ? `${t('excellent.importing')}...` : t('excellent.import_xml')}
+                {importing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>{lang === 'ar' ? 'جاري الاستيراد...' : 'Importing...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <CloudArrowUpIcon className="w-5 h-5" />
+                    <span>{t('excellent.import_xml')}</span>
+                  </>
+                )}
               </button>
             </div>
+
+            {/* Progress Bar (shown during import) */}
+            {importing && (
+              <div className="mt-6">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className={colors.textSecondary}>
+                    {lang === 'ar' ? 'معالجة ملف XML...' : 'Processing XML file...'}
+                  </span>
+                  <span className={colors.textSecondary}>100%</span>
+                </div>
+                <div className={`w-full ${colors.progressBg} rounded-full h-2`}>
+                  <div className={`${colors.progressFill} rounded-full h-2 transition-all duration-500`} style={{ width: '100%' }}></div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirmModal && projectToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
-            <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4`}>{t('excellent.confirm_delete')}</h3>
-            <p className={`${colors.textSecondary} mb-6`}>{t('excellent.deleteConfirm')}</p>
-            <div className="flex justify-end space-x-2">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-xl font-semibold ${colors.textPrimary}`}>{t('excellent.confirm_delete')}</h3>
               <button
                 onClick={() => setShowDeleteConfirmModal(false)}
-                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200`}
+                className={`p-2 transition-colors ${
+                  isSalam ? 'text-[#005147] hover:text-[#003931]' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <div className={`text-center mb-4 ${
+                isSalam ? 'text-[#003931]' : 'text-white'
+              }`}>
+                <p className={`text-lg font-medium mb-2 ${
+                  isSalam ? 'text-[#003931]' : 'text-white'
+                }`}>
+                  {lang === "ar" ? "هل أنت متأكد من حذف" : "Are you sure you want to delete"}
+                </p>
+                <p className={`text-sm ${
+                  isSalam ? 'text-[#005147]' : 'text-slate-300'
+                }`}>
+                  {projectToDelete.name}
+                </p>
+                <p className={`text-xs mt-2 ${
+                  isSalam ? 'text-[#FF6B6B]' : 'text-red-400'
+                }`}>
+                  {lang === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone"}
+                </p>
+              </div>
+            </div>
+
+            <div className={`flex items-center ${
+              lang === "ar" ? "space-x-reverse space-x-4" : "space-x-4"
+            }`}>
+              <button
+                onClick={() => setShowDeleteConfirmModal(false)}
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200 flex-1`}
               >
                 {t('excellent.cancel')}
               </button>
               <button
                 onClick={handleDeleteProject}
                 disabled={isDeleting}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-1 ${
+                  isSalam ? '!bg-[#FF6B6B] hover:!bg-[#FF5252]' : ''
+                }`}
               >
                 {isDeleting ? `${t('excellent.deleting')}...` : t('excellent.delete')}
               </button>
@@ -2529,7 +2993,192 @@ export default function ExcellentPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Phase Confirmation Modal */}
+      {showDeletePhaseModal && phaseToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-xl font-semibold ${colors.textPrimary}`}>{t('excellent.confirm_delete')}</h3>
+              <button
+                onClick={() => setShowDeletePhaseModal(false)}
+                className={`p-2 transition-colors ${
+                  isSalam ? 'text-[#005147] hover:text-[#003931]' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <div className={`text-center mb-4 ${
+                isSalam ? 'text-[#003931]' : 'text-white'
+              }`}>
+                <p className={`text-lg font-medium mb-2 ${
+                  isSalam ? 'text-[#003931]' : 'text-white'
+                }`}>
+                  {lang === "ar" ? "هل أنت متأكد من حذف المرحلة" : "Are you sure you want to delete the phase"}
+                </p>
+                <p className={`text-sm ${
+                  isSalam ? 'text-[#005147]' : 'text-slate-300'
+                }`}>
+                  {phaseToDelete.name}
+                </p>
+                <p className={`text-xs mt-2 ${
+                  isSalam ? 'text-[#FF6B6B]' : 'text-red-400'
+                }`}>
+                  {lang === "ar" ? "سيتم حذف جميع المهام في هذه المرحلة" : "All tasks in this phase will be deleted"}
+                </p>
+                <p className={`text-xs mt-1 ${
+                  isSalam ? 'text-[#FF6B6B]' : 'text-red-400'
+                }`}>
+                  {lang === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone"}
+                </p>
+              </div>
+            </div>
+
+            <div className={`flex items-center ${
+              lang === "ar" ? "space-x-reverse space-x-4" : "space-x-4"
+            }`}>
+              <button
+                onClick={() => setShowDeletePhaseModal(false)}
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200 flex-1`}
+              >
+                {t('excellent.cancel')}
+              </button>
+              <button
+                onClick={confirmDeletePhase}
+                disabled={isDeleting}
+                className={`bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-1 ${
+                  isSalam ? '!bg-[#FF6B6B] hover:!bg-[#FF5252]' : ''
+                }`}
+              >
+                {isDeleting ? `${t('excellent.deleting')}...` : t('excellent.delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Task Confirmation Modal */}
+      {showDeleteTaskModal && taskToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-lg shadow-xl w-full max-w-md`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-xl font-semibold ${colors.textPrimary}`}>{t('excellent.confirm_delete')}</h3>
+              <button
+                onClick={() => setShowDeleteTaskModal(false)}
+                className={`p-2 transition-colors ${
+                  isSalam ? 'text-[#005147] hover:text-[#003931]' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <div className={`text-center mb-4 ${
+                isSalam ? 'text-[#003931]' : 'text-white'
+              }`}>
+                <p className={`text-lg font-medium mb-2 ${
+                  isSalam ? 'text-[#003931]' : 'text-white'
+                }`}>
+                  {lang === "ar" ? "هل أنت متأكد من حذف المهمة" : "Are you sure you want to delete the task"}
+                </p>
+                <p className={`text-sm ${
+                  isSalam ? 'text-[#005147]' : 'text-slate-300'
+                }`}>
+                  {taskToDelete.name}
+                </p>
+                <p className={`text-xs mt-1 ${
+                  isSalam ? 'text-[#FF6B6B]' : 'text-red-400'
+                }`}>
+                  {lang === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone"}
+                </p>
+              </div>
+            </div>
+
+            <div className={`flex items-center ${
+              lang === "ar" ? "space-x-reverse space-x-4" : "space-x-4"
+            }`}>
+              <button
+                onClick={() => setShowDeleteTaskModal(false)}
+                className={`${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary} px-4 py-2 rounded-lg font-medium hover:${colors.cardBgHover} transition-all duration-200 flex-1`}
+              >
+                {t('excellent.cancel')}
+              </button>
+              <button
+                onClick={confirmDeleteTask}
+                disabled={isDeleting}
+                className={`bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-1 ${
+                  isSalam ? '!bg-[#FF6B6B] hover:!bg-[#FF5252]' : ''
+                }`}
+              >
+                {isDeleting ? `${t('excellent.deleting')}...` : t('excellent.delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Alert Modal */}
+      {showAlertModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`${colors.cardBg} border ${colors.borderPrimary} p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100`}>
+            {/* Icon */}
+            <div className="text-center mb-6">
+              <div className={`inline-flex p-4 rounded-full ${
+                alertType === 'success' ? 'bg-green-100 text-green-600' :
+                alertType === 'error' ? 'bg-red-100 text-red-600' :
+                alertType === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                'bg-blue-100 text-blue-600'
+              }`}>
+                {alertType === 'success' && (
+                  <CheckCircleIcon className="w-12 h-12" />
+                )}
+                {alertType === 'error' && (
+                  <ExclamationTriangleIcon className="w-12 h-12" />
+                )}
+                {alertType === 'warning' && (
+                  <ExclamationTriangleIcon className="w-12 h-12" />
+                )}
+                {alertType === 'info' && (
+                  <ChartBarIcon className="w-12 h-12" />
+                )}
+              </div>
+            </div>
+
+            {/* Message */}
+            <div className="text-center mb-8">
+              <h3 className={`text-xl font-bold ${colors.textPrimary} mb-2`}>
+                {alertType === 'success' ? (lang === 'ar' ? 'نجح!' : 'Success!') :
+                 alertType === 'error' ? (lang === 'ar' ? 'خطأ!' : 'Error!') :
+                 alertType === 'warning' ? (lang === 'ar' ? 'تحذير!' : 'Warning!') :
+                 (lang === 'ar' ? 'معلومات' : 'Info')}
+              </h3>
+              <p className={`text-lg ${colors.textSecondary}`}>
+                {alertMessage}
+              </p>
+            </div>
+
+            {/* Button */}
+            <div className="text-center">
+              <button
+                onClick={() => setShowAlertModal(false)}
+                className={`px-8 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 ${
+                  alertType === 'success' ? 'bg-green-600 text-white hover:bg-green-700' :
+                  alertType === 'error' ? 'bg-red-600 text-white hover:bg-red-700' :
+                  alertType === 'warning' ? 'bg-yellow-600 text-white hover:bg-yellow-700' :
+                  'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                {lang === 'ar' ? 'حسناً' : 'OK'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </main>
     </div>
   );
-} 
+}

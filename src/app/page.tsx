@@ -520,7 +520,7 @@ export default function HomePage() {
 
             {/* Progress Circles */}
             <section className="content-animate">
-              <div className="card-hover group p-6 rounded-xl bg-[#101e2c] border border-slate-600">
+              <div className="p-6 rounded-xl bg-[#ffffff] border border-slate-600">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Tasks Completion */}
                   <div className="flex flex-col items-center">
@@ -595,14 +595,14 @@ export default function HomePage() {
             <section className="content-animate">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Projects */}
-                <div className={`p-6 rounded-xl ${isSalam ? 'bg-white border border-[#003931]' : 'card-hover group bg-[#101e2c] border border-slate-600'}`}>
+                <div className={`p-6 rounded-xl ${isSalam ? 'bg-white border border-[#003931]' : 'bg-[#101e2c] border border-slate-600'}`}>
                   <div className="flex items-center gap-3 mb-4">
                     <ChartBarIcon className={`w-6 h-6 ${isSalam ? 'text-[#36C639]' : 'text-blue-400'}`} />
                     <h2 className={`text-lg font-bold ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{lang === 'ar' ? 'المشاريع المرتبطة' : 'Related Projects'}</h2>
                   </div>
                   <div className="space-y-3">
                     {projectsData.slice(0, 2).map((p) => (
-                      <div key={p.id} className={`flex items-center justify-between rounded-lg px-4 py-3 ${isSalam ? 'bg-[#EEFDEC] border border-[#003931]' : 'bg-slate-800'}`}>
+                      <div key={p.id} className={`flex items-center justify-between rounded-lg px-4 py-3 ${isSalam ? 'bg-[#EEFDEC] border border-[#003931]' : 'bg-slate-800'} hover:bg-slate-700 hover:scale-105 transition-all duration-200 cursor-pointer`}>
                         <span className={`font-bold text-sm ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{p.name}</span>
                         <span className={`px-2 py-1 rounded-lg text-xs font-semibold text-white ${isSalam ? 'bg-[#00F000]' : 'bg-green-600'}`}>{p.status}</span>
                       </div>
@@ -611,14 +611,14 @@ export default function HomePage() {
                 </div>
 
                 {/* Tasks */}
-                <div className={`p-6 rounded-xl ${isSalam ? 'bg-white border border-[#003931]' : 'card-hover group bg-[#101e2c] border border-slate-600'}`}>
+                <div className={`p-6 rounded-xl ${isSalam ? 'bg-white border border-[#003931]' : 'bg-[#101e2c] border border-slate-600'}`}>
                   <div className="flex items-center gap-3 mb-4">
                     <ClipboardDocumentCheckIcon className={`w-6 h-6 ${isSalam ? 'text-[#73F64B]' : 'text-yellow-400'}`} />
                     <h2 className={`text-lg font-bold ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{lang === 'ar' ? 'المهام المرتبطة' : 'Related Tasks'}</h2>
                   </div>
                   <div className="space-y-3">
                     {tasksData.slice(0, 2).map((t) => (
-                      <div key={t.id} className={`flex items-center justify-between rounded-lg px-4 py-3 ${isSalam ? 'bg-[#EEFDEC] border border-[#003931]' : 'bg-slate-800'}`}>
+                      <div key={t.id} className={`flex items-center justify-between rounded-lg px-4 py-3 ${isSalam ? 'bg-[#EEFDEC] border border-[#003931]' : 'bg-slate-800'} hover:bg-slate-700 hover:scale-105 transition-all duration-200 cursor-pointer`}>
                         <span className={`font-bold text-sm ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{t.title}</span>
                         <span className={`px-2 py-1 rounded-lg text-xs font-semibold text-white ${isSalam ? 'bg-[#36C639]' : 'bg-blue-600'}`}>{t.status}</span>
                       </div>
@@ -636,7 +636,7 @@ export default function HomePage() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {activeProjects.map((project) => (
-                  <div key={project.id} className="card card-hover p-6">
+                  <div key={project.id} className="card p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-lg">{project.name}</h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${

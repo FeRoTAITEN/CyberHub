@@ -65,7 +65,7 @@ export default function NewsPage() {
 
   // تحديد ما إذا كان الثيم Salam أم لا
   const isSalam = theme === 'salam';
-
+  
   // تضمين سكربت تويتر مرة واحدة فقط
   useEffect(() => {
     if (window && twitterRef.current && !twitterRef.current.querySelector('iframe')) {
@@ -108,8 +108,8 @@ export default function NewsPage() {
           <div className="flex items-center gap-3 mb-6">
             <NewspaperIcon className={`w-6 h-6 ${isSalam ? 'text-[#36C639]' : 'text-green-400'}`} />
                       <h2 className={`${isSalam ? 'section-title' : 'heading-2'}`}>
-            {lang === 'ar' ? 'الأخبار والتحديثات الداخلية' : 'Internal News & Updates'}
-          </h2>
+              {lang === 'ar' ? 'الأخبار والتحديثات الداخلية' : 'Internal News & Updates'}
+            </h2>
           </div>
           <div className="space-y-6">
             {internalNewsData.map((item, index) => (

@@ -2205,3 +2205,66 @@
   border-radius: 1rem;
   box-shadow: 0 2px 8px 0 rgba(0, 240, 0, 0.15);
 }
+
+/* Custom spacing for Arabic language */
+.rtl-spacing {
+  direction: rtl;
+}
+
+.rtl-spacing .space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.rtl-spacing .space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.rtl-spacing .space-y-8 > * + * {
+  margin-top: 2rem;
+}
+
+/* Improved margins for Arabic */
+.rtl-spacing .mb-4 {
+  margin-bottom: 1rem;
+}
+
+.rtl-spacing .mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.rtl-spacing .mb-8 {
+  margin-bottom: 2rem;
+}
+
+/* Compact padding for Arabic */
+.rtl-spacing .p-4 {
+  padding: 1rem;
+}
+
+.rtl-spacing .p-6 {
+  padding: 1.5rem;
+}
+
+.rtl-spacing .p-8 {
+  padding: 2rem;
+}
+
+/* Improved gaps for Arabic */
+.rtl-spacing .gap-4 {
+  gap: 1rem;
+}
+
+.rtl-spacing .gap-6 {
+  gap: 1.5rem;
+}
+
+/* Compact spacing for Arabic */
+.rtl-spacing .py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.rtl-spacing .py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}

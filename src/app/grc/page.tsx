@@ -250,7 +250,7 @@ export default function GRCPage() {
     setShowUploadModal(true);
   };
 
-    const handleDelete = async (policyId: number) => {
+  const handleDelete = async (policyId: number) => {
     const currentPolicy = policies.find(p => p.id === policyId) || 
                          standards.find(s => s.id === policyId) || 
                          procedures.find(p => p.id === policyId);
@@ -264,36 +264,36 @@ export default function GRCPage() {
   const confirmDelete = async () => {
     if (!policyToDelete) return;
     
-    setIsLoading(true);
-    try {
+      setIsLoading(true);
+      try {
       let endpoint = `/api/policies/${policyToDelete.id}`;
-      if (activeTab === 'standards') {
+        if (activeTab === 'standards') {
         endpoint = `/api/standards/${policyToDelete.id}`;
-      } else if (activeTab === 'procedures') {
-        endpoint = `/api/procedures/${policyToDelete.id}`;
-      }
-
-      const response = await fetch(endpoint, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        if (activeTab === 'policies') {
-          setPolicies(policies.filter((p) => p.id !== policyToDelete.id));
-        } else if (activeTab === 'standards') {
-          setStandards(standards.filter((s) => s.id !== policyToDelete.id));
         } else if (activeTab === 'procedures') {
-          setProcedures(procedures.filter((p) => p.id !== policyToDelete.id));
+        endpoint = `/api/procedures/${policyToDelete.id}`;
         }
+
+        const response = await fetch(endpoint, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          if (activeTab === 'policies') {
+          setPolicies(policies.filter((p) => p.id !== policyToDelete.id));
+          } else if (activeTab === 'standards') {
+          setStandards(standards.filter((s) => s.id !== policyToDelete.id));
+          } else if (activeTab === 'procedures') {
+          setProcedures(procedures.filter((p) => p.id !== policyToDelete.id));
+          }
         setShowDeleteModal(false);
         setPolicyToDelete(null);
-      } else {
+        } else {
         console.error(`Failed to delete ${activeTab}`);
-      }
-    } catch (error) {
+        }
+      } catch (error) {
       console.error(`Error deleting ${activeTab}:`, error);
-    } finally {
-      setIsLoading(false);
+      } finally {
+        setIsLoading(false);
     }
   };
 
@@ -545,54 +545,54 @@ export default function GRCPage() {
 
         {/* Governance Sub Tab Switcher - Only show when governance is active */}
         {activeMainTab === 'governance' && (
-          <div className="flex justify-center mb-8 content-animate">
-            <div className={`flex rounded-lg p-1 ${
-              isSalam ? 'bg-white border border-[#003931]' : 'bg-slate-900 border border-slate-700'
-            }`}>
-              <button
-                onClick={() => setActiveTab('policies')}
-                className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
-                  activeTab === 'policies'
-                    ? isSalam 
-                      ? 'bg-[#00F000] text-[#003931] shadow-lg'
-                      : 'bg-green-500 text-white shadow-lg'
-                    : isSalam
-                      ? 'text-[#005147] hover:text-[#003931] hover:bg-[#EEFDEC]'
-                      : 'text-slate-400 hover:text-white'
-                }`}
-              >
+        <div className="flex justify-center mb-8 content-animate">
+          <div className={`flex rounded-lg p-1 ${
+            isSalam ? 'bg-white border border-[#003931]' : 'bg-slate-900 border border-slate-700'
+          }`}>
+            <button
+              onClick={() => setActiveTab('policies')}
+              className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
+                activeTab === 'policies'
+                  ? isSalam 
+                    ? 'bg-[#00F000] text-[#003931] shadow-lg'
+                    : 'bg-green-500 text-white shadow-lg'
+                  : isSalam
+                    ? 'text-[#005147] hover:text-[#003931] hover:bg-[#EEFDEC]'
+                    : 'text-slate-400 hover:text-white'
+              }`}
+            >
                 {t('grc.policies_tab')}
-              </button>
-              <button
-                onClick={() => setActiveTab('standards')}
-                className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
-                  activeTab === 'standards'
-                    ? isSalam 
-                      ? 'bg-[#00F000] text-[#003931] shadow-lg'
-                      : 'bg-green-500 text-white shadow-lg'
-                    : isSalam
-                      ? 'text-[#005147] hover:text-[#003931] hover:bg-[#EEFDEC]'
-                      : 'text-slate-400 hover:text-white'
-                }`}
-              >
+            </button>
+            <button
+              onClick={() => setActiveTab('standards')}
+              className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
+                activeTab === 'standards'
+                  ? isSalam 
+                    ? 'bg-[#00F000] text-[#003931] shadow-lg'
+                    : 'bg-green-500 text-white shadow-lg'
+                  : isSalam
+                    ? 'text-[#005147] hover:text-[#003931] hover:bg-[#EEFDEC]'
+                    : 'text-slate-400 hover:text-white'
+              }`}
+            >
                 {t('grc.standards_tab')}
-              </button>
-              <button
-                onClick={() => setActiveTab('procedures')}
-                className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
-                  activeTab === 'procedures'
-                    ? isSalam 
-                      ? 'bg-[#00F000] text-[#003931] shadow-lg'
-                      : 'bg-green-500 text-white shadow-lg'
-                    : isSalam
-                      ? 'text-[#005147] hover:text-[#003931] hover:bg-[#EEFDEC]'
-                      : 'text-slate-400 hover:text-white'
-                }`}
-              >
+            </button>
+            <button
+              onClick={() => setActiveTab('procedures')}
+              className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
+                activeTab === 'procedures'
+                  ? isSalam 
+                    ? 'bg-[#00F000] text-[#003931] shadow-lg'
+                    : 'bg-green-500 text-white shadow-lg'
+                  : isSalam
+                    ? 'text-[#005147] hover:text-[#003931] hover:bg-[#EEFDEC]'
+                    : 'text-slate-400 hover:text-white'
+              }`}
+            >
                 {t('grc.procedures_tab')}
-              </button>
-            </div>
+            </button>
           </div>
+        </div>
         )}
 
         {/* Main Tab Content */}
@@ -650,86 +650,86 @@ export default function GRCPage() {
         {/* Governance Content - Only show when governance is active */}
         {activeMainTab === 'governance' && (
           <>
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 content-animate">
-              <div className={`text-center p-8 stagger-animate ${
-                isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
-              }`}>
-                <div className={`text-3xl font-bold mb-3 ${
-                  isSalam ? 'text-[#00F000]' : 'text-green-400'
-                }`}>
-                  {currentData.length}
-                </div>
-                <div className={`text-sm font-medium ${
-                  isSalam ? 'text-[#005147]' : 'text-slate-300'
-                }`}>
-                  {activeTab === 'policies' ? t("grc.total_policies") : 
-                   activeTab === 'standards' ? (lang === 'ar' ? 'إجمالي المعايير' : 'Total Standards') :
-                   (lang === 'ar' ? 'إجمالي الإجراءات' : 'Total Procedures')}
-                </div>
-              </div>
-              <div className={`text-center p-8 stagger-animate ${
-                isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
-              }`}>
-                <div className={`text-3xl font-bold mb-3 ${
-                  isSalam ? 'text-[#36C639]' : 'text-blue-400'
-                }`}>
-                  {totalDownloads}
-                </div>
-                <div className={`text-sm font-medium ${
-                  isSalam ? 'text-[#005147]' : 'text-slate-300'
-                }`}>
-                  {t("grc.total_downloads")}
-                </div>
-              </div>
-              <div className={`text-center p-8 stagger-animate ${
-                isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
-              }`}>
-                <div className={`text-3xl font-bold mb-3 ${
-                  isSalam ? 'text-[#73F64B]' : 'text-purple-400'
-                }`}>
-                  {totalViews}
-                </div>
-                <div className={`text-sm font-medium ${
-                  isSalam ? 'text-[#005147]' : 'text-slate-300'
-                }`}>
-                  {t("grc.total_views")}
-                </div>
-              </div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 content-animate">
+          <div className={`text-center p-8 stagger-animate ${
+            isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
+          }`}>
+            <div className={`text-3xl font-bold mb-3 ${
+              isSalam ? 'text-[#00F000]' : 'text-green-400'
+            }`}>
+              {currentData.length}
             </div>
+            <div className={`text-sm font-medium ${
+              isSalam ? 'text-[#005147]' : 'text-slate-300'
+            }`}>
+              {activeTab === 'policies' ? t("grc.total_policies") : 
+               activeTab === 'standards' ? (lang === 'ar' ? 'إجمالي المعايير' : 'Total Standards') :
+               (lang === 'ar' ? 'إجمالي الإجراءات' : 'Total Procedures')}
+            </div>
+          </div>
+          <div className={`text-center p-8 stagger-animate ${
+            isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
+          }`}>
+            <div className={`text-3xl font-bold mb-3 ${
+              isSalam ? 'text-[#36C639]' : 'text-blue-400'
+            }`}>
+              {totalDownloads}
+            </div>
+            <div className={`text-sm font-medium ${
+              isSalam ? 'text-[#005147]' : 'text-slate-300'
+            }`}>
+              {t("grc.total_downloads")}
+            </div>
+          </div>
+          <div className={`text-center p-8 stagger-animate ${
+            isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
+          }`}>
+            <div className={`text-3xl font-bold mb-3 ${
+              isSalam ? 'text-[#73F64B]' : 'text-purple-400'
+            }`}>
+              {totalViews}
+            </div>
+            <div className={`text-sm font-medium ${
+              isSalam ? 'text-[#005147]' : 'text-slate-300'
+            }`}>
+              {t("grc.total_views")}
+            </div>
+          </div>
+        </div>
           </>
         )}
 
         {/* Management Section - Only show when governance is active */}
         {activeMainTab === 'governance' && (
-          <div className={`p-8 mb-12 content-animate ${
-            isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
-          }`}>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className={`text-2xl font-bold ${
+        <div className={`p-8 mb-12 content-animate ${
+          isSalam ? 'bg-white border border-[#003931] rounded-xl shadow-lg' : 'card'
+        }`}>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className={`text-2xl font-bold ${
                 isSalam ? 'section-title' : 'text-white'
-              }`}>
-                {activeTab === 'policies' ? t("grc.policy_management") : 
-                 activeTab === 'standards' ? (lang === 'ar' ? 'إدارة المعايير' : 'Standards Management') :
-                 (lang === 'ar' ? 'إدارة الإجراءات' : 'Procedures Management')}
-              </h2>
-              <button
-                onClick={() => {
-                  resetForm();
-                  setShowUploadModal(true);
-                }}
-                className={`flex items-center px-6 py-3 rounded-lg transition-all duration-200 ${
-                  isSalam 
-                    ? 'bg-[#00F000] text-[#003931] hover:bg-[#73F64B] shadow-lg'
-                    : 'btn-primary hover:bg-green-700'
-                }`}
-              >
-                <PlusIcon className={`w-5 h-5 ${lang === "ar" ? "ml-2" : "mr-2"}`} />
-                {activeTab === 'policies' ? t("grc.upload_policy") : 
-                 activeTab === 'standards' ? (lang === 'ar' ? 'رفع معيار' : 'Upload Standard') :
-                 (lang === 'ar' ? 'رفع إجراء' : 'Upload Procedure')}
-              </button>
-            </div>
+            }`}>
+              {activeTab === 'policies' ? t("grc.policy_management") : 
+               activeTab === 'standards' ? (lang === 'ar' ? 'إدارة المعايير' : 'Standards Management') :
+               (lang === 'ar' ? 'إدارة الإجراءات' : 'Procedures Management')}
+            </h2>
+            <button
+              onClick={() => {
+                resetForm();
+                setShowUploadModal(true);
+              }}
+              className={`flex items-center px-6 py-3 rounded-lg transition-all duration-200 ${
+                isSalam 
+                  ? 'bg-[#00F000] text-[#003931] hover:bg-[#73F64B] shadow-lg'
+                  : 'btn-primary hover:bg-green-700'
+              }`}
+            >
+              <PlusIcon className={`w-5 h-5 ${lang === "ar" ? "ml-2" : "mr-2"}`} />
+              {activeTab === 'policies' ? t("grc.upload_policy") : 
+               activeTab === 'standards' ? (lang === 'ar' ? 'رفع معيار' : 'Upload Standard') :
+               (lang === 'ar' ? 'رفع إجراء' : 'Upload Procedure')}
+            </button>
+          </div>
 
           {/* Policies Table */}
           <div className="overflow-x-auto">
@@ -821,72 +821,72 @@ export default function GRCPage() {
                     <td className="py-6 px-4">
                       <div className="space-y-2">
                         {/* Row 1: View, Download, Update */}
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handleView(policy)}
-                            className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
-                              isSalam 
-                                ? 'bg-[#36C639]/10 hover:bg-[#36C639]/20 text-[#36C639]'
-                                : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-400'
-                            }`}
-                            title={t("grc.view")}
-                          >
-                            <EyeIcon className="w-4 h-4" />
-                          </button>
-                          
-                          <button
-                            onClick={() => handleDownload(policy)}
-                            className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
-                              isSalam 
-                                ? 'bg-[#00F000]/10 hover:bg-[#00F000]/20 text-[#00F000]'
-                                : 'bg-green-500/10 hover:bg-green-500/20 text-green-400'
-                            }`}
-                            title={t("grc.download")}
-                          >
-                            <ArrowDownTrayIcon className="w-4 h-4" />
-                          </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleView(policy)}
+                          className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                            isSalam 
+                              ? 'bg-[#36C639]/10 hover:bg-[#36C639]/20 text-[#36C639]'
+                              : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-400'
+                          }`}
+                          title={t("grc.view")}
+                        >
+                          <EyeIcon className="w-4 h-4" />
+                        </button>
+                        
+                        <button
+                          onClick={() => handleDownload(policy)}
+                          className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                            isSalam 
+                              ? 'bg-[#00F000]/10 hover:bg-[#00F000]/20 text-[#00F000]'
+                              : 'bg-green-500/10 hover:bg-green-500/20 text-green-400'
+                          }`}
+                          title={t("grc.download")}
+                        >
+                          <ArrowDownTrayIcon className="w-4 h-4" />
+                        </button>
 
-                          <button
-                            onClick={() => handleUpdateFile(policy)}
-                            className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
-                              isSalam 
-                                ? 'bg-[#73F64B]/10 hover:bg-[#73F64B]/20 text-[#73F64B]'
-                                : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400'
-                            }`}
-                            title={lang === "ar" ? "تحديث الملف" : "Update File"}
-                          >
-                            <CloudArrowUpIcon className="w-4 h-4" />
-                          </button>
+                        <button
+                          onClick={() => handleUpdateFile(policy)}
+                          className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                            isSalam 
+                              ? 'bg-[#73F64B]/10 hover:bg-[#73F64B]/20 text-[#73F64B]'
+                              : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400'
+                          }`}
+                          title={lang === "ar" ? "تحديث الملف" : "Update File"}
+                        >
+                          <CloudArrowUpIcon className="w-4 h-4" />
+                        </button>
                         </div>
 
                         {/* Row 2: Hide/Show, Archive, Delete */}
                         <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handleToggleVisibility(policy)}
-                            className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
-                              policy.is_visible 
-                                ? 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-400' 
-                                : 'bg-red-500/10 hover:bg-red-500/20 text-red-400'
-                            }`}
-                            title={policy.is_visible ? t("grc.hide") : t("grc.show")}
-                          >
-                            <EyeSlashIcon className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleViewVersions(policy)}
-                            className="p-2 bg-gray-500/10 hover:bg-gray-500/20 text-gray-400 rounded-lg transition-all duration-200 hover:scale-110"
-                            title={t("grc.archive")}
-                          >
-                            <ArchiveBoxIcon className="w-4 h-4" />
-                          </button>
-                          
-                          <button
-                            onClick={() => handleDelete(policy.id)}
-                            className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all duration-200 hover:scale-110"
-                            title={t("grc.delete")}
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
+                        <button
+                          onClick={() => handleToggleVisibility(policy)}
+                          className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                            policy.is_visible 
+                              ? 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-400' 
+                              : 'bg-red-500/10 hover:bg-red-500/20 text-red-400'
+                          }`}
+                          title={policy.is_visible ? t("grc.hide") : t("grc.show")}
+                        >
+                          <EyeSlashIcon className="w-4 h-4" />
+                  </button>
+                        <button
+                          onClick={() => handleViewVersions(policy)}
+                          className="p-2 bg-gray-500/10 hover:bg-gray-500/20 text-gray-400 rounded-lg transition-all duration-200 hover:scale-110"
+                          title={t("grc.archive")}
+                        >
+                          <ArchiveBoxIcon className="w-4 h-4" />
+                        </button>
+                        
+                        <button
+                          onClick={() => handleDelete(policy.id)}
+                          className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all duration-200 hover:scale-110"
+                          title={t("grc.delete")}
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
                         </div>
                       </div>
                     </td>
