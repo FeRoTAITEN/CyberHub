@@ -58,7 +58,7 @@ export default function SurveyPermanentPage({ params }: { params: Promise<{ toke
         setLoading(false);
         setError(t("survey.expired"));
       });
-  }, [token]);
+  }, [token, t]);
 
   // Validate form field function removed as it was unused
 

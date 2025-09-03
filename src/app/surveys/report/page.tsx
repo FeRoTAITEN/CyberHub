@@ -1337,7 +1337,7 @@ export default function SurveyReportPage() {
         value: `${lowRatings} | ${mediumRatings} | ${highRatings}`
       },
     ];
-  }, [surveys, t, lang, loading]);
+  }, [surveys, t, lang]);
 
   // Calculate rating statistics for pie charts with real-time updates
   const ratingStats = useMemo((): Array<{
@@ -1399,7 +1399,7 @@ export default function SurveyReportPage() {
     }
     
     return stats;
-  }, [surveys, lang, responses, loading]);
+  }, [surveys, lang]);
 
   // Reset pagination when rating stats change
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Navigation from '@/components/Navigation';
 import {
   ShieldCheckIcon,
@@ -172,23 +172,7 @@ export default function CyberGuardianGame() {
   const isLastScenario = currentScenario >= currentLevelData.scenarios.length;
 
   // عدل المؤقت:
-  useEffect(() => {
-    if (!gameStarted || gameCompleted || isPaused) return;
 
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          // إذا لم يتم اختيار إجابة، انتقل مباشرة بدون نقاط
-          setAutoAdvance(true);
-          handleNextScenario();
-          return 30;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [gameStarted, gameCompleted, isPaused]);
 
   // استخدم useEffect للانتقال التلقائي عند تجاوز عدد الأسئلة
   useEffect(() => {
@@ -201,8 +185,7 @@ export default function CyberGuardianGame() {
         setGameCompleted(true);
       }
     }
-    // eslint-disable-next-line
-  }, [currentScenario, currentLevel, gameCompleted]);
+  }, [currentScenario, currentLevel, gameCompleted, currentLevelData.scenarios.length]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -226,7 +209,7 @@ export default function CyberGuardianGame() {
   };
 
   // في handleNextScenario أعد autoAdvance إلى false
-  const handleNextScenario = () => {
+  const handleNextScenario = useCallback(() => {
     setAutoAdvance(false);
     // إذا تجاوزنا عدد الأسئلة في المرحلة الحالية، انتقل تلقائياً للمرحلة التالية أو النتيجة
     if (currentScenario >= currentLevelData.scenarios.length) {
@@ -243,9 +226,26 @@ export default function CyberGuardianGame() {
       setCurrentScenario(prev => prev + 1);
       setTimeLeft(30);
     }
-  };
+  }, [currentScenario, currentLevel, currentLevelData.scenarios.length]);
 
+  // Timer effect with handleNextScenario dependency
+  useEffect(() => {
+    if (!gameStarted || gameCompleted || isPaused) return;
 
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          // إذا لم يتم اختيار إجابة، انتقل مباشرة بدون نقاط
+          setAutoAdvance(true);
+          handleNextScenario();
+          return 30;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameStarted, gameCompleted, isPaused, handleNextScenario]);
 
   const resetGame = () => {
     setCurrentLevel(0);

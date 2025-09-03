@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Navigation from '@/components/Navigation';
 import {
   ShieldCheckIcon,
@@ -184,26 +184,9 @@ export default function DigitalFortressGame() {
     if (gameStarted && !gameCompleted) {
       setBudget(currentLevelData.budget);
     }
-  }, [currentLevel, gameStarted, gameCompleted]);
+  }, [currentLevel, gameStarted, gameCompleted, currentLevelData.budget]);
 
-  // Timer effect
-  useEffect(() => {
-    if (!gameStarted || gameCompleted || isPaused) return;
 
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          // إذا لم يتم اختيار مكونات، انتقل مباشرة بدون نقاط
-          setAutoAdvance(true);
-          handleEvaluate();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [gameStarted, gameCompleted, isPaused]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -230,7 +213,26 @@ export default function DigitalFortressGame() {
     }
   };
 
-  const handleEvaluate = () => {
+  const handleNextLevel = useCallback(() => {
+    if (nextLevelCalled.current) return; // منع الاستدعاءات المتعددة
+    
+    nextLevelCalled.current = true;
+    setAutoAdvance(false);
+    if (currentLevel < levels.length - 1) {
+      setCurrentLevel(prev => prev + 1);
+      setTimeLeft(90);
+      setBudget(levels[currentLevel + 1].budget);
+    } else {
+      setGameCompleted(true);
+    }
+    
+    // إعادة تعيين بعد فترة قصيرة
+    setTimeout(() => {
+      nextLevelCalled.current = false;
+    }, 1000);
+  }, [currentLevel]);
+
+  const handleEvaluate = useCallback(() => {
     if (autoAdvance || showResults) return; // منع الإرسال بعد انتهاء الوقت
     
     const selectedComps = currentLevelData.components.filter(c => 
@@ -269,28 +271,26 @@ export default function DigitalFortressGame() {
       setSelectedComponents([]);
       handleNextLevel();
     }, 3000);
-  };
+  }, [autoAdvance, showResults, currentLevelData.components, selectedComponents, budget, timeLeft, handleNextLevel, currentLevelData.budget]);
 
-  const handleNextLevel = () => {
-    if (nextLevelCalled.current) return; // منع الاستدعاءات المتعددة
-    
-    nextLevelCalled.current = true;
-    setAutoAdvance(false);
-    if (currentLevel < levels.length - 1) {
-      setCurrentLevel(prev => prev + 1);
-      setTimeLeft(90);
-      setBudget(levels[currentLevel + 1].budget);
-    } else {
-      setGameCompleted(true);
-    }
-    
-    // إعادة تعيين بعد فترة قصيرة
-    setTimeout(() => {
-      nextLevelCalled.current = false;
+  // Timer effect with handleEvaluate dependency
+  useEffect(() => {
+    if (!gameStarted || gameCompleted || isPaused) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          // إذا لم يتم اختيار مكونات، انتقل مباشرة بدون نقاط
+          setAutoAdvance(true);
+          handleEvaluate();
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
-  };
 
-
+    return () => clearInterval(timer);
+  }, [gameStarted, gameCompleted, isPaused, handleEvaluate]);
 
   const resetGame = () => {
     setCurrentLevel(0);

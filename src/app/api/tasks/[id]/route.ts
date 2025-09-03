@@ -3,6 +3,208 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Utility to round progress to two decimals safely
+function roundProgress(value: number | null | undefined): number {
+  if (value === null || value === undefined || isNaN(Number(value))) return 0;
+  return Math.round(Number(value) * 100) / 100;
+}
+
+// Enforce phase statuses: only one active (first <100%), completed if 100%, others on_hold
+async function updatePhaseStatuses(projectId: number) {
+  const phases = await prisma.phase.findMany({
+    where: { project_id: projectId },
+    orderBy: { order: 'asc' },
+  });
+
+  let activeAssigned = false;
+  const updates: any[] = [];
+  let nextActivePhaseId: number | null = null;
+
+  for (const phase of phases) {
+    const progress = roundProgress(phase.progress);
+    let desiredStatus: string;
+
+    // Keep cancelled phases as-is
+    if ((phase.status || '').toLowerCase() === 'cancelled') {
+      continue;
+    }
+
+    if (progress >= 100) {
+      desiredStatus = 'completed';
+    } else if (!activeAssigned) {
+      desiredStatus = 'active';
+      activeAssigned = true;
+      nextActivePhaseId = phase.id;
+    } else {
+      desiredStatus = 'on_hold';
+    }
+
+    if (phase.status !== desiredStatus) {
+      updates.push(
+        prisma.phase.update({
+          where: { id: phase.id },
+          data: { status: desiredStatus },
+        })
+      );
+    }
+  }
+
+  if (updates.length > 0) {
+    await prisma.$transaction(updates);
+  }
+
+  // Ensure all tasks under the (single) active phase are active (excluding completed/cancelled)
+  if (nextActivePhaseId) {
+    const directTasks = await prisma.task.findMany({ where: { phase_id: nextActivePhaseId }, select: { id: true } });
+    let frontier = directTasks.map(t => t.id);
+    const allIds = new Set<number>(frontier);
+
+    while (frontier.length > 0) {
+      const children = await prisma.task.findMany({
+        where: { parent_task_id: { in: frontier } },
+        select: { id: true },
+      });
+      const newIds = children.map(c => c.id).filter(id => !allIds.has(id));
+      newIds.forEach(id => allIds.add(id));
+      frontier = newIds;
+    }
+
+    const idsArr = Array.from(allIds);
+    if (idsArr.length > 0) {
+      await prisma.task.updateMany({
+        where: { id: { in: idsArr }, NOT: { status: { in: ['completed', 'cancelled'] } } },
+        data: { status: 'active' },
+      });
+    }
+  }
+}
+
+// Helpers: roll-up dates
+async function rollupTaskDates(taskId: number): Promise<void> {
+  const subtasks = await prisma.task.findMany({
+    where: { parent_task_id: taskId, NOT: { status: { in: ['cancelled', 'canceled'] } } },
+    select: { id: true, order: true, baseline_start: true, baseline_finish: true, actual_start: true, actual_finish: true },
+    orderBy: [{ order: 'asc' }, { id: 'asc' }],
+  });
+
+  if (subtasks.length === 0) return;
+
+  const firstWith = (key: 'baseline_start' | 'actual_start') => {
+    for (const s of subtasks) {
+      const v = s[key];
+      if (v) return v;
+    }
+    return null;
+  };
+  const lastWith = (key: 'baseline_finish' | 'actual_finish') => {
+    for (let i = subtasks.length - 1; i >= 0; i--) {
+      const v = (subtasks[i] as any)[key] as Date | null;
+      if (v) return v;
+    }
+    return null;
+  };
+
+  await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      baseline_start: firstWith('baseline_start'),
+      baseline_finish: lastWith('baseline_finish'),
+      actual_start: firstWith('actual_start'),
+      actual_finish: lastWith('actual_finish'),
+    },
+  });
+}
+
+async function rollupPhaseDates(phaseId: number): Promise<void> {
+  const tasks = await prisma.task.findMany({
+    where: { phase_id: phaseId, NOT: { status: { in: ['cancelled', 'canceled'] } } },
+    select: { id: true, order: true, baseline_start: true, baseline_finish: true, actual_start: true, actual_finish: true },
+    orderBy: [{ order: 'asc' }, { id: 'asc' }],
+  });
+
+  const firstWith = (key: 'baseline_start' | 'actual_start') => {
+    for (const s of tasks) {
+      const v = s[key];
+      if (v) return v;
+    }
+    return null;
+  };
+  const lastWith = (key: 'baseline_finish' | 'actual_finish') => {
+    for (let i = tasks.length - 1; i >= 0; i--) {
+      const v = (tasks[i] as any)[key] as Date | null;
+      if (v) return v;
+    }
+    return null;
+  };
+
+  await prisma.phase.update({
+    where: { id: phaseId },
+    data: {
+      baseline_start: firstWith('baseline_start'),
+      baseline_finish: lastWith('baseline_finish'),
+      actual_start: firstWith('actual_start'),
+      actual_finish: lastWith('actual_finish'),
+    },
+  });
+}
+
+async function rollupProjectDates(projectId: number): Promise<void> {
+  const [phases, topTasks] = await Promise.all([
+    prisma.phase.findMany({
+      where: { project_id: projectId, NOT: { status: { in: ['cancelled', 'canceled'] } } },
+      select: { id: true, order: true, baseline_start: true, baseline_finish: true, actual_start: true, actual_finish: true },
+    }),
+    prisma.task.findMany({
+      where: { project_id: projectId, phase_id: null, parent_task_id: null, NOT: { status: { in: ['cancelled', 'canceled'] } } },
+      select: { id: true, order: true, baseline_start: true, baseline_finish: true, actual_start: true, actual_finish: true },
+    }),
+  ]);
+
+  const combined = [
+    ...phases.map(p => ({
+      id: p.id,
+      order: p.order ?? 0,
+      baseline_start: p.baseline_start,
+      baseline_finish: p.baseline_finish,
+      actual_start: p.actual_start,
+      actual_finish: p.actual_finish,
+    })),
+    ...topTasks.map(t => ({
+      id: t.id,
+      order: t.order ?? 0,
+      baseline_start: t.baseline_start,
+      baseline_finish: t.baseline_finish,
+      actual_start: t.actual_start,
+      actual_finish: t.actual_finish,
+    })),
+  ].sort((a, b) => (a.order - b.order) || (a.id - b.id));
+
+  const firstWith = (key: 'baseline_start' | 'actual_start') => {
+    for (const s of combined) {
+      const v = s[key];
+      if (v) return v;
+    }
+    return null;
+  };
+  const lastWith = (key: 'baseline_finish' | 'actual_finish') => {
+    for (let i = combined.length - 1; i >= 0; i--) {
+      const v = (combined[i] as any)[key] as Date | null;
+      if (v) return v;
+    }
+    return null;
+  };
+
+  await prisma.project.update({
+    where: { id: projectId },
+    data: {
+      baseline_start: firstWith('baseline_start'),
+      baseline_finish: lastWith('baseline_finish'),
+      actual_start: firstWith('actual_start'),
+      actual_finish: lastWith('actual_finish'),
+    },
+  });
+}
+
 // DELETE /api/tasks/[id] - Delete a task and all its related data
 export async function DELETE(
   request: NextRequest,
@@ -21,73 +223,37 @@ export async function DELETE(
 
     console.log(`Deleting task with ID: ${taskId}`);
 
-    // First, get the task to check if it exists and get its subtasks
-    const task = await prisma.task.findUnique({
-      where: { id: taskId },
-      include: {
-        assignments: true,
-        subtasks: {
-          include: {
-            assignments: true
-          }
-        }
-      }
-    });
-
-    if (!task) {
-      return NextResponse.json(
-        { error: 'Task not found' },
-        { status: 404 }
-      );
+    // Gather the task and all descendant subtasks (recursive)
+    const allIds = new Set<number>([taskId]);
+    let frontier: number[] = [taskId];
+    while (frontier.length > 0) {
+      const children = await prisma.task.findMany({
+        where: { parent_task_id: { in: frontier } },
+        select: { id: true },
+      });
+      const newIds = children.map(c => c.id).filter(id => !allIds.has(id));
+      newIds.forEach(id => allIds.add(id));
+      frontier = newIds;
     }
+    const idsArr = Array.from(allIds);
 
-    // Delete in the correct order to handle foreign key constraints
-    // 1. Delete task dependencies where this task is involved
-    console.log('Deleting task dependencies...');
+    // 1) Delete dependencies where any of these IDs are predecessor or successor
     await prisma.taskDependency.deleteMany({
       where: {
         OR: [
-          { predecessor_task_id: taskId },
-          { successor_task_id: taskId }
-        ]
-      }
+          { predecessor_task_id: { in: idsArr } },
+          { successor_task_id: { in: idsArr } },
+        ],
+      },
     });
 
-    // 2. Delete assignments for all subtasks first
-    console.log(`Deleting assignments for ${task.subtasks.length} subtasks...`);
-    for (const subtask of task.subtasks) {
-      await prisma.taskAssignment.deleteMany({
-        where: {
-          task_id: subtask.id
-        }
-      });
-    }
+    // 2) Delete assignments for all tasks in the set
+    await prisma.taskAssignment.deleteMany({ where: { task_id: { in: idsArr } } });
 
-    // 3. Delete assignments for the main task
-    console.log('Deleting main task assignments...');
-    await prisma.taskAssignment.deleteMany({
-      where: {
-        task_id: taskId
-      }
-    });
+    // 3) Delete tasks themselves
+    await prisma.task.deleteMany({ where: { id: { in: idsArr } } });
 
-    // 4. Delete all subtasks (this will cascade to their assignments)
-    console.log('Deleting subtasks...');
-    await prisma.task.deleteMany({
-      where: {
-        parent_task_id: taskId
-      }
-    });
-
-    // 5. Finally delete the main task
-    console.log('Deleting main task...');
-    await prisma.task.delete({
-      where: {
-        id: taskId
-      }
-    });
-
-    console.log(`Task ${taskId} deleted successfully`);
+    console.log(`Task ${taskId} and its descendants deleted successfully`);
 
     return NextResponse.json({
       message: 'Task deleted successfully',
@@ -127,7 +293,7 @@ export async function PUT(
       actual_finish?: string;
       xml_uid?: string;
     } = await request.json();
-    
+
     const { 
       progress, 
       assigned_employee_id,
@@ -143,7 +309,13 @@ export async function PUT(
 
     // Update the task
     const updateData: any = {};
-    if (progress !== undefined) updateData.progress = progress;
+    if (progress !== undefined) {
+      const rounded = roundProgress(progress);
+      updateData.progress = rounded;
+      if (rounded >= 100) {
+        updateData.status = 'completed';
+      }
+    }
     if (name) updateData.name = name;
     if (description !== undefined) updateData.description = description;
     if (status) updateData.status = status;
@@ -169,6 +341,15 @@ export async function PUT(
       },
     });
 
+    // Cascade status to subtasks if requested status is active/on_hold/cancelled
+    if (status && ['active', 'on_hold', 'cancelled', 'canceled'].includes(status)) {
+      const normalized = status === 'canceled' ? 'cancelled' : status;
+      await prisma.task.updateMany({
+        where: { parent_task_id: taskId, NOT: { status: { in: ['completed', 'cancelled'] } } },
+        data: { status: normalized },
+      });
+    }
+
     // Update assignment if employee is provided
     if (assigned_employee_id) {
       // Remove existing assignments for this task
@@ -188,6 +369,11 @@ export async function PUT(
 
     // Cascade progress updates
     await cascadeProgressUpdates(taskId);
+
+    // After cascade updates, enforce phase statuses on the project
+    if (updatedTask.project) {
+      await updatePhaseStatuses(updatedTask.project.id);
+    }
 
     return NextResponse.json(updatedTask);
   } catch (error) {
@@ -219,11 +405,11 @@ async function cascadeProgressUpdates(taskId: number) {
 
     if (parentTask && parentTask.subtasks.length > 0) {
       const totalProgress = parentTask.subtasks.reduce((sum, subtask) => sum + subtask.progress, 0);
-      const averageProgress = totalProgress / parentTask.subtasks.length;
+      const averageProgress = roundProgress(totalProgress / parentTask.subtasks.length);
 
       await prisma.task.update({
         where: { id: parentTask.id },
-        data: { progress: averageProgress },
+        data: { progress: averageProgress, ...(averageProgress >= 100 ? { status: 'completed' } : {}) },
       });
 
       // Recursively update parent's parent
@@ -240,11 +426,11 @@ async function cascadeProgressUpdates(taskId: number) {
 
     if (phase && phase.tasks.length > 0) {
       const totalProgress = phase.tasks.reduce((sum, phaseTask) => sum + phaseTask.progress, 0);
-      const averageProgress = totalProgress / phase.tasks.length;
+      const averageProgress = roundProgress(totalProgress / phase.tasks.length);
 
       await prisma.phase.update({
         where: { id: phase.id },
-        data: { progress: averageProgress },
+        data: { progress: averageProgress, ...(averageProgress >= 100 ? { status: 'completed' } : {}) },
       });
     }
   }
@@ -258,12 +444,26 @@ async function cascadeProgressUpdates(taskId: number) {
 
     if (project && project.phases.length > 0) {
       const totalProgress = project.phases.reduce((sum, phase) => sum + phase.progress, 0);
-      const averageProgress = totalProgress / project.phases.length;
+      const averageProgress = roundProgress(totalProgress / project.phases.length);
 
       await prisma.project.update({
         where: { id: project.id },
-        data: { progress: averageProgress },
+        data: { progress: averageProgress, ...(averageProgress >= 100 ? { status: 'completed' } : {}) },
       });
+
+      // After recompute, enforce single active phase
+      await updatePhaseStatuses(project.id);
+
+      // Roll up dates to project (phases + project-level tasks excluding cancelled)
+      await rollupProjectDates(project.id);
     }
+  }
+
+  // Roll up dates upwards along task -> parent task -> phase
+  if (task.parent_task) {
+    await rollupTaskDates(task.parent_task.id);
+  }
+  if (task.phase) {
+    await rollupPhaseDates(task.phase.id);
   }
 } 

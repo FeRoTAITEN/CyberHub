@@ -21,6 +21,7 @@
     "governance": "Governance",
     "grc": "GRC",
     "projects": "Project Management",
+    "timeline": "Timeline",
     "more": "More"
   },
   "governance": {
@@ -105,11 +106,26 @@
     "add_phase": "Add Phase",
     "select_manager": "Select Manager",
     "tabs": {
+      "dashboard": "Dashboard",
       "project_management": "Project Management",
       "quality_assurance": "Quality Assurance",
       "performance_monitoring": "Performance Monitoring",
       "excellence_standards": "Excellence Standards"
-    }
+    },
+    "gantt_chart": "Project Gantt Chart",
+    "gantt_description": "Interactive view of projects, phases, and tasks with timelines",
+      "loading_gantt": "Loading Gantt Chart...",
+  "no_gantt_data": "No project data available",
+  "no_search_results": "No tasks found matching your search",
+  "go_to_today": "Go to Today",
+  "today": "Today",
+    "year": "Year",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "show_completed": "Show Completed",
+    "today": "TODAY",
+    "go_to_today": "Go to Today"
   },
   "policies": {
     "standards_tab": "Standards",
@@ -504,5 +520,23 @@
     "selectAll": "Select All",
     "autoReassignError": "Error in auto-reassign",
     "unavailableError": "Error setting unavailability"
+  },
+  "gantt": {
+    "title": "Project Timeline",
+    "subtitle": "Comprehensive view of current projects and their timeline progress",
+    "view": "View:",
+    "week": "Week",
+    "month": "Month",
+    "quarter": "Quarter",
+    "year": "Year",
+    "today": "Today",
+    "projects": "Projects",
+    "color_legend": "Color Legend",
+    "today_date": "Today",
+    "total_projects": "Total Projects",
+    "avg_progress": "Avg Progress",
+    "active_projects": "Active Projects",
+    "view_mode": "View Mode",
+    "complete": "Complete"
   }
 } 

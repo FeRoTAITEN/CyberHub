@@ -31,6 +31,12 @@ function parseDuration(durationStr: string): number {
   return hours / 8;
 }
 
+// Utility to round progress to two decimals safely
+function roundProgress(value: number | null | undefined): number {
+  if (value === null || value === undefined || isNaN(Number(value))) return 0;
+  return Math.round(Number(value) * 100) / 100; // keep two decimals
+}
+
 
 
 export async function POST(request: NextRequest) {
@@ -60,7 +66,8 @@ export async function POST(request: NextRequest) {
 
     // Extract project information
     const projectName = projectData.Name || projectData.Title || 'Imported Project';
-    const completionPercent = projectData.PercentComplete ? parseFloat(projectData.PercentComplete) : 0;
+    const completionPercentRaw = projectData.PercentComplete ? parseFloat(projectData.PercentComplete) : 0;
+    const completionPercent = roundProgress(completionPercentRaw);
     
     // Extract baseline and actual dates for project
     const projectBaselineStart = projectData.Baseline?.Start ? new Date(projectData.Baseline.Start) : null;
@@ -94,7 +101,7 @@ export async function POST(request: NextRequest) {
       const taskUID = task.UID;
       const outlineLevel = parseInt(task.OutlineLevel || '1');
       const taskName = task.Name || 'Unnamed Task';
-      const taskProgress = task.PercentComplete ? parseFloat(task.PercentComplete) : 0;
+      const taskProgress = roundProgress(task.PercentComplete ? parseFloat(task.PercentComplete) : 0);
       const taskDuration = parseDuration(task.Duration);
       
       // Parse baseline and actual dates
@@ -109,6 +116,7 @@ export async function POST(request: NextRequest) {
           data: {
             name: taskName,
             progress: taskProgress,
+            status: 'on_hold',
             order: parseInt(task.ID || '0'),
             project_id: project.id,
             baseline_start: baselineStart,
@@ -124,6 +132,7 @@ export async function POST(request: NextRequest) {
           data: {
             name: taskName,
             progress: taskProgress,
+            status: taskProgress >= 100 ? 'completed' : 'on_hold',
             order: parseInt(task.ID || '0'),
             project: {
               connect: { id: project.id }
@@ -145,6 +154,7 @@ export async function POST(request: NextRequest) {
           data: {
             name: taskName,
             progress: taskProgress,
+            status: taskProgress >= 100 ? 'completed' : 'on_hold',
             order: parseInt(task.ID || '0'),
             project: {
               connect: { id: project.id }
@@ -253,7 +263,37 @@ export async function POST(request: NextRequest) {
 
     // Update project progress based on phases
     await updateProjectProgress(project.id);
+    // Enforce single active phase and proper statuses by order
+    await updatePhaseStatuses(project.id);
 
+    // Ensure tasks under the active phase (and their descendants) are active (excluding completed/cancelled)
+    const activePhase = await prisma.phase.findFirst({ where: { project_id: project.id, status: 'active' } });
+    if (activePhase) {
+      // Get direct tasks of the active phase
+      const directTasks = await prisma.task.findMany({ where: { phase_id: activePhase.id }, select: { id: true } });
+      let frontier = directTasks.map(t => t.id);
+      const allIds = new Set<number>(frontier);
+
+      // BFS to collect all descendant subtasks
+      while (frontier.length > 0) {
+        const children = await prisma.task.findMany({
+          where: { parent_task_id: { in: frontier } },
+          select: { id: true },
+        });
+        const newIds = children.map(c => c.id).filter(id => !allIds.has(id));
+        newIds.forEach(id => allIds.add(id));
+        frontier = newIds;
+      }
+
+      const idsArr = Array.from(allIds);
+      if (idsArr.length > 0) {
+        await prisma.task.updateMany({
+          where: { id: { in: idsArr }, NOT: { status: { in: ['completed', 'cancelled'] } } },
+          data: { status: 'active' },
+        });
+      }
+    }
+ 
     return NextResponse.json({ 
       message: 'Project imported successfully',
       projectId: project.id,
@@ -339,21 +379,26 @@ async function updateProjectProgress(projectId: number) {
       for (const subtask of task.subtasks) {
         totalSubtaskProgress += subtask.progress;
         subtaskCount++;
-  }
+      }
 
       // Update task progress based on subtasks
-      const taskProgress = subtaskCount > 0 ? totalSubtaskProgress / subtaskCount : task.progress;
+      const taskProgressRaw = subtaskCount > 0 ? totalSubtaskProgress / subtaskCount : task.progress;
+      const taskProgress = roundProgress(taskProgressRaw);
       await prisma.task.update({
         where: { id: task.id },
-        data: { progress: taskProgress },
+        data: {
+          progress: taskProgress,
+          ...(taskProgress >= 100 ? { status: 'completed' } : {}),
+        },
       });
 
       totalTaskProgress += taskProgress;
       taskCount++;
-  }
+    }
 
     // Update phase progress based on tasks
-    const phaseProgress = taskCount > 0 ? totalTaskProgress / taskCount : phase.progress;
+    const phaseProgressRaw = taskCount > 0 ? totalTaskProgress / taskCount : phase.progress;
+    const phaseProgress = roundProgress(phaseProgressRaw);
     await prisma.phase.update({
       where: { id: phase.id },
       data: { progress: phaseProgress },
@@ -364,9 +409,51 @@ async function updateProjectProgress(projectId: number) {
   }
 
   // Update project progress based on phases
-  const projectProgress = phaseCount > 0 ? totalPhaseProgress / phaseCount : 0;
+  const projectProgressRaw = phaseCount > 0 ? totalPhaseProgress / phaseCount : 0;
+  const projectProgress = roundProgress(projectProgressRaw);
   await prisma.project.update({
     where: { id: projectId },
-    data: { progress: projectProgress },
+    data: {
+      progress: projectProgress,
+      ...(projectProgress >= 100 ? { status: 'completed' } : {}),
+    },
   });
+}
+
+// Helper to enforce phase statuses: only one active (first <100%), completed if 100%, others on_hold
+async function updatePhaseStatuses(projectId: number) {
+  const phases = await prisma.phase.findMany({
+    where: { project_id: projectId },
+    orderBy: { order: 'asc' },
+  });
+
+  let activeAssigned = false;
+  const updates: any[] = [];
+
+  for (const phase of phases) {
+    const progress = roundProgress(phase.progress);
+    let desiredStatus: string;
+
+    if (progress >= 100) {
+      desiredStatus = 'completed';
+    } else if (!activeAssigned) {
+      desiredStatus = 'active';
+      activeAssigned = true;
+    } else {
+      desiredStatus = 'on_hold';
+    }
+
+    if (phase.status !== desiredStatus) {
+      updates.push(
+        prisma.phase.update({
+          where: { id: phase.id },
+          data: { status: desiredStatus },
+        })
+      );
+    }
+  }
+
+  if (updates.length > 0) {
+    await prisma.$transaction(updates);
+  }
 } 

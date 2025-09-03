@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Navigation from '@/components/Navigation';
+import GanttChart from '@/components/GanttChart';
+import GanttEmbedded from '@/components/GanttEmbedded';
 import { useLang, useTheme } from '../ClientLayout';
 import { useTranslation } from '@/lib/useTranslation';
 import {
@@ -111,7 +113,7 @@ export default function ExcellentPage() {
   const { t } = useTranslation(lang);
   
   // State for tabs
-  const [activeTab, setActiveTab] = useState('project_management');
+  const [activeTab, setActiveTab] = useState('dashboard');
   
   const [projects, setProjects] = useState<Project[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -219,18 +221,21 @@ export default function ExcellentPage() {
   // State for scroll position preservation
   const [scrollPosition, setScrollPosition] = useState(0);
 
-
-
-  // Load projects and employees on component mount
-  useEffect(() => {
-    loadProjects();
-    loadEmployees();
+  // Save scroll position before updates
+  const saveScrollPosition = useCallback(() => {
+    setScrollPosition(window.scrollY);
   }, []);
 
-  // Reload projects when filters change
-  useEffect(() => {
-    loadProjects();
-  }, [statusFilter, searchTerm]);
+  // Restore scroll position after updates
+  const restoreScrollPosition = useCallback(() => {
+    if (scrollPosition > 0) {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPosition);
+      }, 100);
+    }
+  }, [scrollPosition]);
+
+
 
   // Debug modal state
   useEffect(() => {
@@ -239,24 +244,9 @@ export default function ExcellentPage() {
     }
   }, [showDeleteConfirmModal, projectToDelete]);
 
-  // Add mouse and touch event listeners for dragging
-  useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('touchmove', handleTouchMove, { passive: false });
-      document.addEventListener('touchend', handleMouseUp);
-      
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-        document.removeEventListener('touchmove', handleTouchMove);
-        document.removeEventListener('touchend', handleMouseUp);
-      };
-    }
-  }, [isDragging, dragTaskId, tempProgress]);
 
-  const loadProjects = async () => {
+
+  const loadProjects = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -270,7 +260,6 @@ export default function ExcellentPage() {
         setProjects(data);
         // Calculate progress stats after loading projects
         setTimeout(() => {
-    
           // Restore scroll position after data is loaded
           restoreScrollPosition();
         }, 100);
@@ -280,9 +269,14 @@ export default function ExcellentPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, searchTerm, restoreScrollPosition]);
 
-  const loadEmployees = async () => {
+  // Reload projects when filters change
+  useEffect(() => {
+    loadProjects();
+  }, [statusFilter, searchTerm, loadProjects]);
+
+  const loadEmployees = useCallback(async () => {
     try {
       const response = await fetch('/api/employees');
       if (response.ok) {
@@ -292,18 +286,31 @@ export default function ExcellentPage() {
     } catch (error) {
       console.error('Error loading employees:', error);
     }
-  };
+  }, []);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Load projects and employees on component mount
+  useEffect(() => {
+    loadProjects();
+    loadEmployees();
+  }, [loadProjects, loadEmployees]);
+
+  // Custom Alert Function
+  const showCustomAlert = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success') => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowAlertModal(true);
+  }, []);
+
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.name.toLowerCase().endsWith('.xml')) {
       setSelectedFile(file);
     } else {
       showCustomAlert(t('excellent.invalid_file'), 'error');
     }
-  };
+  }, [t, showCustomAlert]);
 
-  const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleFileDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     const files = event.dataTransfer.files;
     if (files.length > 0) {
@@ -314,14 +321,7 @@ export default function ExcellentPage() {
         showCustomAlert(t('excellent.invalid_file'), 'error');
       }
     }
-  };
-
-  // Custom Alert Function
-  const showCustomAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success') => {
-    setAlertMessage(message);
-    setAlertType(type);
-    setShowAlertModal(true);
-  };
+  }, [t, showCustomAlert]);
 
   // Update Progress Stats
   const updateProgressStats = () => {
@@ -330,11 +330,11 @@ export default function ExcellentPage() {
 
   // Calculate Progress Statistics - removed unused function
 
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-  };
+  }, []);
 
-  const handleImportXML = async () => {
+  const handleImportXML = useCallback(async () => {
     if (!selectedFile) {
       showCustomAlert(t('excellent.no_xml_file'), 'warning');
       return;
@@ -367,9 +367,9 @@ export default function ExcellentPage() {
     } finally {
       setImporting(false);
     }
-  };
+  }, [selectedFile, showCustomAlert, t, loadProjects]);
 
-  const handleCreateProject = async () => {
+  const handleCreateProject = useCallback(async () => {
     try {
       const response = await fetch('/api/projects', {
         method: 'POST',
@@ -393,9 +393,9 @@ export default function ExcellentPage() {
     } catch (error) {
       console.error('Error creating project:', error);
     }
-  };
+  }, [newProject, loadProjects]);
 
-  const handleDeleteProject = async () => {
+  const handleDeleteProject = useCallback(async () => {
     if (!projectToDelete) return;
     
     setIsDeleting(true);
@@ -416,16 +416,26 @@ export default function ExcellentPage() {
     } finally {
       setIsDeleting(false);
     }
-  };
+  }, [projectToDelete, loadProjects]);
 
-  const confirmDeleteProject = (project: Project) => {
+  const confirmDeleteProject = useCallback((project: Project) => {
     console.log('confirmDeleteProject called with:', project);
     setProjectToDelete(project);
     setShowDeleteConfirmModal(true);
     console.log('showDeleteConfirmModal set to true');
-  };
+  }, []);
 
-  const handleEditProject = (project: Project) => {
+  // UI lock helper for project
+  const isProjectLocked = useCallback((status: string) => {
+    const normalized = (status || '').toLowerCase();
+    return normalized === 'completed' || normalized === 'on_hold' || normalized === 'cancelled' || normalized === 'canceled';
+  }, []);
+
+  const handleEditProject = useCallback((project: Project) => {
+    if (isProjectLocked(project.status)) {
+      showCustomAlert(lang === 'ar' ? 'هذا المشروع مقفل ولا يمكن تعديله' : 'This project is locked and cannot be edited', 'warning');
+      return;
+    }
     setProjectToEdit(project);
     setEditingProject({
       name: project.name,
@@ -438,9 +448,9 @@ export default function ExcellentPage() {
       actual_finish: project.actual_finish ? project.actual_finish.split('T')[0] : ''
     });
     setShowEditProjectModal(true);
-  };
+  }, [isProjectLocked, showCustomAlert, lang]);
 
-  const handleUpdateProject = async () => {
+  const handleUpdateProject = useCallback(async () => {
     if (!projectToEdit) return;
 
     try {
@@ -469,9 +479,9 @@ export default function ExcellentPage() {
     } catch (error) {
       console.error('Error updating project:', error);
     }
-  };
+  }, [projectToEdit, editingProject, loadProjects]);
 
-  const handleCreatePhase = async () => {
+  const handleCreatePhase = useCallback(async () => {
     if (!selectedProjectForPhase) {
       showCustomAlert('Please select a project for the new phase', 'warning');
       return;
@@ -517,9 +527,25 @@ export default function ExcellentPage() {
     } catch (error) {
       console.error('Error creating phase:', error);
     }
-  };
+  }, [selectedProjectForPhase, newPhase, showCustomAlert, loadProjects]);
 
-  const handleEditPhase = (phase: Phase) => {
+  // UI lock helper for phases
+  const isPhaseLocked = useCallback((status: string) => {
+    const normalized = (status || '').toLowerCase();
+    return normalized === 'completed' || normalized === 'on_hold' || normalized === 'cancelled' || normalized === 'canceled';
+  }, []);
+
+  // UI lock helpers for tasks and projects
+  const isTaskLocked = useCallback((status: string) => {
+    const normalized = (status || '').toLowerCase();
+    return normalized === 'completed' || normalized === 'on_hold' || normalized === 'cancelled' || normalized === 'canceled';
+  }, []);
+
+  const handleEditPhase = useCallback((phase: Phase) => {
+    if (isPhaseLocked(phase.status)) {
+      showCustomAlert(lang === 'ar' ? 'هذه المرحلة مقفلة ولا يمكن تعديلها' : 'This phase is locked and cannot be edited', 'warning');
+      return;
+    }
     setPhaseToEdit(phase);
     setEditingPhase({
       name: phase.name,
@@ -531,9 +557,9 @@ export default function ExcellentPage() {
       actual_finish: phase.actual_finish ? phase.actual_finish.split('T')[0] : ''
     });
     setShowEditPhaseModal(true);
-  };
+  }, [isPhaseLocked, showCustomAlert, lang]);
 
-  const handleUpdatePhase = async () => {
+  const handleUpdatePhase = useCallback(async () => {
     if (!phaseToEdit) return;
 
     try {
@@ -561,9 +587,9 @@ export default function ExcellentPage() {
     } catch (error) {
       console.error('Error updating phase:', error);
     }
-  };
+  }, [phaseToEdit, editingPhase, loadProjects]);
 
-  const handleUpdateTaskProgress = async (taskId: number, progress: number) => {
+  const handleUpdateTaskProgress = useCallback(async (taskId: number, progress: number) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
         method: 'PUT',
@@ -587,10 +613,10 @@ export default function ExcellentPage() {
       console.error('Error updating task:', error);
       showCustomAlert('Failed to update task progress', 'error');
     }
-  };
+  }, [saveScrollPosition, restoreScrollPosition, loadProjects, showCustomAlert]);
 
   // Dragging handlers for progress bars
-  const handleMouseDown = (taskId: number, e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseDown = useCallback((taskId: number, e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
     setDragTaskId(taskId);
@@ -606,9 +632,9 @@ export default function ExcellentPage() {
       percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
     }
     setTempProgress(Math.round(percentage));
-  };
+  }, [lang]);
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !dragTaskId) return;
     
     const progressBar = document.querySelector(`[data-task-id="${dragTaskId}"]`) as HTMLElement;
@@ -626,9 +652,9 @@ export default function ExcellentPage() {
     
     // Update visual progress immediately without API call
     setTempProgress(Math.round(percentage));
-  };
+  }, [isDragging, dragTaskId, lang]);
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging || !dragTaskId) return;
     
     e.preventDefault(); // Prevent scrolling
@@ -650,9 +676,9 @@ export default function ExcellentPage() {
     
     // Update visual progress immediately without API call
     setTempProgress(Math.round(percentage));
-  };
+  }, [isDragging, dragTaskId, lang]);
 
-  const handleMouseUp = async () => {
+  const handleMouseUp = useCallback(async () => {
     if (dragTaskId && tempProgress !== null) {
       // Only here we send data to API
       await handleUpdateTaskProgress(dragTaskId, tempProgress);
@@ -662,9 +688,26 @@ export default function ExcellentPage() {
     setIsDragging(false);
     setDragTaskId(null);
     setTempProgress(null);
-  };
+  }, [dragTaskId, tempProgress, handleUpdateTaskProgress]);
 
-  const handleAssignEmployee = async (taskId: number, employeeId: number) => {
+  // Add mouse and touch event listeners for dragging
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove]);
+
+  const handleAssignEmployee = useCallback(async (taskId: number, employeeId: number) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
         method: 'PUT',
@@ -686,9 +729,9 @@ export default function ExcellentPage() {
     } catch (error) {
       console.error('Error assigning employee:', error);
     }
-  };
+  }, [saveScrollPosition, loadProjects, restoreScrollPosition]);
 
-  const handleDeleteTask = async (taskId: number) => {
+  const handleDeleteTask = useCallback(async (taskId: number) => {
     // Find the task in the current projects
     let currentTask: Task | null = null;
     for (const project of projects) {
@@ -722,9 +765,9 @@ export default function ExcellentPage() {
       setTaskToDelete(currentTask);
       setShowDeleteTaskModal(true);
     }
-  };
+  }, [projects]);
 
-  const confirmDeleteTask = async () => {
+  const confirmDeleteTask = useCallback(async () => {
     if (!taskToDelete) return;
     
     setIsDeleting(true);
@@ -751,9 +794,9 @@ export default function ExcellentPage() {
     } finally {
       setIsDeleting(false);
     }
-  };
+  }, [taskToDelete, saveScrollPosition, loadProjects, restoreScrollPosition, showCustomAlert]);
 
-  const handleDeletePhase = async (phaseId: number) => {
+  const handleDeletePhase = useCallback(async (phaseId: number) => {
     // Find the phase in the current projects
     let currentPhase: Phase | null = null;
     for (const project of projects) {
@@ -768,9 +811,9 @@ export default function ExcellentPage() {
       setPhaseToDelete(currentPhase);
       setShowDeletePhaseModal(true);
     }
-  };
+  }, [projects]);
 
-  const confirmDeletePhase = async () => {
+  const confirmDeletePhase = useCallback(async () => {
     if (!phaseToDelete) return;
     
     setIsDeleting(true);
@@ -792,9 +835,13 @@ export default function ExcellentPage() {
     } finally {
       setIsDeleting(false);
     }
-  };
+  }, [phaseToDelete, loadProjects, showCustomAlert]);
 
-  const handleEditTask = (task: Task) => {
+  const handleEditTask = useCallback((task: Task) => {
+    if (isTaskLocked(task.status)) {
+      showCustomAlert(lang === 'ar' ? 'هذه المهمة مقفلة ولا يمكن تعديلها' : 'This task is locked and cannot be edited', 'warning');
+      return;
+    }
     setTaskToEdit(task);
     setEditingTask({
       name: task.name,
@@ -807,9 +854,9 @@ export default function ExcellentPage() {
       actual_finish: task.actual_finish ? task.actual_finish.split('T')[0] : ''
     });
     setShowEditTaskModal(true);
-  };
+  }, [isTaskLocked, showCustomAlert, lang]);
 
-  const handleUpdateTask = async () => {
+  const handleUpdateTask = useCallback(async () => {
     if (!taskToEdit) return;
 
     try {
@@ -839,9 +886,40 @@ export default function ExcellentPage() {
     } catch (error) {
       console.error('Error updating task:', error);
     }
-  };
+  }, [taskToEdit, editingTask, loadProjects]);
 
-    const handleCreateTask = async () => {
+  // Helper function to find a task in a project (including subtasks)
+  const findTaskInProject = useCallback((project: Project, taskId: number): Task | null => {
+    // Search in project tasks
+    for (const task of project.tasks) {
+      if (task.id === taskId) {
+        return task;
+      }
+      // Search in subtasks
+      for (const subtask of task.subtasks) {
+        if (subtask.id === taskId) {
+          return subtask;
+        }
+      }
+    }
+    // Search in phases
+    for (const phase of project.phases) {
+      for (const task of phase.tasks) {
+        if (task.id === taskId) {
+          return task;
+        }
+        // Search in subtasks
+        for (const subtask of task.subtasks) {
+          if (subtask.id === taskId) {
+            return subtask;
+          }
+        }
+      }
+    }
+    return null;
+  }, []);
+
+  const handleCreateTask = useCallback(async () => {
     // Validate required fields
     if (!newTask.name) {
       showCustomAlert('Please fill in all required fields: Name', 'warning');
@@ -968,19 +1046,54 @@ export default function ExcellentPage() {
       console.error('Error creating task:', error);
       showCustomAlert('Failed to create task. Please try again.', 'error');
     }
-  };
+  }, [newTask, parentTask, parentPhase, parentProject, selectedProjectForTask, projects, showCustomAlert, loadProjects, findTaskInProject]);
 
-  const toggleExpanded = (itemId: string) => {
-    const newExpanded = new Set(expandedItems);
-    if (newExpanded.has(itemId)) {
-      newExpanded.delete(itemId);
-    } else {
-      newExpanded.add(itemId);
-    }
-    setExpandedItems(newExpanded);
-  };
+  const toggleExpanded = useCallback((itemId: string) => {
+    setExpandedItems(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(itemId)) {
+        newExpanded.delete(itemId);
+      } else {
+        newExpanded.add(itemId);
+      }
+      return newExpanded;
+    });
+  }, []);
 
-  const getStatusColor = (status: string) => {
+  // Theme-aware styling
+  const isSalam = theme === 'salam';
+  const isLight = theme === 'light';
+
+  // Theme colors based on current theme
+  const colors = useMemo(() => ({
+    primary: isSalam ? 'text-[#00F000]' : isLight ? 'text-green-600' : 'text-green-400',
+    primaryHover: isSalam ? 'text-[#73F64B]' : isLight ? 'text-green-500' : 'text-green-300',
+    primaryBg: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
+    primaryBgHover: isSalam ? 'bg-[#73F64B]' : isLight ? 'bg-green-500' : 'bg-green-400',
+    cardBg: isSalam ? 'bg-white' : isLight ? 'bg-white' : 'bg-slate-900',
+    cardBgHover: isSalam ? 'bg-[#EEFDEC]' : isLight ? 'bg-slate-50' : 'bg-slate-800',
+    textPrimary: isSalam ? 'text-[#003931]' : isLight ? 'text-slate-900' : 'text-white',
+    textSecondary: isSalam ? 'text-[#005147]' : isLight ? 'text-slate-600' : 'text-slate-400',
+    borderPrimary: isSalam ? 'border-[#003931]' : isLight ? 'border-slate-200' : 'border-slate-700',
+    borderHover: isSalam ? 'border-[#00F000]' : 'border-green-500',
+    inputBg: isSalam ? 'bg-white' : isLight ? 'bg-white' : 'bg-slate-800',
+    inputBorder: isSalam ? 'border-[#003931]' : isLight ? 'border-slate-300' : 'border-slate-700',
+    iconBg: isSalam ? 'bg-[#EEFDEC]' : isLight ? 'bg-slate-200' : 'bg-slate-800',
+    glassBg: isSalam ? 'bg-white/95' : isLight ? 'bg-white/80' : 'bg-slate-900/80',
+    glassBorder: isSalam ? 'border-[#00F000]/20' : 'border-green-500/20',
+    tabActiveBg: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
+    tabActiveText: isSalam ? 'text-[#003931]' : 'text-white',
+    tabInactiveText: isSalam ? 'text-[#005147]' : isLight ? 'text-slate-600' : 'text-slate-400',
+    tabInactiveHover: isSalam ? 'hover:bg-[#EEFDEC]' : isLight ? 'hover:bg-slate-100' : 'hover:bg-slate-800',
+            progressBg: isSalam ? 'bg-[#36C639]' : isLight ? 'bg-gray-200' : 'bg-slate-700',
+    progressFill: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
+    badgeSuccess: isSalam ? 'bg-[#00F000] text-[#003931]' : 'bg-green-500 text-white',
+    badgeWarning: isSalam ? 'bg-[#73F64B] text-[#003931]' : 'bg-yellow-500 text-white',
+    badgeError: isSalam ? 'bg-red-500 text-white' : 'bg-red-500 text-white',
+    badgeInfo: isSalam ? 'bg-[#36C639] text-white' : 'bg-blue-500 text-white'
+  }), [isSalam, isLight]);
+
+  const getStatusColor = useCallback((status: string) => {
     if (isSalam) {
       switch (status) {
         case 'active': return 'bg-[#00F000] text-[#003931]';
@@ -998,44 +1111,31 @@ export default function ExcellentPage() {
         default: return 'text-slate-400';
       }
     }
-  };
+  }, [isSalam]);
 
 
+  // Helper function to calculate subtasks count for a specific task
+  const getTaskSubtasksCount = useCallback((task: Task): number => {
+    return task.subtasks?.length || 0;
+  }, []);
 
+  // Helper function to calculate tasks count in a phase
+  const getPhaseTasksCount = useCallback((phase: Phase): number => {
+    return phase.tasks?.length || 0;
+  }, []);
 
+  // Helper function to calculate subtasks count in a phase
+  const getPhaseSubtasksCount = useCallback((phase: Phase): number => {
+    let subtasksCount = 0;
+    
+    phase.tasks?.forEach(task => {
+      subtasksCount += task.subtasks?.length || 0;
+    });
+    
+    return subtasksCount;
+  }, []);
 
-  // Helper function to find a task in a project (including subtasks)
-  const findTaskInProject = (project: Project, taskId: number): Task | null => {
-    // Search in project tasks
-    for (const task of project.tasks) {
-      if (task.id === taskId) {
-        return task;
-      }
-      // Search in subtasks
-      for (const subtask of task.subtasks) {
-        if (subtask.id === taskId) {
-          return subtask;
-        }
-      }
-    }
-    // Search in phases
-    for (const phase of project.phases) {
-      for (const task of phase.tasks) {
-        if (task.id === taskId) {
-          return task;
-        }
-        // Search in subtasks
-        for (const subtask of task.subtasks) {
-          if (subtask.id === taskId) {
-            return subtask;
-          }
-        }
-      }
-    }
-    return null;
-  };
-
-  const renderProgressBar = (progress: number, size: 'sm' | 'md' | 'lg' = 'md') => {
+  const renderProgressBar = useCallback((progress: number, size: 'sm' | 'md' | 'lg' = 'md') => {
     const sizeClasses = {
       sm: 'h-1',
       md: 'h-2',
@@ -1050,9 +1150,9 @@ export default function ExcellentPage() {
         />
       </div>
     );
-  };
+  }, [colors.progressBg, colors.progressFill]);
 
-  const renderInteractiveProgressBar = (task: Task, size: 'sm' | 'md' | 'lg' = 'sm') => {
+  const renderInteractiveProgressBar = useCallback((task: Task, size: 'sm' | 'md' | 'lg' = 'sm', locked: boolean = false) => {
     const sizeClasses = {
       sm: 'h-2',
       md: 'h-3',
@@ -1084,6 +1184,20 @@ export default function ExcellentPage() {
       setTempProgress(Math.round(percentage));
     };
 
+    if (locked) {
+      return (
+        <div 
+          className={`w-full ${colors.progressBg} rounded-full ${sizeClasses[size]} select-none`}
+          title={lang === 'ar' ? 'هذه المهمة مقفلة' : 'This task is locked'}
+        >
+          <div 
+            className={`${colors.progressFill} rounded-full h-full transition-all duration-100`}
+            style={{ width: `${currentProgress}%` }}
+          />
+        </div>
+      );
+    }
+
     return (
       <div 
         className={`w-full ${colors.progressBg} rounded-full ${sizeClasses[size]} cursor-pointer select-none hover:${colors.cardBgHover} transition-colors touch-none`}
@@ -1098,12 +1212,13 @@ export default function ExcellentPage() {
         />
       </div>
     );
-  };
+  }, [dragTaskId, tempProgress, lang, colors.progressBg, colors.cardBgHover, colors.progressFill, handleMouseDown]);
 
-  const renderTask = (task: Task, level: number = 0) => {
+  const renderTask = useCallback((task: Task, level: number = 0) => {
     const isExpanded = expandedItems.has(`task-${task.id}`);
     const hasSubtasks = task.subtasks && task.subtasks.length > 0;
     const assignedEmployee = task.assignments && task.assignments[0]?.employee;
+    const taskLocked = isTaskLocked(task.status);
 
     return (
       <div key={task.id} className={`border-l-2 ${colors.borderPrimary} ml-4`}>
@@ -1195,7 +1310,7 @@ export default function ExcellentPage() {
                 )}
               </div>
               <div className="w-32">
-                {renderInteractiveProgressBar(task, 'sm')}
+                {renderInteractiveProgressBar(task, 'sm', taskLocked)}
                 <div className={`text-xs ${colors.textSecondary} mt-1`}>
                   {((dragTaskId === task.id && tempProgress !== null) ? tempProgress : task.progress).toFixed(2)}%
                 </div>
@@ -1207,7 +1322,8 @@ export default function ExcellentPage() {
               
               <button
                 onClick={() => handleEditTask(task)}
-                className={`p-1 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
+                disabled={taskLocked}
+                className={`p-1 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors ${taskLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title="Edit Task"
               >
                 <PencilIcon className="w-4 h-4" />
@@ -1215,12 +1331,17 @@ export default function ExcellentPage() {
               
               <button
                 onClick={() => {
+                  if (taskLocked) {
+                    showCustomAlert(lang === 'ar' ? 'هذه المهمة مقفلة ولا يمكن إضافة مهام فرعية' : 'This task is locked and cannot accept subtasks', 'warning');
+                    return;
+                  }
                   setParentTask(task);
                   setParentProject(null);
                   setParentPhase(null);
                   setShowAddTaskModal(true);
                 }}
-                className={`p-1 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
+                disabled={taskLocked}
+                className={`p-1 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors ${taskLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title="Add Subtask"
               >
                 <PlusIcon className="w-4 h-4" />
@@ -1237,7 +1358,8 @@ export default function ExcellentPage() {
               <select
                 value={assignedEmployee?.id || ''}
                 onChange={(e) => handleAssignEmployee(task.id, parseInt(e.target.value))}
-                className={`${colors.inputBg} border ${colors.inputBorder} rounded px-2 py-1 text-sm ${colors.textPrimary}`}
+                disabled={taskLocked}
+                className={`${colors.inputBg} border ${colors.inputBorder} rounded px-2 py-1 text-sm ${colors.textPrimary} ${taskLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <option value="">{t('excellent.select_employee')}</option>
                 {employees.map(emp => (
@@ -1257,17 +1379,18 @@ export default function ExcellentPage() {
         )}
       </div>
     );
-  };
+  }, [expandedItems, colors, lang, t, getTaskSubtasksCount, dragTaskId, tempProgress, getStatusColor, handleEditTask, handleDeleteTask, handleAssignEmployee, employees, renderInteractiveProgressBar, toggleExpanded, isTaskLocked, showCustomAlert]);
 
-  const renderPhase = (phase: Phase) => {
+  const renderPhase = useCallback((phase: Phase) => {
     const isExpanded = expandedItems.has(`phase-${phase.id}`);
     const hasTasks = phase.tasks && phase.tasks.length > 0;
+    const locked = isPhaseLocked(phase.status);
 
     return (
       <div key={phase.id} className="mb-6">
         <div className={`${colors.cardBgHover} border ${colors.borderPrimary} rounded-lg p-4 transition-all duration-200`}>
           <div className="flex items-center justify-between mb-3">
-            <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+            <div className={`${lang === 'ar' ? 'space-x-reverse space-x-2' : 'space-x-2'} flex items-center`}>
               {hasTasks && (
                 <button
                   onClick={() => toggleExpanded(`phase-${phase.id}`)}
@@ -1340,7 +1463,8 @@ export default function ExcellentPage() {
               
               <button
                 onClick={() => handleEditPhase(phase)}
-                className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
+                disabled={locked}
+                className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors ${locked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title="Edit Phase"
               >
                 <PencilIcon className="w-5 h-5" />
@@ -1348,12 +1472,17 @@ export default function ExcellentPage() {
               
               <button
                 onClick={() => {
+                  if (locked) {
+                    showCustomAlert(lang === 'ar' ? 'هذه المرحلة مقفلة ولا يمكن إضافة مهام إليها' : 'This phase is locked and cannot accept new tasks', 'warning');
+                    return;
+                  }
                   setParentPhase(phase);
                   setParentProject(null);
                   setParentTask(null);
                   setShowAddTaskModal(true);
                 }}
-                className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
+                disabled={locked}
+                className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors ${locked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title="Add Task to Phase"
               >
                 <PlusIcon className="w-5 h-5" />
@@ -1377,12 +1506,13 @@ export default function ExcellentPage() {
         </div>
       </div>
     );
-  };
+  }, [expandedItems, colors, lang, t, getPhaseTasksCount, getPhaseSubtasksCount, getStatusColor, handleEditPhase, handleDeletePhase, renderProgressBar, renderTask, toggleExpanded, isPhaseLocked, showCustomAlert]);
 
   const renderProject = (project: Project) => {
     const isExpanded = expandedItems.has(`project-${project.id}`);
     const hasPhases = project.phases && project.phases.length > 0;
     const hasTasks = project.tasks && project.tasks.length > 0;
+    const projectLocked = isProjectLocked(project.status);
 
     return (
       <div key={project.id} className={`${colors.cardBg} border ${colors.borderPrimary} rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-8`}>
@@ -1477,17 +1607,23 @@ export default function ExcellentPage() {
                 </span>
                 <button
                   onClick={() => handleEditProject(project)}
-                  className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded-lg transition-colors`}
+                  disabled={projectLocked}
+                  className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded-lg transition-colors ${projectLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                   title="Edit Project"
                 >
                   <PencilIcon className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => {
+                    if (projectLocked) {
+                      showCustomAlert(lang === 'ar' ? 'هذا المشروع مقفل ولا يمكن إضافة مراحل' : 'This project is locked and cannot accept new phases', 'warning');
+                      return;
+                    }
                     setSelectedProjectForPhase(project);
                     setShowAddPhaseModal(true);
                   }}
-                  className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded-lg transition-colors`}
+                  disabled={projectLocked}
+                  className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded-lg transition-colors ${projectLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                   title="Add Phase"
                 >
                   <PlusIcon className="w-5 h-5" />
@@ -1518,12 +1654,17 @@ export default function ExcellentPage() {
                     <h3 className={`text-lg font-semibold ${colors.textPrimary}`}>{t('excellent.tasks')}</h3>
                     <button
                       onClick={() => {
+                        if (projectLocked) {
+                          showCustomAlert(lang === 'ar' ? 'هذا المشروع مقفل ولا يمكن إضافة مهام' : 'This project is locked and cannot accept new tasks', 'warning');
+                          return;
+                        }
                         setParentProject(project);
                         setParentPhase(null);
                         setParentTask(null);
                         setShowAddTaskModal(true);
                       }}
-                      className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors`}
+                      disabled={projectLocked}
+                      className={`p-2 ${colors.primary} hover:${colors.primaryHover} hover:${colors.cardBgHover} rounded transition-colors ${projectLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                       title="Add Task to Project"
                     >
                       <PlusIcon className="w-5 h-5" />
@@ -1539,42 +1680,14 @@ export default function ExcellentPage() {
     );
   };
 
-  // Theme-aware styling
-  const isSalam = theme === 'salam';
-  const isLight = theme === 'light';
-
-
-  // Theme colors based on current theme
-  const colors = {
-    primary: isSalam ? 'text-[#00F000]' : isLight ? 'text-green-600' : 'text-green-400',
-    primaryHover: isSalam ? 'text-[#73F64B]' : isLight ? 'text-green-500' : 'text-green-300',
-    primaryBg: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
-    primaryBgHover: isSalam ? 'bg-[#73F64B]' : isLight ? 'bg-green-500' : 'bg-green-400',
-    cardBg: isSalam ? 'bg-white' : isLight ? 'bg-white' : 'bg-slate-900',
-    cardBgHover: isSalam ? 'bg-[#EEFDEC]' : isLight ? 'bg-slate-50' : 'bg-slate-800',
-    textPrimary: isSalam ? 'text-[#003931]' : isLight ? 'text-slate-900' : 'text-white',
-    textSecondary: isSalam ? 'text-[#005147]' : isLight ? 'text-slate-600' : 'text-slate-400',
-    borderPrimary: isSalam ? 'border-[#003931]' : isLight ? 'border-slate-200' : 'border-slate-700',
-    borderHover: isSalam ? 'border-[#00F000]' : 'border-green-500',
-    inputBg: isSalam ? 'bg-white' : isLight ? 'bg-white' : 'bg-slate-800',
-    inputBorder: isSalam ? 'border-[#003931]' : isLight ? 'border-slate-300' : 'border-slate-700',
-    iconBg: isSalam ? 'bg-[#EEFDEC]' : isLight ? 'bg-slate-200' : 'bg-slate-800',
-    glassBg: isSalam ? 'bg-white/95' : isLight ? 'bg-white/80' : 'bg-slate-900/80',
-    glassBorder: isSalam ? 'border-[#00F000]/20' : 'border-green-500/20',
-    tabActiveBg: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
-    tabActiveText: isSalam ? 'text-[#003931]' : 'text-white',
-    tabInactiveText: isSalam ? 'text-[#005147]' : isLight ? 'text-slate-600' : 'text-slate-400',
-    tabInactiveHover: isSalam ? 'hover:bg-[#EEFDEC]' : isLight ? 'hover:bg-slate-100' : 'hover:bg-slate-800',
-            progressBg: isSalam ? 'bg-[#36C639]' : isLight ? 'bg-gray-200' : 'bg-slate-700',
-    progressFill: isSalam ? 'bg-[#00F000]' : isLight ? 'bg-green-600' : 'bg-green-500',
-    badgeSuccess: isSalam ? 'bg-[#00F000] text-[#003931]' : 'bg-green-500 text-white',
-    badgeWarning: isSalam ? 'bg-[#73F64B] text-[#003931]' : 'bg-yellow-500 text-white',
-    badgeError: isSalam ? 'bg-red-500 text-white' : 'bg-red-500 text-white',
-    badgeInfo: isSalam ? 'bg-[#36C639] text-white' : 'bg-blue-500 text-white'
-  };
-
   // Tab configuration
   const tabs = [
+    {
+      id: 'dashboard',
+      name: t('excellent.tabs.dashboard'),
+      icon: ChartBarIcon,
+      description: 'Overview and key metrics dashboard'
+    },
     {
       id: 'project_management',
       name: t('excellent.tabs.project_management'),
@@ -1604,6 +1717,8 @@ export default function ExcellentPage() {
   // Render tab content
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'dashboard':
+        return renderDashboard();
       case 'project_management':
         return renderProjectManagement();
       case 'quality_assurance':
@@ -1613,9 +1728,155 @@ export default function ExcellentPage() {
       case 'excellence_standards':
         return renderExcellenceStandards();
       default:
-        return renderProjectManagement();
+        return renderDashboard();
     }
   };
+
+  const renderDashboard = () => (
+    <div className="space-y-6">
+
+
+      {/* Key Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-blue-500/50 hover:bg-gradient-to-br hover:from-blue-500/5 hover:to-transparent stagger-animate`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={`text-sm ${colors.textSecondary} mb-1`}>{t('excellent.total_projects')}</p>
+              <p className={`text-3xl font-bold ${colors.textPrimary} group-hover:text-blue-400 transition-colors duration-200`}>{projects.length}</p>
+            </div>
+            <ChartBarIcon className="w-10 h-10 text-blue-400 group-hover:scale-110 transition-transform duration-200" />
+          </div>
+        </div>
+          
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-green-500/50 hover:bg-gradient-to-br hover:from-green-500/5 hover:to-transparent stagger-animate`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={`text-sm ${colors.textSecondary} mb-1`}>{t('excellent.active_projects')}</p>
+              <p className={`text-3xl font-bold ${colors.textPrimary} group-hover:text-green-400 transition-colors duration-200`}>
+                {projects.filter(p => p.status === 'active').length}
+              </p>
+            </div>
+            <CheckCircleIcon className="w-10 h-10 text-green-400 group-hover:scale-110 transition-transform duration-200" />
+          </div>
+        </div>
+          
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-yellow-500/50 hover:bg-gradient-to-br hover:from-yellow-500/5 hover:to-transparent stagger-animate`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={`text-sm ${colors.textSecondary} mb-1`}>{t('excellent.completed_projects')}</p>
+              <p className={`text-3xl font-bold ${colors.textPrimary} group-hover:text-yellow-400 transition-colors duration-200`}>
+                {projects.filter(p => p.status === 'completed').length}
+              </p>
+            </div>
+            <StarIcon className="w-10 h-10 text-yellow-400 group-hover:scale-110 transition-transform duration-200" />
+          </div>
+        </div>
+          
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer hover:border-purple-500/50 hover:bg-gradient-to-br hover:from-purple-500/5 hover:to-transparent stagger-animate`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={`text-sm ${colors.textSecondary} mb-1`}>{t('excellent.avg_progress')}</p>
+              <p className={`text-3xl font-bold ${colors.textPrimary} group-hover:text-purple-400 transition-colors duration-200`}>
+                {projects.length > 0
+                  ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length)
+                  : 0}%
+              </p>
+            </div>
+            <ChartPieIcon className="w-10 h-10 text-purple-400 group-hover:scale-110 transition-transform duration-200" />
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Projects */}
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg content-animate`}>
+          <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4 flex items-center`}>
+            <ClockIcon className="w-6 h-6 mr-2" />
+            {lang === 'ar' ? 'المشاريع الأخيرة' : 'Recent Projects'}
+          </h3>
+          <div className="space-y-3">
+            {loading ? (
+              <div className="text-center py-4">
+                <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              </div>
+            ) : projects.length === 0 ? (
+              <p className={`text-center ${colors.textSecondary} py-4`}>
+                {lang === 'ar' ? 'لا توجد مشاريع بعد' : 'No projects yet'}
+              </p>
+            ) : (
+              projects.slice(0, 5).map(project => (
+                <div key={project.id} className={`p-3 ${colors.cardBgHover} rounded-lg border ${colors.borderPrimary} hover:border-green-500/50 transition-all duration-200`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className={`font-medium ${colors.textPrimary}`}>{project.name}</h4>
+                      <p className={`text-sm ${colors.textSecondary}`}>
+                        {lang === 'ar' ? 'التقدم: ' : 'Progress: '}{project.progress.toFixed(1)}%
+                      </p>
+                    </div>
+                    <span className={`text-sm px-2 py-1 rounded ${getStatusColor(project.status)}`}>
+                      {project.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl shadow-lg content-animate`}>
+          <h3 className={`text-xl font-semibold ${colors.textPrimary} mb-4 flex items-center`}>
+            <PlusIcon className="w-6 h-6 mr-2" />
+            {lang === 'ar' ? 'إجراءات سريعة' : 'Quick Actions'}
+          </h3>
+          <div className="space-y-3">
+            <button
+              onClick={() => setShowNewProjectModal(true)}
+              className={`w-full p-4 ${colors.cardBgHover} border ${colors.borderPrimary} rounded-lg hover:border-green-500/50 transition-all duration-200 flex items-center justify-between group`}
+            >
+              <div className="flex items-center">
+                <PlusIcon className="w-5 h-5 mr-3 text-green-400" />
+                <span className={`font-medium ${colors.textPrimary}`}>
+                  {t('excellent.new_project')}
+                </span>
+              </div>
+              <ChevronRightIcon className="w-5 h-5 text-gray-400 group-hover:text-green-400 transition-colors" />
+            </button>
+            
+            <button
+              onClick={() => setShowImportModal(true)}
+              className={`w-full p-4 ${colors.cardBgHover} border ${colors.borderPrimary} rounded-lg hover:border-blue-500/50 transition-all duration-200 flex items-center justify-between group`}
+            >
+              <div className="flex items-center">
+                <CloudArrowUpIcon className="w-5 h-5 mr-3 text-blue-400" />
+                <span className={`font-medium ${colors.textPrimary}`}>
+                  {t('excellent.import_xml')}
+                </span>
+              </div>
+              <ChevronRightIcon className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('project_management')}
+              className={`w-full p-4 ${colors.cardBgHover} border ${colors.borderPrimary} rounded-lg hover:border-purple-500/50 transition-all duration-200 flex items-center justify-between group`}
+            >
+              <div className="flex items-center">
+                <ChartBarIcon className="w-5 h-5 mr-3 text-purple-400" />
+                <span className={`font-medium ${colors.textPrimary}`}>
+                  {lang === 'ar' ? 'إدارة المشاريع' : 'Project Management'}
+                </span>
+              </div>
+              <ChevronRightIcon className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Gantt Chart Section */}
+      <GanttEmbedded />
+    </div>
+  );
 
   const renderProjectManagement = () => (
     <div className="space-y-4">
@@ -1779,22 +2040,6 @@ export default function ExcellentPage() {
     </div>
   );
 
-  // Save scroll position before updates
-  const saveScrollPosition = () => {
-    setScrollPosition(window.scrollY);
-  };
-
-  // Restore scroll position after updates
-  const restoreScrollPosition = () => {
-    if (scrollPosition > 0) {
-      setTimeout(() => {
-        window.scrollTo(0, scrollPosition);
-      }, 100);
-    }
-  };
-
-
-
   // Helper functions are no longer needed
 
   // Helper function to calculate tasks count (without subtasks) in a project
@@ -1831,27 +2076,7 @@ export default function ExcellentPage() {
     return subtasksCount;
   };
 
-  // Helper function to calculate tasks count in a phase
-  const getPhaseTasksCount = (phase: Phase): number => {
-    return phase.tasks?.length || 0;
-  };
-
-  // Helper function to calculate subtasks count in a phase
-  const getPhaseSubtasksCount = (phase: Phase): number => {
-    let subtasksCount = 0;
-    
-    phase.tasks?.forEach(task => {
-      subtasksCount += task.subtasks?.length || 0;
-    });
-    
-    return subtasksCount;
-  };
-
-  // Helper function to calculate subtasks count for a specific task
-  const getTaskSubtasksCount = (task: Task): number => {
-    return task.subtasks?.length || 0;
-  };
-
+  // UI lock helper: prevent editing on phases that are completed/on_hold/cancelled
   return (
     <div className="min-h-screen gradient-bg">
       <Navigation />

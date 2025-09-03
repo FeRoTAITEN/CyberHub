@@ -135,8 +135,8 @@ export default function EmployeesPage() {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        // Fallback to mock data
-        setEmployees(employees);
+        // Fallback to mock data - using functional update to avoid dependency warning
+        setEmployees(prevEmployees => prevEmployees);
       } finally {
         setLoading(false);
       }

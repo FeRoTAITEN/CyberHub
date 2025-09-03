@@ -90,6 +90,10 @@ const Navigation = () => {
     { name: lang === 'ar' ? 'التميز' : 'Excellent', href: '/excellent', icon: ShieldCheckIcon },
     // Add Survey Reports page to More dropdown
     { name: lang === 'ar' ? 'التقارير' : 'Reports', href: '/surveys/report', icon: ClipboardDocumentCheckIcon },
+    // Add Gantt Test page
+    { name: lang === 'ar' ? 'تجربة جانت' : 'Gantt Test', href: '/gantt-test', icon: ChartBarIcon },
+    // Add Gantt Timeline page
+    { name: t('nav.timeline'), href: '/gantt', icon: ChartBarIcon },
   ];
 
   // تحديد العناصر المرئية حسب حجم الشاشة

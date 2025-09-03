@@ -15,10 +15,68 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
     }
 
-    // Delete the project (this will cascade delete phases, tasks, and assignments)
-    await prisma.project.delete({
-      where: { id: projectId },
+    // Collect all phases under project
+    const phases = await prisma.phase.findMany({ where: { project_id: projectId }, select: { id: true } });
+
+    // Collect all project-level tasks (no phase, no parent)
+    const projectLevelTasks = await prisma.task.findMany({
+      where: { project_id: projectId },
+      select: { id: true, parent_task_id: true, phase_id: true },
     });
+
+    // Build full task set (all descendants) BFS
+    const allTaskIds = new Set<number>();
+    let frontier: number[] = projectLevelTasks.map(t => t.id);
+
+    // Include tasks already fetched
+    projectLevelTasks.forEach(t => allTaskIds.add(t.id));
+
+    // Also include tasks belonging to phases as roots to delete
+    const phaseTaskRoots = await prisma.task.findMany({
+      where: { phase_id: { in: phases.map(p => p.id) } },
+      select: { id: true },
+    });
+    phaseTaskRoots.forEach(t => {
+      if (!allTaskIds.has(t.id)) {
+        allTaskIds.add(t.id);
+        frontier.push(t.id);
+      }
+    });
+
+    while (frontier.length > 0) {
+      const children = await prisma.task.findMany({
+        where: { parent_task_id: { in: frontier } },
+        select: { id: true },
+      });
+      const newIds = children.map(c => c.id).filter(id => !allTaskIds.has(id));
+      newIds.forEach(id => allTaskIds.add(id));
+      frontier = newIds;
+    }
+    const idsArr = Array.from(allTaskIds);
+
+    // 1) Delete dependencies involving any of these tasks
+    await prisma.taskDependency.deleteMany({
+      where: {
+        OR: [
+          { predecessor_task_id: { in: idsArr } },
+          { successor_task_id: { in: idsArr } },
+        ],
+      },
+    });
+
+    // 2) Delete assignments for all tasks
+    if (idsArr.length > 0) {
+      await prisma.taskAssignment.deleteMany({ where: { task_id: { in: idsArr } } });
+      await prisma.task.deleteMany({ where: { id: { in: idsArr } } });
+    }
+
+    // 3) Delete phases
+    if (phases.length > 0) {
+      await prisma.phase.deleteMany({ where: { id: { in: phases.map(p => p.id) } } });
+    }
+
+    // 4) Finally delete project
+    await prisma.project.delete({ where: { id: projectId } });
 
     return NextResponse.json({ message: 'Project deleted successfully' });
   } catch (error) {
@@ -133,6 +191,29 @@ export async function PUT(
         tasks: true,
       },
     });
+
+    // Cascade status to children if project status set to active/on_hold/cancelled
+    if (status && ['active', 'on_hold', 'cancelled', 'canceled'].includes(status)) {
+      // Normalize canceled spelling
+      const normalized = status === 'canceled' ? 'cancelled' : status;
+
+      await prisma.$transaction([
+        prisma.phase.updateMany({
+          where: {
+            project_id: projectId,
+            NOT: { status: { in: ['completed', 'cancelled'] } },
+          },
+          data: { status: normalized },
+        }),
+        prisma.task.updateMany({
+          where: {
+            project_id: projectId,
+            NOT: { status: { in: ['completed', 'cancelled'] } },
+          },
+          data: { status: normalized },
+        }),
+      ]);
+    }
 
     return NextResponse.json(updatedProject);
   } catch (error) {

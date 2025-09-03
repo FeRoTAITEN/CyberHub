@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   UserGroupIcon, 
@@ -807,7 +807,7 @@ export default function ShiftManagementPage() {
   };
 
   // API functions
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -834,7 +834,7 @@ export default function ShiftManagementPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [lang]);
 
   const handleAssignEmployee = async (data: { date: string; shift_id: number; employee_id: number }) => {
     try {

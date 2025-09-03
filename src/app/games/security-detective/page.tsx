@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Navigation from '@/components/Navigation';
 import {
   ShieldCheckIcon,
@@ -167,23 +167,7 @@ export default function SecurityDetectiveGame() {
   const currentCaseData = cases[currentCase];
 
   // Timer effect
-  useEffect(() => {
-    if (!gameStarted || gameCompleted || isPaused) return;
 
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          // إذا لم يتم اختيار أدلة، انتقل مباشرة بدون نقاط
-          setAutoAdvance(true);
-          handleNextCase();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [gameStarted, gameCompleted, isPaused]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -227,7 +211,7 @@ export default function SecurityDetectiveGame() {
     }, 3000);
   };
 
-  const handleNextCase = () => {
+  const handleNextCase = useCallback(() => {
     if (nextCaseCalled.current) return; // منع الاستدعاءات المتعددة
     
     nextCaseCalled.current = true;
@@ -243,9 +227,26 @@ export default function SecurityDetectiveGame() {
     setTimeout(() => {
       nextCaseCalled.current = false;
     }, 1000);
-  };
+  }, [currentCase]);
 
+  // Timer effect with handleNextCase dependency
+  useEffect(() => {
+    if (!gameStarted || gameCompleted || isPaused) return;
 
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          // إذا لم يتم اختيار أدلة، انتقل مباشرة بدون نقاط
+          setAutoAdvance(true);
+          handleNextCase();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameStarted, gameCompleted, isPaused, handleNextCase]);
 
   const resetGame = () => {
     setCurrentCase(0);

@@ -25,6 +25,16 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid phase ID' }, { status: 400 });
     }
 
+    // Load existing phase to enforce lock rules
+    const existingPhase = await prisma.phase.findUnique({ where: { id: phaseId } });
+    if (!existingPhase) {
+      return NextResponse.json({ error: 'Phase not found' }, { status: 404 });
+    }
+    const lockedStatuses = new Set(['completed', 'on_hold', 'cancelled', 'canceled']);
+    if (lockedStatuses.has((existingPhase.status || '').toLowerCase())) {
+      return NextResponse.json({ error: 'Phase is locked and cannot be edited' }, { status: 403 });
+    }
+
     const {
       name,
       description,
@@ -81,6 +91,27 @@ export async function PUT(
       },
     });
 
+    // Cascade status to tasks and subtasks if status is active/on_hold/cancelled
+    if (status && ['active', 'on_hold', 'cancelled', 'canceled'].includes(status)) {
+      const normalized = status === 'canceled' ? 'cancelled' : status;
+
+      // Update tasks in this phase (excluding completed/cancelled)
+      await prisma.task.updateMany({
+        where: { phase_id: phaseId, NOT: { status: { in: ['completed', 'cancelled'] } } },
+        data: { status: normalized },
+      });
+
+      // Update subtasks under tasks of this phase (excluding completed/cancelled)
+      const tasksInPhase = await prisma.task.findMany({ where: { phase_id: phaseId }, select: { id: true } });
+      const taskIds = tasksInPhase.map(t => t.id);
+      if (taskIds.length > 0) {
+        await prisma.task.updateMany({
+          where: { parent_task_id: { in: taskIds }, NOT: { status: { in: ['completed', 'cancelled'] } } },
+          data: { status: normalized },
+        });
+      }
+    }
+
     return NextResponse.json(updatedPhase);
   } catch (error) {
     console.error('Update phase error:', error);
@@ -106,82 +137,101 @@ export async function DELETE(
 
     console.log(`Deleting phase with ID: ${phaseId}`);
 
-    // First, get the phase to check if it exists
-    const phase = await prisma.phase.findUnique({
+    // Load phase meta to decide next active after deletion
+    const phaseMeta = await prisma.phase.findUnique({
       where: { id: phaseId },
-      include: {
-        tasks: {
-          include: {
-            assignments: true,
-            subtasks: true
-          }
-        }
-      }
+      select: { id: true, project_id: true, order: true, status: true }
     });
-
-    if (!phase) {
+    if (!phaseMeta) {
       return NextResponse.json(
         { error: 'Phase not found' },
         { status: 404 }
       );
     }
 
-    // Delete in the correct order to handle foreign key constraints
-    // 1. Delete task assignments for all tasks in this phase
-    console.log(`Deleting assignments for ${phase.tasks.length} tasks...`);
-    for (const task of phase.tasks) {
-      await prisma.taskAssignment.deleteMany({
-        where: {
-          task_id: task.id
-        }
+    // Collect all tasks in this phase and all descendant subtasks
+    const rootTasks = await prisma.task.findMany({ where: { phase_id: phaseId }, select: { id: true } });
+    const allIds = new Set<number>(rootTasks.map(t => t.id));
+    let frontier: number[] = rootTasks.map(t => t.id);
+
+    while (frontier.length > 0) {
+      const children = await prisma.task.findMany({
+        where: { parent_task_id: { in: frontier } },
+        select: { id: true },
       });
-
-      // Delete subtasks assignments
-      for (const subtask of task.subtasks) {
-        await prisma.taskAssignment.deleteMany({
-          where: {
-            task_id: subtask.id
-          }
-        });
-      }
+      const newIds = children.map(c => c.id).filter(id => !allIds.has(id));
+      newIds.forEach(id => allIds.add(id));
+      frontier = newIds;
     }
+    const idsArr = Array.from(allIds);
 
-    // 2. Delete task dependencies for all tasks in this phase
-    console.log('Deleting task dependencies...');
+    // 1) Delete task dependencies involving any of these tasks
     await prisma.taskDependency.deleteMany({
       where: {
         OR: [
-          {
-            predecessor_task: {
-              phase_id: phaseId
-            }
-          },
-          {
-            successor_task: {
-              phase_id: phaseId
-            }
-          }
-        ]
-      }
+          { predecessor_task_id: { in: idsArr } },
+          { successor_task_id: { in: idsArr } },
+        ],
+      },
     });
 
-    // 3. Delete all tasks in this phase (this will also delete subtasks due to cascade)
-    console.log('Deleting tasks...');
-    await prisma.task.deleteMany({
-      where: {
-        phase_id: phaseId
-      }
-    });
+    // 2) Delete assignments for all tasks/subtasks
+    await prisma.taskAssignment.deleteMany({ where: { task_id: { in: idsArr } } });
 
-    // 4. Finally delete the phase
-    console.log('Deleting phase...');
-    await prisma.phase.delete({
-      where: {
-        id: phaseId
-      }
-    });
+    // 3) Delete all collected tasks/subtasks
+    if (idsArr.length > 0) {
+      await prisma.task.deleteMany({ where: { id: { in: idsArr } } });
+    }
+
+    // 4) Delete the phase itself
+    await prisma.phase.delete({ where: { id: phaseId } });
 
     console.log(`Phase ${phaseId} deleted successfully`);
+
+    // 5) If deleted phase was active, activate the next phase by order
+    if ((phaseMeta.status || '').toLowerCase() === 'active') {
+      const nextPhase = await prisma.phase.findFirst({
+        where: {
+          project_id: phaseMeta.project_id,
+          order: { gt: phaseMeta.order ?? 0 },
+          NOT: { status: { in: ['completed', 'cancelled'] } },
+        },
+        orderBy: { order: 'asc' },
+      });
+
+      if (nextPhase) {
+        // Set chosen next to active if it's not completed/cancelled; others (not completed/cancelled) to on_hold
+        if (!['completed', 'cancelled', 'canceled'].includes((nextPhase.status || '').toLowerCase())) {
+          await prisma.phase.update({ where: { id: nextPhase.id }, data: { status: 'active' } });
+        }
+        await prisma.phase.updateMany({
+          where: {
+            project_id: phaseMeta.project_id,
+            id: { not: nextPhase.id },
+            NOT: { status: { in: ['completed', 'cancelled'] } },
+          },
+          data: { status: 'on_hold' },
+        });
+
+        // Activate all tasks under the new active phase and descendants (excluding completed/cancelled)
+        const directTasks = await prisma.task.findMany({ where: { phase_id: nextPhase.id }, select: { id: true } });
+        let tf = directTasks.map(t => t.id);
+        const allTIds = new Set<number>(tf);
+        while (tf.length > 0) {
+          const children = await prisma.task.findMany({ where: { parent_task_id: { in: tf } }, select: { id: true } });
+          const newIds = children.map(c => c.id).filter(id => !allTIds.has(id));
+          newIds.forEach(id => allTIds.add(id));
+          tf = newIds;
+        }
+        const idsToActivate = Array.from(allTIds);
+        if (idsToActivate.length > 0) {
+          await prisma.task.updateMany({
+            where: { id: { in: idsToActivate }, NOT: { status: { in: ['completed', 'cancelled'] } } },
+            data: { status: 'active' },
+          });
+        }
+      }
+    }
 
     return NextResponse.json({
       message: 'Phase deleted successfully',

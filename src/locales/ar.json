@@ -21,6 +21,7 @@
     "governance": "الحوكمة",
     "grc": "GRC",
     "projects": "إدارة المشاريع",
+    "timeline": "الجدول الزمني",
     "more": "المزيد"
   },
   "governance": {
@@ -495,10 +496,43 @@
     "add_phase": "إضافة مرحلة",
     "select_manager": "اختر المدير",
     "tabs": {
+      "dashboard": "لوحة التحكم",
       "project_management": "إدارة المشاريع",
       "quality_assurance": "ضمان الجودة",
       "performance_monitoring": "مراقبة الأداء",
       "excellence_standards": "معايير التميز"
-    }
+    },
+    "gantt_chart": "مخطط جانت للمشاريع",
+    "year": "سنة",
+    "month": "شهر",
+    "week": "أسبوع",
+    "day": "يوم",
+    "show_completed": "إظهار المكتملة",
+    "today": "اليوم",
+    "go_to_today": "اذهب إلى اليوم",
+    "gantt_description": "عرض تفاعلي للمشاريع والمراحل والمهام مع الجداول الزمنية",
+      "loading_gantt": "جاري تحميل مخطط جانت...",
+  "no_gantt_data": "لا توجد بيانات مشاريع متاحة",
+  "no_search_results": "لا توجد مهام تطابق بحثك",
+  "go_to_today": "اذهب إلى اليوم",
+  "today": "اليوم"
+  },
+  "gantt": {
+    "title": "جدول زمني للمشاريع",
+    "subtitle": "عرض شامل للمشاريع الحالية وتقدمها الزمني",
+    "view": "عرض:",
+    "week": "أسبوع",
+    "month": "شهر",
+    "quarter": "ربع سنة",
+    "year": "سنة",
+    "today": "اليوم",
+    "projects": "المشاريع",
+    "color_legend": "دليل الألوان",
+    "today_date": "تاريخ اليوم",
+    "total_projects": "إجمالي المشاريع",
+    "avg_progress": "متوسط التقدم",
+    "active_projects": "المشاريع النشطة",
+    "view_mode": "طريقة العرض",
+    "complete": "مكتمل"
   }
 } 

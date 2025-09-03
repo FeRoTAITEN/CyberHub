@@ -60,7 +60,7 @@ export default function SurveyPage({ params }: { params: Promise<{ token: string
         setLoading(false);
         setError(t("survey.expired"));
       });
-  }, [token]);
+  }, [token, t]);
 
   // Validate form field
   const validateField = (name: string, value: unknown) => {
