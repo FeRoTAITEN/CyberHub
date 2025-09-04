@@ -38,9 +38,9 @@
     "title": "GRC Management",
     "intro": "Governance, Risk, and Compliance management system"
   },
-  "excellent": {
-    "title": "Excellence & Project Management",
-    "intro": "Manage projects, track progress, and ensure excellence in all operations",
+  "Excellence": {
+    "title": "Excellence",
+    "intro": "Excellence Department Management System",
     "search_projects": "Search projects...",
     "import_xml": "Import XML",
     "new_project": "New Project",
@@ -99,10 +99,10 @@
     "project": "Project",
     "select_project": "Select Project",
     "cancel": "Cancel",
-    "no_projects": "No projects available",
-    "title": "Excellent Management",
-    "intro": "Manage projects, phases, tasks, and assignments with excellence",
-    "edit_project": "Edit Project",
+"no_projects": "No projects available",
+"title": "Excellence",
+"intro": "Excellence Department Management System",
+"edit_project": "Edit Project",
     "add_phase": "Add Phase",
     "select_manager": "Select Manager",
     "tabs": {

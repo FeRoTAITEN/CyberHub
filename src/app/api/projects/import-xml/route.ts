@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
         });
       }
     }
- 
+
     return NextResponse.json({ 
       message: 'Project imported successfully',
       projectId: project.id,
@@ -379,7 +379,7 @@ async function updateProjectProgress(projectId: number) {
       for (const subtask of task.subtasks) {
         totalSubtaskProgress += subtask.progress;
         subtaskCount++;
-      }
+  }
 
       // Update task progress based on subtasks
       const taskProgressRaw = subtaskCount > 0 ? totalSubtaskProgress / subtaskCount : task.progress;
@@ -394,7 +394,7 @@ async function updateProjectProgress(projectId: number) {
 
       totalTaskProgress += taskProgress;
       taskCount++;
-    }
+  }
 
     // Update phase progress based on tasks
     const phaseProgressRaw = taskCount > 0 ? totalTaskProgress / taskCount : phase.progress;

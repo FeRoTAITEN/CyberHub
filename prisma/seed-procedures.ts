@@ -11,7 +11,7 @@ async function main() {
       title_ar: 'إجراء الاستجابة للحوادث',
       description: 'Step-by-step procedure for handling security incidents and breaches',
       version: 'v2.1',
-      file_path: '/uploads/procedures/incident-response.pdf',
+      file_path: '/Just-for-testing.pdf',
       downloads: 67,
       views: 145,
       is_visible: true
@@ -21,7 +21,7 @@ async function main() {
       title_ar: 'إجراء التحكم في الوصول',
       description: 'Procedures for managing user access to systems and data',
       version: 'v1.8',
-      file_path: '/uploads/procedures/access-control.pdf',
+      file_path: '/Just-for-testing.pdf',
       downloads: 89,
       views: 234,
       is_visible: true
@@ -31,7 +31,7 @@ async function main() {
       title_ar: 'النسخ الاحتياطي واستعادة البيانات',
       description: 'Procedures for backing up critical data and disaster recovery',
       version: 'v1.5',
-      file_path: '/uploads/procedures/backup-recovery.pdf',
+      file_path: '/Just-for-testing.pdf',
       downloads: 45,
       views: 112,
       is_visible: true
@@ -41,7 +41,7 @@ async function main() {
       title_ar: 'تقييم نقاط الضعف',
       description: 'Procedures for conducting security vulnerability assessments',
       version: 'v1.3',
-      file_path: '/uploads/procedures/vulnerability-assessment.pdf',
+      file_path: '/Just-for-testing.pdf',
       downloads: 34,
       views: 78,
       is_visible: true
@@ -51,7 +51,7 @@ async function main() {
       title_ar: 'إجراء إدارة التغيير',
       description: 'Procedures for managing changes to IT systems and infrastructure',
       version: 'v1.9',
-      file_path: '/uploads/procedures/change-management.pdf',
+      file_path: '/Just-for-testing.pdf',
       downloads: 56,
       views: 134,
       is_visible: true
@@ -61,7 +61,7 @@ async function main() {
       title_ar: 'تدريب التوعية الأمنية',
       description: 'Procedures for conducting security awareness training programs',
       version: 'v1.2',
-      file_path: '/uploads/procedures/security-training.pdf',
+      file_path: '/Just-for-testing.pdf',
       downloads: 78,
       views: 189,
       is_visible: true

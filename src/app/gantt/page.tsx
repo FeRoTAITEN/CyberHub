@@ -8,7 +8,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CalendarIcon,
-  ClockIcon,
+
   ChartBarIcon
 } from '@heroicons/react/24/outline';
 
@@ -64,7 +64,7 @@ export default function GanttPage() {
   const [viewMode, setViewMode] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
   const timelineRef = useRef<HTMLDivElement>(null);
   const [rows, setRows] = useState<GanttProject[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [, setLoading] = useState<boolean>(true);
   const [showPhaseModal, setShowPhaseModal] = useState(false);
   const [phaseModalData, setPhaseModalData] = useState<{
     projectName: string;
@@ -194,6 +194,7 @@ export default function GanttPage() {
         setLoading(false);
       }
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
 
   // Calculate project bar position and width
@@ -332,7 +333,7 @@ export default function GanttPage() {
       const position = parseInt(todayPosition);
       timelineRef.current.scrollLeft = position - timelineRef.current.clientWidth / 2;
     }
-  }, [viewMode, currentDate]);
+  }, [viewMode, currentDate, todayPosition]);
 
   // Navigate to today
   const goToToday = () => {
@@ -380,21 +381,7 @@ export default function GanttPage() {
     return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
   };
 
-  // Get view mode display name
-  const getViewModeDisplayName = () => {
-    switch (viewMode) {
-      case 'week':
-        return 'Week';
-      case 'month':
-        return 'Month';
-      case 'quarter':
-        return 'Quarter';
-      case 'year':
-        return 'Year';
-      default:
-        return 'Month';
-    }
-  };
+  // (removed) getViewModeDisplayName was unused
 
   // Theme colors
   const themeColors = {

@@ -14,102 +14,100 @@ import {
   ExclamationTriangleIcon,
   ClockIcon,
   ClipboardDocumentCheckIcon,
-  ChartBarIcon
-} from '@heroicons/react/24/outline';
+  ChartBarIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useLang, useTheme } from "./ClientLayout";
 import { useTranslation } from "@/lib/useTranslation";
 // import Image from "next/image"; // Unused import
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 
 // Dashboard data
 const employee = {
-  name: 'Turki Alshehri',
-  position: 'Full Stack Developer',
-  department: 'Cyber Security Sector',
-  email: 'tu.alshehri@salam.sa',
-  phone: '+966501234567',
+  name: "Turki Alshehri",
+  position: "Full Stack Developer",
+  department: "Cyber Security Sector",
+  email: "tu.alshehri@salam.sa",
+  phone: "+966501234567",
 };
 
 const projectsData = [
-  { id: 1, name: 'SOC Modernization', status: 'Active' },
-  { id: 2, name: 'Zero Trust Implementation', status: 'Planning' },
-  { id: 3, name: 'Employee Awareness Program', status: 'Completed' },
-  { id: 4, name: 'Threat Intelligence Platform', status: 'Active' },
+  { id: 1, name: "SOC Modernization", status: "Active" },
+  { id: 2, name: "Zero Trust Implementation", status: "Planning" },
+  { id: 3, name: "Employee Awareness Program", status: "Completed" },
+  { id: 4, name: "Threat Intelligence Platform", status: "Active" },
 ];
 
 const tasksData = [
-  { id: 1, title: 'Prepare Security Report', status: 'In Progress' },
-  { id: 2, title: 'Review Access Policies', status: 'Completed' },
-  { id: 3, title: 'UI Design', status: 'In Progress' },
-  { id: 4, title: 'Database Update', status: 'Pending' },
-  { id: 5, title: 'Training Session', status: 'Completed' },
+  { id: 1, title: "Prepare Security Report", status: "In Progress" },
+  { id: 2, title: "Review Access Policies", status: "Completed" },
+  { id: 3, title: "UI Design", status: "In Progress" },
+  { id: 4, title: "Database Update", status: "Pending" },
+  { id: 5, title: "Training Session", status: "Completed" },
 ];
-
-
 
 const achievementsData = [
   {
     icon: <TrophyIcon className="w-6 h-6 text-yellow-400" />,
-    ar: 'أفضل موظف الشهر',
-    en: 'Employee of the Month',
+    ar: "أفضل موظف الشهر",
+    en: "Employee of the Month",
   },
   {
     icon: <StarIcon className="w-6 h-6 text-green-400" />,
-    ar: 'إكمال جميع الدورات التدريبية',
-    en: 'Completed All Training Courses',
+    ar: "إكمال جميع الدورات التدريبية",
+    en: "Completed All Training Courses",
   },
   {
     icon: <StarIcon className="w-6 h-6 text-blue-400" />,
-    ar: 'مساهمة في مشروع رئيسي',
-    en: 'Contributed to Major Project',
+    ar: "مساهمة في مشروع رئيسي",
+    en: "Contributed to Major Project",
   },
 ];
 
 // ThemeCardStyles for dashboard cards
 const themeCardStyles = {
   default: {
-    card: 'bg-[#0a1826] border border-slate-600',
-    name: 'text-green-400',
-    department: 'text-slate-400',
-    secondary: 'text-blue-300',
-    avatar: 'bg-slate-800 border-green-400',
+    card: "bg-[#0a1826] border border-slate-600",
+    name: "text-green-400",
+    department: "text-slate-400",
+    secondary: "text-blue-300",
+    avatar: "bg-slate-800 border-green-400",
   },
   light: {
-    card: 'bg-white border border-slate-200',
-    name: 'text-blue-700',
-    department: 'text-slate-400',
-    secondary: 'text-slate-700',
-    avatar: 'bg-blue-100 border-blue-400',
+    card: "bg-white border border-slate-200",
+    name: "text-blue-700",
+    department: "text-slate-400",
+    secondary: "text-slate-700",
+    avatar: "bg-blue-100 border-blue-400",
   },
   midnight: {
-    card: 'bg-slate-900 border border-slate-700',
-    name: 'text-white',
-    department: 'text-slate-400',
-    secondary: 'text-blue-300',
-    avatar: 'bg-slate-800 border-blue-400',
+    card: "bg-slate-900 border border-slate-700",
+    name: "text-white",
+    department: "text-slate-400",
+    secondary: "text-blue-300",
+    avatar: "bg-slate-800 border-blue-400",
   },
   novel: {
-    card: 'bg-gradient-to-br from-slate-100 to-slate-300 border border-slate-300',
-    name: 'text-slate-900',
-    department: 'text-slate-500',
-    secondary: 'text-blue-700',
-    avatar: 'bg-slate-200 border-slate-400',
+    card: "bg-gradient-to-br from-slate-100 to-slate-300 border border-slate-300",
+    name: "text-slate-900",
+    department: "text-slate-500",
+    secondary: "text-blue-700",
+    avatar: "bg-slate-200 border-slate-400",
   },
   cyber: {
-    card: 'bg-gradient-to-br from-[#0f172a] to-[#0a1826] border border-green-500/30 shadow-[0_0_24px_#39ff14cc]',
-    name: 'text-green-400',
-    department: 'text-slate-400',
-    secondary: 'text-cyan-300',
-    avatar: 'bg-[#0a1826] border-green-400',
+    card: "bg-gradient-to-br from-[#0f172a] to-[#0a1826] border border-green-500/30 shadow-[0_0_24px_#39ff14cc]",
+    name: "text-green-400",
+    department: "text-slate-400",
+    secondary: "text-cyan-300",
+    avatar: "bg-[#0a1826] border-green-400",
   },
   salam: {
-    card: 'bg-white border border-[#003931]',
-    name: 'text-[#003931]',
-    department: 'text-[#005147]',
-    secondary: 'text-[#005147]',
-    avatar: 'bg-[#EEFDEC] border-[#00F000]',
+    card: "bg-white border border-[#003931]",
+    name: "text-[#003931]",
+    department: "text-[#005147]",
+    secondary: "text-[#005147]",
+    avatar: "bg-[#EEFDEC] border-[#00F000]",
   },
 };
 
@@ -119,39 +117,39 @@ export default function HomePage() {
   const { lang } = useLang();
   const { theme } = useTheme();
   const { t } = useTranslation(lang);
-  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const dir = lang === "ar" ? "rtl" : "ltr";
   const styles = themeCardStyles[theme] || themeCardStyles.default;
 
   // تحديد ما إذا كان الثيم Salam أم لا
-  const isSalam = theme === 'salam';
-  
+  const isSalam = theme === "salam";
+
   // نظام الألوان الجديد لثيم Salam
   const salamColors = {
     // النصوص
-    primaryText: '#000000',      // أسود - للنصوص الرئيسية
-    secondaryText: '#003931',    // Reliable Green - للعناوين الفرعية
-    whiteText: '#FFFFFF',        // Cloud White - للنصوص على خلفيات داكنة
-    highlightText: '#00F000',    // Vibrant Green - للنصوص المميزة
-    
+    primaryText: "#000000", // أسود - للنصوص الرئيسية
+    secondaryText: "#003931", // Reliable Green - للعناوين الفرعية
+    whiteText: "#FFFFFF", // Cloud White - للنصوص على خلفيات داكنة
+    highlightText: "#00F000", // Vibrant Green - للنصوص المميزة
+
     // الأزرار
-    primaryButton: '#00F000',    // Vibrant Green
-    primaryButtonText: '#005147', // Dark Saudi Green
-    secondaryButton: '#FFFFFF',   // Cloud White
-    secondaryButtonText: '#003931', // Reliable Green
-    secondaryButtonBorder: '#00F000', // Vibrant Green
-    
+    primaryButton: "#00F000", // Vibrant Green
+    primaryButtonText: "#005147", // Dark Saudi Green
+    secondaryButton: "#FFFFFF", // Cloud White
+    secondaryButtonText: "#003931", // Reliable Green
+    secondaryButtonBorder: "#00F000", // Vibrant Green
+
     // البطاقات
-    cardBackground: '#FFFFFF',    // Cloud White مع opacity
-    cardBorder: '#003931',       // Reliable Green
-    
+    cardBackground: "#FFFFFF", // Cloud White مع opacity
+    cardBorder: "#003931", // Reliable Green
+
     // التنبيهات
-    successAlert: '#00F000',     // Vibrant Green
-    infoAlert: '#EEFDEC',        // Light Mint Green
-    warningAlert: '#A0FB8E',     // Fresh Green
-    
+    successAlert: "#00F000", // Vibrant Green
+    infoAlert: "#EEFDEC", // Light Mint Green
+    warningAlert: "#A0FB8E", // Fresh Green
+
     // الأيقونات
-    activeIcon: '#00F000',       // Vibrant Green
-    inactiveIcon: '#005147',     // Dark Saudi Green
+    activeIcon: "#00F000", // Vibrant Green
+    inactiveIcon: "#005147", // Dark Saudi Green
   };
 
   const [alerts, setAlerts] = useState([
@@ -199,8 +197,7 @@ export default function HomePage() {
     },
     {
       title: t("nav.projects"),
-      description:
-        lang === "ar" ? "إدارة المشاريع" : "Project Management",
+      description: lang === "ar" ? "إدارة المشاريع" : "Project Management",
       icon: ChartBarIcon,
       href: "/projects",
       color: isSalam ? salamColors.primaryButton : "bg-green-600",
@@ -288,7 +285,9 @@ export default function HomePage() {
   };
 
   // Dashboard calculations
-  const completedTasks = tasksData.filter((t) => t.status === 'Completed').length;
+  const completedTasks = tasksData.filter(
+    (t) => t.status === "Completed"
+  ).length;
   const totalTasks = tasksData.length;
   const completionRate = Math.round((completedTasks / totalTasks) * 100);
 
@@ -299,14 +298,16 @@ export default function HomePage() {
   const leavesRate = Math.round((remainingLeaves / totalLeaves) * 100);
 
   // Project data
-  const completedProjects = projectsData.filter((p) => p.status === 'Completed').length;
+  const completedProjects = projectsData.filter(
+    (p) => p.status === "Completed"
+  ).length;
   const totalProjects = projectsData.length;
   const projectsRate = Math.round((completedProjects / totalProjects) * 100);
 
   return (
     <div className="min-h-screen gradient-bg">
       <Navigation />
-      
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -319,7 +320,7 @@ export default function HomePage() {
             <p className="page-subtitle text-xl md:text-2xl text-slate-300 mb-12 max-w-4xl mx-auto">
               {t("home.subtitle")}
             </p>
-            
+
             {/* Quick Action Buttons */}
             <div className="flex flex-wrap justify-center gap-4 mb-16">
               {quickLinks.map((link) => (
@@ -341,36 +342,50 @@ export default function HomePage() {
       {/* Main Content Grid */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Left Column - Alerts & Quick Stats */}
           <div className="lg:col-span-1 space-y-8">
-            
             {/* Important Alerts */}
             <section className="content-animate">
-                <h2 className={`mb-6 flex items-center gap-3 ${isSalam ? 'section-title' : 'heading-2'}`}>
-                  <ExclamationTriangleIcon className={`w-6 h-6 ${isSalam ? 'text-white' : 'text-red-400'}`} />
+              <h2
+                className={`mb-6 flex items-center gap-3 ${
+                  isSalam ? "section-title" : "heading-2"
+                }`}
+              >
+                <ExclamationTriangleIcon
+                  className={`w-6 h-6 ${
+                    isSalam ? "text-white" : "text-red-400"
+                  }`}
+                />
                 {t("home.important_alerts")}
               </h2>
-                             <div className="space-y-4">
-                 {alerts.map((alert) => (
-                   <Alert
-                     key={alert.id}
-                     id={alert.id}
-                     type={alert.type}
-                     title={alert.title}
-                     message={alert.message}
-                     date={alert.date}
-                     onDismiss={handleDismissAlert}
-                   />
-                 ))}
-               </div>
+              <div className="space-y-4">
+                {alerts.map((alert) => (
+                  <Alert
+                    key={alert.id}
+                    id={alert.id}
+                    type={alert.type}
+                    title={alert.title}
+                    message={alert.message}
+                    date={alert.date}
+                    onDismiss={handleDismissAlert}
+                  />
+                ))}
+              </div>
             </section>
 
             {/* Quick Stats */}
             <section className="content-animate">
-                <h2 className={`mb-6 flex items-center gap-3 ${isSalam ? 'section-title' : 'heading-2'}`}>
-                  <ChartBarIcon className={`w-6 h-6 ${isSalam ? 'text-white' : 'text-blue-400'}`} />
-                {lang === 'ar' ? 'إحصائيات سريعة' : 'Quick Stats'}
+              <h2
+                className={`mb-6 flex items-center gap-3 ${
+                  isSalam ? "section-title" : "heading-2"
+                }`}
+              >
+                <ChartBarIcon
+                  className={`w-6 h-6 ${
+                    isSalam ? "text-white" : "text-blue-400"
+                  }`}
+                />
+                {lang === "ar" ? "إحصائيات سريعة" : "Quick Stats"}
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="stat-card p-4 text-center">
@@ -386,7 +401,7 @@ export default function HomePage() {
                     {completionRate}%
                   </div>
                   <div className="stat-label text-sm text-slate-400">
-                    {lang === 'ar' ? 'معدل الإنجاز' : 'Completion Rate'}
+                    {lang === "ar" ? "معدل الإنجاز" : "Completion Rate"}
                   </div>
                 </div>
               </div>
@@ -394,20 +409,40 @@ export default function HomePage() {
 
             {/* Recent Activities */}
             <section className="content-animate">
-                <h2 className={`mb-6 flex items-center gap-3 ${isSalam ? 'section-title' : 'heading-2'}`}>
-                  <ClockIcon className={`w-6 h-6 ${isSalam ? 'text-white' : 'text-blue-400'}`} />
+              <h2
+                className={`mb-6 flex items-center gap-3 ${
+                  isSalam ? "section-title" : "heading-2"
+                }`}
+              >
+                <ClockIcon
+                  className={`w-6 h-6 ${
+                    isSalam ? "text-white" : "text-blue-400"
+                  }`}
+                />
                 {t("home.recent_activity")}
               </h2>
               <div className="space-y-3">
                 {recentActivities.map((activity) => (
                   <div
                     key={activity.id}
-                    className={`p-3 rounded-lg ${isSalam ? 'bg-white border border-[#003931]' : `activity-${activity.type}`}`}
+                    className={`p-3 rounded-lg ${
+                      isSalam
+                        ? "bg-white border border-[#003931]"
+                        : `activity-${activity.type}`
+                    }`}
                   >
-                    <p className={`text-sm mb-1 ${isSalam ? 'text-[#005147]' : 'text-slate-300'}`}>
+                    <p
+                      className={`text-sm mb-1 ${
+                        isSalam ? "text-[#005147]" : "text-slate-300"
+                      }`}
+                    >
                       {activity.message}
                     </p>
-                    <span className={`text-xs ${isSalam ? 'text-[#005147]/70' : 'text-slate-500'}`}>
+                    <span
+                      className={`text-xs ${
+                        isSalam ? "text-[#005147]/70" : "text-slate-500"
+                      }`}
+                    >
                       {activity.time}
                     </span>
                   </div>
@@ -418,19 +453,25 @@ export default function HomePage() {
 
           {/* Center Column - Dashboard Content */}
           <div className="lg:col-span-2 space-y-8">
-            
             {/* User Info & Achievements */}
             <section className="content-animate">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* User Info Card */}
-                <div className={`card card-hover ${styles.card} p-6 rounded-xl flex flex-col items-center text-center`} dir={dir}>
-                  <div className={`rounded-full p-3 border-2 mb-4 ${styles.avatar}`}>
+                <div
+                  className={`card card-hover ${styles.card} p-6 rounded-xl flex flex-col items-center text-center`}
+                  dir={dir}
+                >
+                  <div
+                    className={`rounded-full p-3 border-2 mb-4 ${styles.avatar}`}
+                  >
                     <UserIcon className="w-12 h-12 text-base-content" />
                   </div>
                   <div className={`text-xl font-bold mb-2 ${styles.name}`}>
                     {employee.name}
                   </div>
-                  <div className={`text-base font-semibold mb-2 ${styles.secondary}`}>
+                  <div
+                    className={`text-base font-semibold mb-2 ${styles.secondary}`}
+                  >
                     {employee.position}
                   </div>
                   <div className={`text-sm ${styles.department}`}>
@@ -439,18 +480,21 @@ export default function HomePage() {
                 </div>
 
                 {/* Achievements Card */}
-                <div className={`card card-hover ${styles.card} p-6 rounded-xl`} dir={dir}>
+                <div
+                  className={`card card-hover ${styles.card} p-6 rounded-xl`}
+                  dir={dir}
+                >
                   <div className="flex items-center gap-2 mb-4">
                     <TrophyIcon className="w-6 h-6 text-yellow-400" />
                     <h3 className="text-lg font-bold">
-                      {lang === 'ar' ? 'إنجازات المستخدم' : 'User Achievements'}
+                      {lang === "ar" ? "إنجازات المستخدم" : "User Achievements"}
                     </h3>
                   </div>
                   <ul className="space-y-2">
                     {achievementsData.slice(0, 2).map((ach, idx) => (
                       <li key={idx} className="flex items-center gap-2 text-sm">
                         {ach.icon}
-                        <span>{lang === 'ar' ? ach.ar : ach.en}</span>
+                        <span>{lang === "ar" ? ach.ar : ach.en}</span>
                       </li>
                     ))}
                   </ul>
@@ -469,18 +513,19 @@ export default function HomePage() {
                         value={completionRate}
                         text={`${completionRate}%`}
                         styles={buildStyles({
-                          pathColor: '#39ff14',
-                          textColor: '#39ff14',
-                          trailColor: '#222f43',
-                          backgroundColor: '#101e2c',
+                          pathColor: "#39ff14",
+                          textColor: "#39ff14",
+                          trailColor: "#222f43",
+                          backgroundColor: "#101e2c",
                         })}
                       />
                     </div>
                     <div className="text-sm font-bold text-green-400">
-                      {lang === 'ar' ? 'إكمال المهام' : 'Tasks Completion'}
+                      {lang === "ar" ? "إكمال المهام" : "Tasks Completion"}
                     </div>
                     <div className="text-slate-400 text-xs">
-                      {completedTasks} / {totalTasks} {lang === 'ar' ? 'مكتملة' : 'Completed'}
+                      {completedTasks} / {totalTasks}{" "}
+                      {lang === "ar" ? "مكتملة" : "Completed"}
                     </div>
                   </div>
 
@@ -491,18 +536,19 @@ export default function HomePage() {
                         value={leavesRate}
                         text={`${remainingLeaves}`}
                         styles={buildStyles({
-                          pathColor: '#00e0ff',
-                          textColor: '#00e0ff',
-                          trailColor: '#222f43',
-                          backgroundColor: '#101e2c',
+                          pathColor: "#00e0ff",
+                          textColor: "#00e0ff",
+                          trailColor: "#222f43",
+                          backgroundColor: "#101e2c",
                         })}
                       />
                     </div>
                     <div className="text-sm font-bold text-cyan-300">
-                      {lang === 'ar' ? 'رصيد الإجازات' : 'Leave Balance'}
+                      {lang === "ar" ? "رصيد الإجازات" : "Leave Balance"}
                     </div>
                     <div className="text-slate-400 text-xs">
-                      {remainingLeaves} / {totalLeaves} {lang === 'ar' ? 'يوم متبقي' : 'days left'}
+                      {remainingLeaves} / {totalLeaves}{" "}
+                      {lang === "ar" ? "يوم متبقي" : "days left"}
                     </div>
                   </div>
 
@@ -513,18 +559,19 @@ export default function HomePage() {
                         value={projectsRate}
                         text={`${projectsRate}%`}
                         styles={buildStyles({
-                          pathColor: '#ff00c8',
-                          textColor: '#ff00c8',
-                          trailColor: '#222f43',
-                          backgroundColor: '#101e2c',
+                          pathColor: "#ff00c8",
+                          textColor: "#ff00c8",
+                          trailColor: "#222f43",
+                          backgroundColor: "#101e2c",
                         })}
                       />
                     </div>
                     <div className="text-sm font-bold text-pink-400">
-                      {lang === 'ar' ? 'إنجاز المشاريع' : 'Projects Completion'}
+                      {lang === "ar" ? "إنجاز المشاريع" : "Projects Completion"}
                     </div>
                     <div className="text-slate-400 text-xs">
-                      {completedProjects} / {totalProjects} {lang === 'ar' ? 'مكتمل' : 'Completed'}
+                      {completedProjects} / {totalProjects}{" "}
+                      {lang === "ar" ? "مكتمل" : "Completed"}
                     </div>
                   </div>
                 </div>
@@ -535,32 +582,102 @@ export default function HomePage() {
             <section className="content-animate">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Projects */}
-                <div className={`p-6 rounded-xl ${isSalam ? 'bg-white border border-[#003931]' : 'bg-[#101e2c] border border-slate-600'}`}>
+                <div
+                  className={`p-6 rounded-xl ${
+                    isSalam
+                      ? "bg-white border border-[#003931]"
+                      : "bg-[#101e2c] border border-slate-600"
+                  }`}
+                >
                   <div className="flex items-center gap-3 mb-4">
-                    <ChartBarIcon className={`w-6 h-6 ${isSalam ? 'text-[#36C639]' : 'text-blue-400'}`} />
-                    <h2 className={`text-lg font-bold ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{lang === 'ar' ? 'المشاريع المرتبطة' : 'Related Projects'}</h2>
+                    <ChartBarIcon
+                      className={`w-6 h-6 ${
+                        isSalam ? "text-[#36C639]" : "text-blue-400"
+                      }`}
+                    />
+                    <h2
+                      className={`text-lg font-bold ${
+                        isSalam ? "text-[#003931]" : "text-white"
+                      }`}
+                    >
+                      {lang === "ar" ? "المشاريع المرتبطة" : "Related Projects"}
+                    </h2>
                   </div>
                   <div className="space-y-3">
                     {projectsData.slice(0, 2).map((p) => (
-                      <div key={p.id} className={`flex items-center justify-between rounded-lg px-4 py-3 ${isSalam ? 'bg-[#EEFDEC] border border-[#003931]' : 'bg-slate-800'} hover:bg-slate-700 hover:scale-105 transition-all duration-200 cursor-pointer`}>
-                        <span className={`font-bold text-sm ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{p.name}</span>
-                        <span className={`px-2 py-1 rounded-lg text-xs font-semibold text-white ${isSalam ? 'bg-[#00F000]' : 'bg-green-600'}`}>{p.status}</span>
+                      <div
+                        key={p.id}
+                        className={`flex items-center justify-between rounded-lg px-4 py-3 ${
+                          isSalam
+                            ? "bg-[#EEFDEC] border border-[#003931]"
+                            : "bg-slate-800"
+                        } hover:bg-slate-700 hover:scale-105 transition-all duration-200 cursor-pointer`}
+                      >
+                        <span
+                          className={`font-bold text-sm ${
+                            isSalam ? "text-[#003931]" : "text-white"
+                          }`}
+                        >
+                          {p.name}
+                        </span>
+                        <span
+                          className={`px-2 py-1 rounded-lg text-xs font-semibold text-white ${
+                            isSalam ? "bg-[#00F000]" : "bg-green-600"
+                          }`}
+                        >
+                          {p.status}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Tasks */}
-                <div className={`p-6 rounded-xl ${isSalam ? 'bg-white border border-[#003931]' : 'bg-[#101e2c] border border-slate-600'}`}>
+                <div
+                  className={`p-6 rounded-xl ${
+                    isSalam
+                      ? "bg-white border border-[#003931]"
+                      : "bg-[#101e2c] border border-slate-600"
+                  }`}
+                >
                   <div className="flex items-center gap-3 mb-4">
-                    <ClipboardDocumentCheckIcon className={`w-6 h-6 ${isSalam ? 'text-[#73F64B]' : 'text-yellow-400'}`} />
-                    <h2 className={`text-lg font-bold ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{lang === 'ar' ? 'المهام المرتبطة' : 'Related Tasks'}</h2>
+                    <ClipboardDocumentCheckIcon
+                      className={`w-6 h-6 ${
+                        isSalam ? "text-[#73F64B]" : "text-yellow-400"
+                      }`}
+                    />
+                    <h2
+                      className={`text-lg font-bold ${
+                        isSalam ? "text-[#003931]" : "text-white"
+                      }`}
+                    >
+                      {lang === "ar" ? "المهام المرتبطة" : "Related Tasks"}
+                    </h2>
                   </div>
                   <div className="space-y-3">
                     {tasksData.slice(0, 2).map((t) => (
-                      <div key={t.id} className={`flex items-center justify-between rounded-lg px-4 py-3 ${isSalam ? 'bg-[#EEFDEC] border border-[#003931]' : 'bg-slate-800'} hover:bg-slate-700 hover:scale-105 transition-all duration-200 cursor-pointer`}>
-                        <span className={`font-bold text-sm ${isSalam ? 'text-[#003931]' : 'text-white'}`}>{t.title}</span>
-                        <span className={`px-2 py-1 rounded-lg text-xs font-semibold text-white ${isSalam ? 'bg-[#36C639]' : 'bg-blue-600'}`}>{t.status}</span>
+                      <div
+                        key={t.id}
+                        className={`flex items-center justify-between rounded-lg px-4 py-3 ${
+                          isSalam
+                            ? "bg-[#EEFDEC] border border-[#003931]"
+                            : "bg-slate-800"
+                        } hover:bg-slate-700 hover:scale-105 transition-all duration-200 cursor-pointer`}
+                      >
+                        <span
+                          className={`font-bold text-sm ${
+                            isSalam ? "text-[#003931]" : "text-white"
+                          }`}
+                        >
+                          {t.title}
+                        </span>
+                        <span
+                          className={`px-2 py-1 rounded-lg text-xs font-semibold text-white ${
+                            isSalam ? "bg-[#36C639]" : "bg-blue-600"
+                          }`}
+                        >
+                          {t.status}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -570,8 +687,16 @@ export default function HomePage() {
 
             {/* Active Projects */}
             <section className="content-animate">
-                <h2 className={`mb-6 flex items-center gap-3 ${isSalam ? 'section-title' : 'heading-2'}`}>
-                <ChartBarIcon className={`w-6 h-6 ${isSalam ? 'text-white' : 'text-green-400'}`} />
+              <h2
+                className={`mb-6 flex items-center gap-3 ${
+                  isSalam ? "section-title" : "heading-2"
+                }`}
+              >
+                <ChartBarIcon
+                  className={`w-6 h-6 ${
+                    isSalam ? "text-white" : "text-green-400"
+                  }`}
+                />
                 {t("home.active_projects")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -579,17 +704,29 @@ export default function HomePage() {
                   <div key={project.id} className="card p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-lg">{project.name}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        project.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {project.status === 'active' ? (lang === 'ar' ? 'نشط' : 'Active') : project.status}
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          project.status === "active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {project.status === "active"
+                          ? lang === "ar"
+                            ? "نشط"
+                            : "Active"
+                          : project.status}
                       </span>
                     </div>
-                    
+
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-600">{lang === 'ar' ? 'التقدم' : 'Progress'}</span>
-                        <span className="font-semibold">{project.progress}%</span>
+                        <span className="text-slate-600">
+                          {lang === "ar" ? "التقدم" : "Progress"}
+                        </span>
+                        <span className="font-semibold">
+                          {project.progress}%
+                        </span>
                       </div>
                       <div className="w-full bg-slate-200 rounded-full h-2">
                         <div
@@ -597,15 +734,23 @@ export default function HomePage() {
                           style={{ width: `${project.progress}%` }}
                         ></div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="text-slate-600">{lang === 'ar' ? 'الفريق' : 'Team'}</span>
-                          <div className="font-semibold">{project.team} {lang === 'ar' ? 'أعضاء' : 'members'}</div>
+                          <span className="text-slate-600">
+                            {lang === "ar" ? "الفريق" : "Team"}
+                          </span>
+                          <div className="font-semibold">
+                            {project.team} {lang === "ar" ? "أعضاء" : "members"}
+                          </div>
                         </div>
                         <div>
-                          <span className="text-slate-600">{lang === 'ar' ? 'الموعد' : 'Deadline'}</span>
-                          <div className="font-semibold">{project.deadline}</div>
+                          <span className="text-slate-600">
+                            {lang === "ar" ? "الموعد" : "Deadline"}
+                          </span>
+                          <div className="font-semibold">
+                            {project.deadline}
+                          </div>
                         </div>
                       </div>
                     </div>

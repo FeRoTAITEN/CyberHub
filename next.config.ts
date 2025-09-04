@@ -44,6 +44,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  async redirects() {
+    return [
+      {
+        source: '/excellent',
+        destination: '/excellence',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

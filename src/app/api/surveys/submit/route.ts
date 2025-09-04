@@ -10,32 +10,50 @@ function sanitize(str: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    const raw = await request.json();
     const body: {
-      invite_id: number;
-      responder_name: string;
-      responder_department: string;
+      token?: string;
+      invite_id?: number | string;
+      name?: string;
+      department?: string;
+      responder_name?: string;
+      responder_department?: string;
       answers: Array<{
-        question_id: number;
+        question_id: number | string;
         answer: string;
-        question_label: string;
+        question_label?: string;
       }>;
-    } = await request.json();
+    } = raw;
+
+    // Support both shapes from UI: token+name+department OR invite_id+responder_name+responder_department
+    const token = body.token as string | undefined;
+    const inviteIdInput = body.invite_id as number | string | undefined;
+    const responder_name = (body.responder_name ?? body.name ?? "").toString();
+    const responder_department = (body.responder_department ?? body.department ?? "").toString();
+    const answersInput = Array.isArray(body.answers) ? body.answers : [];
     
-    const { invite_id, responder_name, responder_department, answers } = body;
-    
-    if (!invite_id || !responder_name || !responder_department || !Array.isArray(answers)) {
+    if ((!token && !inviteIdInput) || !responder_name || !responder_department || answersInput.length === 0) {
       return NextResponse.json({ success: false, error: "Missing required information." }, { status: 400 });
     }
     
-    // Find survey invite by token
-    const invite = await prisma.surveyInvite.findUnique({
-      where: { id: invite_id },
+    // Locate invite by token or by id
+    let invite = null as any;
+    if (token) {
+      invite = await prisma.surveyInvite.findUnique({
+        where: { token },
       include: { 
-        survey: {
-          include: { questions: true }
-        }
+          survey: { include: { questions: true } }
       }
     });
+    } else if (inviteIdInput) {
+      const invite_id_num = typeof inviteIdInput === 'string' ? parseInt(inviteIdInput) : inviteIdInput;
+      invite = await prisma.surveyInvite.findUnique({
+        where: { id: invite_id_num as number },
+        include: {
+          survey: { include: { questions: true } }
+        }
+      });
+    }
     
     if (!invite) {
       return NextResponse.json({ success: false, error: "Invalid or expired link." }, { status: 400 });
@@ -47,10 +65,11 @@ export async function POST(request: NextRequest) {
     }
     
     // Validate required answers and process answers
-    const processedAnswers = [];
+    const processedAnswers: Array<{ question_id: number; answer: string }> = [];
+    const byId = new Map<string, any>(invite.survey.questions.map((q: any) => [q.id.toString(), q]));
     
     for (const q of invite.survey.questions) {
-      const answer = answers.find((a: any) => a.question_id.toString() === q.id.toString());
+      const answer = answersInput.find((a: any) => a.question_id.toString() === q.id.toString());
       
       if (q.required) {
           if (!answer || (answer.answer === undefined || answer.answer === "")) {
@@ -58,28 +77,24 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Process different question types
       let processedAnswer = "";
       if (answer) {
-        processedAnswer = answer.answer;
+        processedAnswer = String(answer.answer ?? "");
       }
 
-      // Always add the answer, even if empty, to ensure all questions are represented
       if (processedAnswer || answer) {
         processedAnswers.push({
-          question_id: q.id,
-          answer: processedAnswer || "" // Use empty string instead of undefined
+          question_id: Number(q.id),
+          answer: processedAnswer
         });
       }
     }
-    
-
 
     // Sanitize inputs
     const safeName = sanitize(responder_name);
     const safeDepartment = sanitize(responder_department);
+
     // Save response and answers
-    
     await prisma.surveyResponse.create({
       data: {
         invite_id: invite.id,
@@ -88,7 +103,7 @@ export async function POST(request: NextRequest) {
         responder_department: safeDepartment,
         answers: {
           create: processedAnswers.map((a: any) => {
-            const question = invite.survey.questions.find((q: any) => q.id.toString() === a.question_id.toString());
+            const question = byId.get(a.question_id.toString());
             return {
               question_id: a.question_id,
               answer: a.answer,

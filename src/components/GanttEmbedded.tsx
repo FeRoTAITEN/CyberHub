@@ -57,7 +57,7 @@ export default function GanttEmbedded() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
   const [rows, setRows] = useState<GanttRow[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [, setLoading] = useState<boolean>(true);
   const timelineRef = useRef<HTMLDivElement>(null);
   const [showPhaseModal, setShowPhaseModal] = useState(false);
   const [phaseModalData, setPhaseModalData] = useState<{
@@ -174,7 +174,7 @@ export default function GanttEmbedded() {
         setLoading(false);
       }
     })();
-  }, [theme]);
+  }, [theme, colors.bar]);
 
   const getProjectBarStyle = (project: GanttRow) => {
     const columnWidth = viewMode === 'year' ? 80 : viewMode === 'week' ? 144 : 64;
@@ -249,7 +249,7 @@ export default function GanttEmbedded() {
       const position = parseInt(todayPosition);
       timelineRef.current.scrollLeft = position - timelineRef.current.clientWidth / 2;
     }
-  }, [viewMode, currentDate]);
+  }, [viewMode, currentDate, todayPosition]);
 
   const formatDate = (date: Date, format: 'short' | 'long' = 'short') => {
     if (format === 'long') return date.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });

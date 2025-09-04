@@ -40,34 +40,40 @@ export default function SurveyPermanentPage({ params }: { params: Promise<{ toke
   const resolvedParams = use(params);
   const token = resolvedParams.token;
 
+  const expiredText = t("survey.expired");
+
   // Fetch survey data from API
   useEffect(() => {
+    let isCancelled = false;
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
-    fetch(`/api/surveys/permanent/validate?token=${token}`)
+    fetch(`/api/surveys/permanent/validate?token=${token}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
+        if (isCancelled) return;
         setLoading(false);
-        if (data.success) {
+        if (data.valid && data.survey) {
           setSurvey(data.survey);
         } else {
-          setError(t("survey.expired"));
+          setError(expiredText);
         }
       })
       .catch(() => {
+        if (isCancelled) return;
         setLoading(false);
-        setError(t("survey.expired"));
+        setError(expiredText);
       });
-  }, [token, t]);
-
-  // Validate form field function removed as it was unused
+    return () => {
+      isCancelled = true;
+      controller.abort();
+    };
+  }, [token, lang, expiredText]);
 
   // Handle input changes with validation
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    
-    // Clear error when user starts typing
     if (error && error.includes(name)) {
       setError(null);
     }
@@ -76,19 +82,11 @@ export default function SurveyPermanentPage({ params }: { params: Promise<{ toke
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate required fields
     const newErrors: { [key: string]: string } = {};
     
-    if (!form.name.trim()) {
-      newErrors.name = t("survey.name_required");
-    }
-    
-    if (!form.department.trim()) {
-      newErrors.department = t("survey.department_required");
-    }
-    
-    // Validate required questions
+    if (!form.name.trim()) newErrors.name = t("survey.name_required");
+    if (!form.department.trim()) newErrors.department = t("survey.department_required");
+
     survey?.questions?.forEach((q) => {
       if (q.required) {
         const value = form[q.id];
@@ -109,56 +107,35 @@ export default function SurveyPermanentPage({ params }: { params: Promise<{ toke
     try {
       const answers: Array<{ question_id: string; answer: string }> = [];
       
-      // Process all form fields
       for (const [key, value] of Object.entries(form)) {
         if (key !== 'name' && key !== 'department' && value !== undefined && value !== '') {
-          // Check if this is a comments question
           const question = survey?.questions?.find((q) => q.id.toString() === key);
           if (question && question.question_type === 'comments') {
-            // For comments, combine Yes/No with additional comment
             const yesNoValue = form[`${key}_yesno`];
             const commentValue = form[`${key}_comment`] || '';
             const combinedAnswer = `${yesNoValue}${commentValue ? ` - ${commentValue}` : ''}`;
-            answers.push({
-              question_id: key,
-              answer: combinedAnswer
-            });
+            answers.push({ question_id: key, answer: combinedAnswer });
           } else if (!key.includes('_yesno') && !key.includes('_comment')) {
-            // For regular questions, add as is
-          answers.push({
-            question_id: key,
-            answer: value
-          });
+            answers.push({ question_id: key, answer: value });
         }
       }
       }
       
-      // Also process comments questions that might not have a main value
       survey?.questions?.forEach((q: any) => {
         if (q.question_type === 'comments') {
           const yesNoValue = form[`${q.id}_yesno`];
           const commentValue = form[`${q.id}_comment`] || '';
           if (yesNoValue) {
             const combinedAnswer = `${yesNoValue}${commentValue ? ` - ${commentValue}` : ''}`;
-            // Check if this question is already in answers
             const existingAnswer = answers.find((a: any) => a.question_id.toString() === q.id.toString());
             if (!existingAnswer) {
-              answers.push({
-                question_id: q.id,
-                answer: combinedAnswer
-              });
+              answers.push({ question_id: q.id, answer: combinedAnswer });
             }
           }
         }
       });
       
-      const requestData = {
-        token: token,
-        name: form.name,
-        department: form.department,
-        answers
-      };
-      
+      const requestData = { survey_id: survey?.id, responder_name: form.name, responder_department: form.department, answers };
       const res = await fetch("/api/surveys/permanent/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -167,15 +144,24 @@ export default function SurveyPermanentPage({ params }: { params: Promise<{ toke
       const data = await res.json();
       setLoading(false);
       if (!data.success) {
-        setError(data.error || t("survey.expired"));
+        setError(data.error || expiredText);
       } else {
         setSubmitted(true);
       }
     } catch {
       setLoading(false);
-      setError(t("survey.expired"));
+      setError(expiredText);
     }
   };
+
+  const errorsObj = React.useMemo(() => {
+    if (!error) return {} as Record<string, string>;
+    try {
+      return JSON.parse(error);
+    } catch {
+      return { general: error } as Record<string, string>;
+    }
+  }, [error]);
 
   return (
     <div className={`min-h-screen w-full flex items-center justify-center relative font-${theme} theme-${theme} gradient-bg transition-colors duration-500`} style={{ overflow: "hidden" }}>
@@ -192,7 +178,7 @@ export default function SurveyPermanentPage({ params }: { params: Promise<{ toke
         loading={loading}
         expired={expired}
         submitted={submitted}
-        errors={error ? JSON.parse(error) : {}}
+        errors={errorsObj}
         form={form}
         onFormChange={handleChange}
         onSubmit={handleSubmit}

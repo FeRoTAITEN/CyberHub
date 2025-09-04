@@ -13,7 +13,7 @@ import {
   NewspaperIcon,
   QuestionMarkCircleIcon,
   PlayIcon,
-  ClipboardDocumentCheckIcon,
+
   ChevronDownIcon,
   XMarkIcon,
   Bars3Icon
@@ -77,7 +77,6 @@ const Navigation = () => {
     { name: t('nav.qa'), href: '/qa', icon: QuestionMarkCircleIcon },
     { name: t('nav.games'), href: '/games', icon: PlayIcon },
           { name: lang === 'ar' ? 'الحوكمة' : 'Governance', href: '/governance', icon: DocumentTextIcon },
-    { name: t('nav.projects'), href: '/projects', icon: ChartBarIcon },
     // تصغير اسم لوحة التحكم
     { name: lang === 'ar' ? 'لوحة' : 'Dash', href: '/dashboard', icon: ChartBarIcon },
     // Add Services page to More dropdown
@@ -87,13 +86,8 @@ const Navigation = () => {
     // Add GRC Management page
     { name: t('nav.grc'), href: '/grc', icon: DocumentTextIcon },
     // Add Excellent page
-    { name: lang === 'ar' ? 'التميز' : 'Excellent', href: '/excellent', icon: ShieldCheckIcon },
-    // Add Survey Reports page to More dropdown
-    { name: lang === 'ar' ? 'التقارير' : 'Reports', href: '/surveys/report', icon: ClipboardDocumentCheckIcon },
-    // Add Gantt Test page
-    { name: lang === 'ar' ? 'تجربة جانت' : 'Gantt Test', href: '/gantt-test', icon: ChartBarIcon },
-    // Add Gantt Timeline page
-    { name: t('nav.timeline'), href: '/gantt', icon: ChartBarIcon },
+    { name: lang === 'ar' ? 'التميز' : 'Excellence', href: '/excellence', icon: ShieldCheckIcon },
+    // removed: Reports, Gantt Test, Timeline, Project Management shortcut
   ];
 
   // تحديد العناصر المرئية حسب حجم الشاشة

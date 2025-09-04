@@ -10,7 +10,11 @@
     "seed": "npx tsx prisma/seed.ts",
     "seed-surveys": "npx tsx prisma/seed-surveys.ts",
     "seed-shifts": "npx tsx prisma/seed-shifts.ts",
-    "seed-policies": "npx tsx prisma/seed-policies.ts"
+    "seed-policies": "npx tsx prisma/seed-policies.ts",
+    "seed-standards": "npx tsx prisma/seed-standards.ts",
+    "seed-procedures": "npx tsx prisma/seed-procedures.ts",
+    "seed-grc": "npm run seed-policies && npm run seed-standards && npm run seed-procedures",
+    "seed-all": "npm run seed && npm run seed-grc && npm run seed-shifts && npm run seed-surveys"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",

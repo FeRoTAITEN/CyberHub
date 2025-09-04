@@ -33,34 +33,55 @@ export default function SurveyPage({ params }: { params: Promise<{ token: string
 
   const [form, setForm] = useState<{ name: string; department: string; [key: string]: string }>({ name: "", department: "" });
   const [expired, setExpired] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  const errorsObj = React.useMemo(() => {
+    if (!error) return {} as Record<string, string>;
+    try {
+      return JSON.parse(error);
+    } catch {
+      return { general: error } as Record<string, string>;
+    }
+  }, [error]);
 
   // Get token from params
   const resolvedParams = use(params);
   const token = resolvedParams.token;
 
+  // Precompute stable translated text
+  const expiredText = t("survey.expired");
+
   // Fetch survey data from API
   useEffect(() => {
+    let isCancelled = false;
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
-    fetch(`/api/surveys/validate?token=${token}`)
+    fetch(`/api/surveys/validate?token=${token}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
+        if (isCancelled) return;
         setLoading(false);
         if (data.expired) {
           setExpired(true);
         } else if (data.valid && data.survey) {
           setSurvey(data.survey);
         } else {
-          setError(t("survey.expired"));
+          setError(expiredText);
         }
       })
       .catch(() => {
+        if (isCancelled) return;
         setLoading(false);
-        setError(t("survey.expired"));
+        setError(expiredText);
       });
-  }, [token, t]);
+
+    return () => {
+      isCancelled = true;
+      controller.abort();
+    };
+  }, [token, lang, expiredText]);
 
   // Validate form field
   const validateField = (name: string, value: unknown) => {
@@ -183,13 +204,13 @@ export default function SurveyPage({ params }: { params: Promise<{ token: string
       const data = await res.json();
       setLoading(false);
       if (!data.success) {
-        setError(data.error || t("survey.expired"));
+        setError(data.error || expiredText);
       } else {
-        // setSubmitted(true); // This state was removed, so this line is removed.
+        setSubmitted(true);
       }
     } catch {
       setLoading(false);
-      setError(t("survey.expired"));
+      setError(expiredText);
     }
   };
 
@@ -207,8 +228,8 @@ export default function SurveyPage({ params }: { params: Promise<{ token: string
         survey={survey}
         loading={loading}
         expired={expired}
-        submitted={false} // submitted state was removed, so this is always false
-        errors={error ? JSON.parse(error) : {}} // Pass error as errors prop
+        submitted={submitted}
+        errors={errorsObj} // Safe errors object
         form={form}
         onFormChange={handleChange}
         onSubmit={handleSubmit}
