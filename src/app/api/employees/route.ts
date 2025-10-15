@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             name: true,
+            description: true,
           },
         },
       },
@@ -48,10 +49,23 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(employees);
+    const data = employees.map((employee) => ({
+      id: employee.id,
+      name: employee.name,
+      name_ar: employee.name_ar,
+      email: employee.email,
+      phone: employee.phone,
+      job_title: employee.job_title,
+      job_title_ar: employee.job_title_ar,
+      department: employee.department,
+      is_active: employee.is_active,
+      pattern_code: employee.pattern_code,
+    }));
+
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('Error fetching employees:', error);
-    return NextResponse.json({ error: 'Failed to fetch employees' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to fetch employees' }, { status: 500 });
   }
 }
 
@@ -223,7 +237,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if employee has shift assignments
-    const assignments = await prisma.shiftAssignment.findMany({
+    const assignments = await prisma.employeeShiftAssignment.findMany({
       where: { employee_id: parseInt(id) }
     });
 

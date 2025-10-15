@@ -89,9 +89,16 @@ export default function SurveyPermanentPage({ params }: { params: Promise<{ toke
 
     survey?.questions?.forEach((q) => {
       if (q.required) {
-        const value = form[q.id];
-        if (!value || value === '') {
-          newErrors[q.id] = t("survey.question_required");
+        if (q.question_type === 'comments') {
+          const yesNoValue = form[`${q.id}_yesno`];
+          if (!yesNoValue || yesNoValue.toString().trim() === '') {
+            newErrors[q.id] = lang === 'ar' ? 'يرجى اختيار نعم أو لا' : 'Please select Yes or No';
+          }
+        } else {
+          const value = form[q.id];
+          if (!value || value.toString().trim() === '') {
+            newErrors[q.id] = lang === 'ar' ? 'هذا الحقل مطلوب' : 'This field is required';
+          }
         }
       }
     });

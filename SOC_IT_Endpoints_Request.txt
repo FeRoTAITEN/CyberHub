@@ -1,0 +1,189 @@
+===============================================
+        SOC INTEGRATION - IT ENDPOINTS REQUEST
+===============================================
+
+Project: CyberHub - SOC (Shift Management)
+Audience: Company IT (API Providers)
+Purpose: List the exact endpoints and data we need from your side to make SOC fully functional.
+Date: January 2025
+
+===============================================
+A) AUTHENTICATION & GENERAL
+===============================================
+- Auth: Bearer token (preferred) or API Key
+  Header: Authorization: Bearer <token>
+- Base URL: To be provided by IT (e.g., https://api.company.com)
+- Formats: JSON UTF-8
+- Dates: YYYY-MM-DD for daily ops; ISO 8601 for DateTime
+- Time: HH:MM (24h)
+- Pagination: limit, offset (please support)
+- Rate limits: please specify
+- Errors: { success: false, error: string, details?: object }
+
+===============================================
+B) ENDPOINTS REQUIRED (READ)
+===============================================
+1) Employees (full directory)
+GET /employees
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "id": 101,
+      "name": "John Doe",
+      "name_ar": "جون دو",
+      "email": "john@company.com",
+      "phone": "+966...",
+      "job_title": "Analyst",
+      "job_title_ar": "محلل",
+      "department": { "id": 5, "name": "SOC", "description": "" },
+      "department_id": 5,
+      "pattern_code": "alpha" | null,
+      "is_active": true,
+      "gender": "male",
+      "hire_date": "2024-04-10T00:00:00Z",
+      "location": "HQ",
+      "avatar": null
+    }
+  ]
+}
+
+2) Departments
+GET /departments
+Response:
+{ "success": true, "data": [ { "id": 5, "name": "SOC", "description": "" } ] }
+
+3) Shifts (catalog)
+GET /shifts
+Response:
+{
+  "success": true,
+  "data": [
+    { "id": 1, "name": "Morning", "name_ar": "صباح", "start_time": "07:00", "end_time": "15:00", "min_members": 2, "max_members": 5 }
+  ]
+}
+
+4) Shift Patterns
+GET /shifts/patterns
+Response:
+{ "success": true, "patterns": [ { "id": 1, "code": "alpha", "name": "Alpha", "name_ar": "ألفا" } ] }
+
+5) Availability (unavailability per month)
+GET /shifts/availability?year=YYYY&month=MM
+Response:
+{
+  "success": true,
+  "data": [
+    { "id": 10, "employee_id": 101, "date": "2025-01-15", "reason": "Leave", "reason_ar": "إجازة", "notes": "", "created_by": 1, "created_at": "2025-01-01T10:00:00Z" }
+  ]
+}
+
+6) Assignments (per month)
+GET /shifts/assignments?year=YYYY&month=MM
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "id": 555,
+      "date": "2025-01-12",
+      "shift_id": 1,
+      "employee_id": 101,
+      "assigned_by": 1,
+      "assigned_at": "2025-01-01T09:00:00Z",
+      "status": "assigned",
+      "shift": { "id": 1, "name": "Morning", "name_ar": "صباح", "start_time": "07:00", "end_time": "15:00" },
+      "employee": { "id": 101, "name": "John Doe", "name_ar": "جون دو", "email": "john@company.com", "job_title": "Analyst" }
+    }
+  ]
+}
+
+7) Day Details (single day)
+GET /shifts/day?date=YYYY-MM-DD
+Response:
+{
+  "success": true,
+  "assignments": [ ... as above ... ],
+  "apologies": [ ... availability items ... ]
+}
+
+===============================================
+C) ENDPOINTS REQUIRED (WRITE)
+===============================================
+1) Manual Assignment
+POST /shifts/assign
+Request:
+{ "date": "2025-01-12", "shift_id": 1, "employee_id": 101, "assigned_by": 1 }
+Response: { "success": true, "assignment": { ... } }
+
+2) Remove Assignment
+DELETE /shifts/assignments?id=555
+Response: { "success": true }
+
+3) Add Availability (Apology)
+POST /shifts/availability
+Request:
+{ "employee_id": 101, "date": "2025-01-15", "reason": "Leave", "reason_ar": "إجازة", "notes": "", "created_by": 1 }
+Response: { "success": true, "id": 10 }
+
+4) Assign Pattern to Employee
+POST /employees/pattern
+Request:
+{ "employee_id": 101, "pattern_code": "alpha" | null }
+Response: { "success": true }
+
+5) Auto-Schedule (server-side action)
+POST /shifts/auto-schedule
+Request (month): { "year": 2025, "month": 1, "mode": "month", "patterns": ["alpha"], "assigned_by": 1 }
+Request (quarter): { "year": 2025, "month": 1, "mode": "quarter", "patterns": ["alpha"], "assigned_by": 1 }
+Request (year): { "year": 2025, "mode": "year", "patterns": ["alpha"], "assigned_by": 1 }
+Response: { "success": true, "createdCount": 120, "rangeStart": "2025-01-01", "rangeEndExclusive": "2025-04-01" }
+
+6) Clear Schedule
+POST /shifts/clear-month
+Request (month): { "year": 2025, "month": 1 }
+Request (quarter): { "year": 2025, "month": 1, "mode": "quarter" }
+Request (year): { "year": 2025, "mode": "year" }
+Response: { "success": true, "deletedCount": 90 }
+
+===============================================
+D) FIELD DEFINITIONS (REFERENCE)
+===============================================
+Employee: { id, name, name_ar?, email, phone?, job_title?, job_title_ar?, department_id, department{ id, name, description? }, pattern_code: string|null, is_active, gender, hire_date?, location?, avatar? }
+Department: { id, name, description? }
+Shift: { id, name, name_ar, start_time, end_time, min_members, max_members }
+Availability: { id, employee_id, date(YYYY-MM-DD), reason, reason_ar?, notes?, created_by, created_at }
+Assignment: { id, date(YYYY-MM-DD), shift_id, employee_id, assigned_by, assigned_at, status, shift{...}, employee{...} }
+Pattern: { id, code, name, name_ar? }
+
+===============================================
+E) NON-FUNCTIONAL REQUIREMENTS
+===============================================
+- Pagination on list endpoints (employees, assignments)
+- Filtering by year/month for calendar views
+- Rate limits disclosure
+- SLA/timeout expectations
+- Consistent error schema
+
+===============================================
+F) DELIVERY CHECKLIST FOR IT
+===============================================
+□ Base URL + Auth method
+□ Endpoint availability (GET/POST/DELETE)
+□ Request/Response schemas match this spec
+□ Pagination & filtering supported
+□ Error handling documented
+□ Rate limits provided
+
+===============================================
+G) NOTES & NEXT STEPS
+===============================================
+- This spec reflects the minimum needed for SOC to go live.
+- After integration, we will begin "Vacation Tracker" planning.
+
+Contact: [Your Name], CyberHub Team
+Email: [your.email@company.com]
+
+
+

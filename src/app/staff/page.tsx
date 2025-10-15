@@ -22,8 +22,6 @@ export default function StaffPage() {
     name_ar?: string;
     email: string;
     phone?: string;
-    position?: string;
-    position_ar?: string;
     job_title?: string;
     job_title_ar?: string;
     department?: {

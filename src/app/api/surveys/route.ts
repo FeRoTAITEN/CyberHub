@@ -91,41 +91,64 @@ export async function POST(request: NextRequest) {
       title_en: string;
       title_ar: string;
       questions: Array<{
-        question_type: string;
+        question_type?: string;
+        type?: string;
         label_en: string;
         label_ar: string;
-        required: boolean;
-        order: number;
+        required?: boolean;
+        order?: number;
         rating_options?: any;
         rating_scale?: string;
       }>;
     } = await request.json();
-    if (!body.title_en || !body.title_ar || !body.questions || body.questions.length === 0) {
+
+    if (!body.title_en || !body.title_ar || !Array.isArray(body.questions) || body.questions.length === 0) {
       return NextResponse.json({ success: false, error: "Missing required fields." }, { status: 400 });
     }
+
+    // Validate questions and normalize fields
+    const normalizedQuestions: Array<{
+      question_type: string;
+      label_en: string;
+      label_ar: string;
+      required: boolean;
+      order: number;
+      rating_scale: string | null;
+      rating_options: any;
+    }> = [];
+
+    for (let idx = 0; idx < body.questions.length; idx++) {
+      const q = body.questions[idx];
+      const questionType = q.question_type || q.type;
+      if (!q.label_en || !q.label_ar || !questionType) {
+        return NextResponse.json({ success: false, error: `Invalid question at index ${idx}: missing label_en/label_ar/question_type` }, { status: 400 });
+      }
+      normalizedQuestions.push({
+        question_type: questionType,
+        label_en: q.label_en,
+        label_ar: q.label_ar,
+        required: !!q.required,
+        order: idx,
+        rating_scale: q.rating_scale || null,
+        rating_options: processRatingOptions(q.rating_options)
+      });
+    }
+
     const survey = await prisma.survey.create({
       data: {
         title_en: body.title_en,
         title_ar: body.title_ar,
         created_by: 1, // Default admin user ID
         questions: {
-          create: body.questions.map((q, idx) => ({
-            question_type: q.question_type,
-            label_en: q.label_en,
-            label_ar: q.label_ar,
-            required: !!q.required,
-            order: idx,
-            rating_scale: q.rating_scale || null,
-            rating_options: processRatingOptions(q.rating_options)
-          }))
+          create: normalizedQuestions
         }
       },
       include: { questions: true }
     });
     
     return NextResponse.json({ success: true, survey });
-  } catch {
-    console.error('Error creating survey');
+  } catch (e) {
+    console.error('Error creating survey', e);
     return NextResponse.json({ success: false, error: 'Failed to create survey' }, { status: 500 });
   }
 }

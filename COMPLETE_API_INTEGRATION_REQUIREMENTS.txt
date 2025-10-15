@@ -1,0 +1,519 @@
+===============================================
+        CYBERHUB - COMPLETE API INTEGRATION REQUIREMENTS
+===============================================
+
+Project: CyberHub - Complete System Integration
+Audience: Company IT (API Providers)
+Purpose: Comprehensive data requirements for ALL pages to make the entire system functional
+Date: January 2025
+
+===============================================
+A) AUTHENTICATION & GENERAL STANDARDS
+===============================================
+- Auth: Bearer token (preferred) or API Key
+  Header: Authorization: Bearer <token>
+- Base URL: To be provided by IT (e.g., https://api.company.com)
+- Formats: JSON UTF-8
+- Dates: YYYY-MM-DD for daily ops; ISO 8601 for DateTime
+- Time: HH:MM (24h)
+- Pagination: limit, offset (please support)
+- Rate limits: please specify
+- Errors: { success: false, error: string, details?: object }
+- Arabic fields: Optional with _ar suffix
+
+===============================================
+B) PAGE-BY-PAGE DATA REQUIREMENTS
+===============================================
+
+1) HOME PAGE (Dashboard) - /page.tsx
+===============================================
+REQUIRED DATA:
+- Employee profile data (current user)
+- Project statistics
+- Task summaries
+- Achievement metrics
+- Recent activities
+
+API ENDPOINTS NEEDED:
+- GET /dashboard/employee-profile
+- GET /dashboard/projects-summary
+- GET /dashboard/tasks-summary
+- GET /dashboard/achievements
+- GET /dashboard/recent-activities
+
+2) STAFF PAGE - /staff/page.tsx
+===============================================
+REQUIRED DATA:
+- Complete employee directory
+- Department information
+- Contact details
+- Job titles and status
+
+API ENDPOINTS NEEDED:
+- GET /employees (with department info)
+- GET /departments
+- Search functionality: GET /employees?search=term
+
+3) EMPLOYEES PAGE - /employees/page.tsx
+===============================================
+REQUIRED DATA:
+- Employee profiles with photos
+- Department assignments
+- Project assignments
+- Status and availability
+- Salary information (if accessible)
+
+API ENDPOINTS NEEDED:
+- GET /employees (full profiles)
+- GET /departments
+- GET /employees/{id}/projects
+- GET /employees/{id}/assignments
+- POST /employees (create new)
+- PUT /employees/{id} (update)
+- DELETE /employees/{id} (delete)
+
+4) SOC PAGE - /soc/page.tsx
+===============================================
+REQUIRED DATA:
+- Employee shift assignments
+- Shift patterns and schedules
+- Availability/unavailability records
+- Department structure
+- Real-time shift management
+
+API ENDPOINTS NEEDED:
+- GET /employees (for shift assignment)
+- GET /departments
+- GET /shifts
+- GET /shifts/patterns
+- GET /shifts/assignments?year=YYYY&month=MM
+- GET /shifts/availability?year=YYYY&month=MM
+- GET /shifts/day?date=YYYY-MM-DD
+- POST /shifts/assign (manual assignment)
+- POST /shifts/auto-schedule (automatic scheduling)
+- POST /shifts/availability (add unavailability)
+- POST /employees/pattern (assign pattern)
+- POST /shifts/clear-month (clear assignments)
+- DELETE /shifts/assignments?id=ID
+- DELETE /shifts/availability?id=ID
+
+5) PROJECTS PAGE - /projects/page.tsx
+===============================================
+REQUIRED DATA:
+- Project details and status
+- Team member assignments
+- Progress tracking
+- Budget and timeline information
+- Attachments and documents
+
+API ENDPOINTS NEEDED:
+- GET /projects (with phases and tasks)
+- GET /projects/{id}/phases
+- GET /projects/{id}/tasks
+- GET /projects/{id}/team
+- GET /projects/{id}/attachments
+- POST /projects (create new)
+- PUT /projects/{id} (update)
+- DELETE /projects/{id} (delete)
+- POST /projects/import-xml (import from XML)
+
+6) EXCELLENCE PAGE - /excellence/page.tsx
+===============================================
+REQUIRED DATA:
+- Project management data
+- Employee performance metrics
+- Task assignments and progress
+- Project phases and milestones
+- Resource allocation
+
+API ENDPOINTS NEEDED:
+- GET /employees (for performance tracking)
+- GET /projects (with detailed progress)
+- GET /phases (project phases)
+- GET /tasks (task assignments)
+- GET /projects/import-xml (XML import functionality)
+- POST /projects (create projects)
+- POST /phases (create phases)
+- POST /tasks (create tasks)
+
+7) GRC PAGE - /grc/page.tsx
+===============================================
+REQUIRED DATA:
+- Policy documents
+- Standards and procedures
+- Version control
+- Download tracking
+- Visibility settings
+
+API ENDPOINTS NEEDED:
+- GET /policies
+- GET /policies/{id}
+- GET /policies/{id}/versions
+- GET /policies/{id}/download
+- GET /policies/{id}/view
+- POST /policies (upload new)
+- PUT /policies/{id} (update)
+- DELETE /policies/{id} (delete)
+- POST /policies/{id}/visibility (set visibility)
+- GET /standards
+- GET /standards/{id}
+- GET /standards/{id}/versions
+- GET /standards/{id}/download
+- GET /standards/{id}/view
+- POST /standards (upload new)
+- PUT /standards/{id} (update)
+- DELETE /standards/{id} (delete)
+- POST /standards/{id}/visibility (set visibility)
+- GET /procedures
+- GET /procedures/{id}
+- GET /procedures/{id}/versions
+- GET /procedures/{id}/download
+- GET /procedures/{id}/view
+- POST /procedures (upload new)
+- PUT /procedures/{id} (update)
+- DELETE /procedures/{id} (delete)
+- POST /procedures/{id}/visibility (set visibility)
+
+8) GOVERNANCE PAGE - /governance/page.tsx
+===============================================
+REQUIRED DATA:
+- Policy documents
+- Standards
+- Procedures
+- Document versions
+- Download statistics
+
+API ENDPOINTS NEEDED:
+- GET /policies
+- GET /standards
+- GET /procedures
+- GET /policies/{id}/download
+- GET /standards/{id}/download
+- GET /procedures/{id}/download
+
+9) SURVEYS REPORT PAGE - /surveys/report/page.tsx
+===============================================
+REQUIRED DATA:
+- Survey responses
+- Analytics and charts
+- Participant data
+- Export functionality
+- Invitation management
+
+API ENDPOINTS NEEDED:
+- GET /surveys
+- GET /surveys/{id}/responses
+- GET /surveys/{id}/export
+- POST /surveys (create new)
+- PUT /surveys/{id} (update)
+- DELETE /surveys/{id} (delete)
+- POST /surveys/invite (send invitations)
+- DELETE /surveys/invite/{id} (remove invitation)
+- POST /surveys/permanent (create permanent survey)
+- DELETE /surveys/permanent/{id} (delete permanent survey)
+- POST /surveys/submit (submit response)
+- POST /surveys/permanent/submit (submit permanent response)
+- GET /surveys/validate (validate token)
+- GET /surveys/permanent/validate (validate permanent token)
+
+10) DEPARTMENTS PAGE - /departments/page.tsx
+===============================================
+REQUIRED DATA:
+- Department structure
+- Employee counts
+- Project assignments
+- Budget information
+- Manager details
+
+API ENDPOINTS NEEDED:
+- GET /departments
+- GET /departments/{id}/employees
+- GET /departments/{id}/projects
+- POST /departments (create new)
+- PUT /departments/{id} (update)
+- DELETE /departments/{id} (delete)
+
+11) GANTT PAGE - /gantt/page.tsx
+===============================================
+REQUIRED DATA:
+- Project timelines
+- Phase information
+- Task dependencies
+- Progress tracking
+- Resource allocation
+
+API ENDPOINTS NEEDED:
+- GET /projects (with timeline data)
+- GET /phases (project phases)
+- GET /tasks (with dependencies)
+- GET /projects/{id}/phases
+- GET /projects/{id}/tasks
+
+12) SHIFTS PAGE - /shifts/page.tsx
+===============================================
+REQUIRED DATA:
+- Shift management (admin view)
+- Employee assignments
+- Pattern management
+- Availability tracking
+- Schedule optimization
+
+API ENDPOINTS NEEDED:
+- Same as SOC page (admin functionality)
+- Additional admin endpoints for pattern management
+- Bulk operations for shift assignments
+
+===============================================
+C) CORE DATA MODELS REQUIRED
+===============================================
+
+EMPLOYEE MODEL:
+{
+  id: number,
+  name: string,
+  name_ar?: string,
+  email: string,
+  phone?: string,
+  job_title?: string,
+  job_title_ar?: string,
+  department_id: number,
+  department: { id: number, name: string, description?: string },
+  pattern_code?: string|null,
+  is_active: boolean,
+  gender?: string,
+  hire_date?: string,
+  location?: string,
+  avatar?: string,
+  salary?: string,
+  status?: string
+}
+
+DEPARTMENT MODEL:
+{
+  id: number,
+  name: string,
+  description?: string,
+  manager_id?: number,
+  manager?: Employee,
+  employee_count?: number,
+  project_count?: number,
+  budget?: string
+}
+
+PROJECT MODEL:
+{
+  id: number,
+  name: string,
+  description?: string,
+  status: string,
+  progress: number,
+  manager_id?: number,
+  manager?: Employee,
+  phases: Phase[],
+  tasks: Task[],
+  baseline_start?: string,
+  baseline_finish?: string,
+  actual_start?: string,
+  actual_finish?: string,
+  budget?: number,
+  spent?: number
+}
+
+PHASE MODEL:
+{
+  id: number,
+  name: string,
+  description?: string,
+  project_id: number,
+  status: string,
+  progress: number,
+  order: number,
+  baseline_start?: string,
+  baseline_finish?: string,
+  actual_start?: string,
+  actual_finish?: string
+}
+
+TASK MODEL:
+{
+  id: number,
+  name: string,
+  description?: string,
+  project_id: number,
+  phase_id?: number,
+  status: string,
+  progress: number,
+  order: number,
+  duration?: number,
+  baseline_start?: string,
+  baseline_finish?: string,
+  actual_start?: string,
+  actual_finish?: string,
+  assignments: TaskAssignment[]
+}
+
+SHIFT MODEL:
+{
+  id: number,
+  name: string,
+  name_ar: string,
+  start_time: string,
+  end_time: string,
+  min_members: number,
+  max_members: number
+}
+
+ASSIGNMENT MODEL:
+{
+  id: number,
+  date: string,
+  shift_id: number,
+  employee_id: number,
+  assigned_by: number,
+  assigned_at: string,
+  status: string,
+  shift: Shift,
+  employee: Employee
+}
+
+AVAILABILITY MODEL:
+{
+  id: number,
+  employee_id: number,
+  date: string,
+  reason: string,
+  reason_ar?: string,
+  notes?: string,
+  created_by: number,
+  created_at: string
+}
+
+POLICY MODEL:
+{
+  id: number,
+  title_en: string,
+  title_ar: string,
+  description_en: string,
+  description_ar: string,
+  version: string,
+  file_size: string,
+  file_url?: string,
+  downloads: number,
+  views: number,
+  status: string,
+  is_visible: boolean,
+  created_at: string,
+  updated_at: string,
+  created_by?: number,
+  updated_by?: number
+}
+
+SURVEY MODEL:
+{
+  id: number,
+  title_en: string,
+  title_ar: string,
+  created_by: number,
+  created_at: string,
+  updated_at: string,
+  permanent_token?: string,
+  questions: SurveyQuestion[],
+  responses: SurveyResponse[]
+}
+
+===============================================
+D) INTEGRATION PRIORITIES
+===============================================
+
+PHASE 1 - CRITICAL (Immediate):
+□ Employee data synchronization
+□ Department structure
+□ Basic project management
+□ SOC shift management
+□ Policy/Standards/Procedures management
+
+PHASE 2 - IMPORTANT (Short-term):
+□ Survey system
+□ Advanced project tracking
+□ Task management
+□ Gantt chart functionality
+□ Reporting and analytics
+
+PHASE 3 - ENHANCEMENT (Long-term):
+□ Real-time updates
+□ Advanced reporting
+□ Performance optimization
+□ Mobile API support
+□ Integration with external systems
+
+===============================================
+E) PERFORMANCE REQUIREMENTS
+===============================================
+- Pagination support for all list endpoints
+- Filtering by date ranges, status, department
+- Search functionality across text fields
+- Optimized queries for dashboard views
+- Caching support for frequently accessed data
+- Real-time updates for critical operations
+
+===============================================
+F) SECURITY REQUIREMENTS
+===============================================
+- Authentication for all endpoints
+- Role-based access control
+- Data encryption in transit
+- Audit logging for sensitive operations
+- Input validation and sanitization
+- Rate limiting and DDoS protection
+
+===============================================
+G) TESTING REQUIREMENTS
+===============================================
+- API endpoint connectivity testing
+- Data format validation
+- Authentication flow testing
+- Error handling scenarios
+- Performance under load
+- Integration testing with frontend
+
+===============================================
+H) DELIVERY CHECKLIST FOR IT
+===============================================
+□ Authentication mechanism implemented
+□ All required endpoints available
+□ Data models match specifications
+□ Pagination and filtering supported
+□ Error handling standardized
+□ Rate limits documented
+□ Security measures implemented
+□ Testing completed
+□ Documentation provided
+
+===============================================
+I) CONTACT INFORMATION
+===============================================
+For questions or clarifications regarding this integration:
+- Project: CyberHub Complete System Integration
+- Status: Ready for Implementation
+- Next Phase: Vacation Tracker Planning
+
+===============================================
+J) NOTES & NEXT STEPS
+===============================================
+- This specification covers ALL pages in the CyberHub system
+- Each page has specific data requirements and API endpoints
+- Implementation should follow the priority phases
+- After integration, we will begin "Vacation Tracker" planning
+- Regular communication and testing will be essential for success
+
+===============================================
+           END OF COMPLETE INTEGRATION REQUIREMENTS
+===============================================
+
+Generated: January 2025
+Project: CyberHub Complete System Integration
+Status: Ready for IT Team Review ✅
+Next: Implementation Phase 🚀
+
+
+

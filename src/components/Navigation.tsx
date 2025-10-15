@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { 
   ShieldCheckIcon, 
   UserGroupIcon, 
-  ChartBarIcon,
   DocumentTextIcon,
   ClockIcon,
   HomeIcon,
@@ -77,12 +76,11 @@ const Navigation = () => {
     { name: t('nav.qa'), href: '/qa', icon: QuestionMarkCircleIcon },
     { name: t('nav.games'), href: '/games', icon: PlayIcon },
           { name: lang === 'ar' ? 'الحوكمة' : 'Governance', href: '/governance', icon: DocumentTextIcon },
-    // تصغير اسم لوحة التحكم
-    { name: lang === 'ar' ? 'لوحة' : 'Dash', href: '/dashboard', icon: ChartBarIcon },
+
     // Add Services page to More dropdown
     { name: lang === 'ar' ? 'الخدمات' : 'Services', href: '/services', icon: ShieldCheckIcon },
-    // Add Shift Management page
-    { name: lang === 'ar' ? 'المناوبات' : 'Shifts', href: '/shifts', icon: ClockIcon },
+    // Add SOC page
+    { name: lang === 'ar' ? 'SOC' : 'SOC', href: '/soc', icon: ClockIcon },
     // Add GRC Management page
     { name: t('nav.grc'), href: '/grc', icon: DocumentTextIcon },
     // Add Excellent page

@@ -38,6 +38,14 @@
     "title": "GRC Management",
     "intro": "Governance, Risk, and Compliance management system"
   },
+  "soc": {
+    "title": "SOC Operations",
+    "intro": "Security Operations Center command console for incidents, team health, and shift coverage.",
+    "dashboard_tab": "SOC Dashboard",
+    "shifts_tab": "Shift Management",
+    "dashboard_content_title": "Welcome to SOC Dashboard",
+    "dashboard_content_description": "Security Operations Center - Incident management, shift scheduling, and continuous monitoring."
+  },
   "Excellence": {
     "title": "Excellence",
     "intro": "Excellence Department Management System",

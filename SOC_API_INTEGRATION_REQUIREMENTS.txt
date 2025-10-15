@@ -1,0 +1,513 @@
+===============================================
+           CYBERHUB SOC - API INTEGRATION REQUIREMENTS
+===============================================
+
+Project: CyberHub SOC (Security Operations Center) Page
+Purpose: Complete Data Integration Requirements for Company API
+Date: January 2025
+Status: Ready for IT Team Implementation
+
+===============================================
+           INTEGRATION SCOPE
+===============================================
+
+CURRENT IMPLEMENTATION:
+- SOC Shift Management System
+- Employee Management
+- Department Management
+- Shift Scheduling
+- Pattern Management
+- Availability Management
+- Assignment Management
+- Auto-Scheduling System
+
+INTEGRATION REQUIREMENTS:
+- Complete data synchronization with company API
+- Real-time employee data updates
+- Department structure alignment
+- Shift pattern management
+- Availability tracking
+- Assignment history maintenance
+
+===============================================
+           GENERAL DATA FORMATS
+===============================================
+
+DATE FORMATS:
+- Daily dates: YYYY-MM-DD (ISO format)
+- DateTime: ISO 8601 format
+- Time: HH:MM format (24-hour)
+
+IDENTIFIERS:
+- All IDs: Integer numbers
+- Unique constraints: email fields
+
+TEXT FORMATS:
+- Encoding: UTF-8
+- Arabic fields: Optional with _ar suffix
+- Default language: English
+
+AUTHENTICATION:
+- Current: None required
+- Future: Bearer Token / JWT / API Key
+- Header: Authorization: Bearer <token>
+
+===============================================
+           1. EMPLOYEES DATA REQUIREMENTS
+===============================================
+
+REQUIRED FIELDS:
+- id: Integer (Primary Key)
+- name: String (Required)
+- name_ar: String (Optional - Arabic name)
+- email: String (Required, Unique)
+- phone: String (Optional)
+- job_title: String (Optional)
+- job_title_ar: String (Optional - Arabic job title)
+- department_id: Integer (Required - Foreign Key)
+- department: Object {id, name, description?}
+- pattern_code: String|null (Shift pattern assignment)
+- is_active: Boolean (Default: true)
+- gender: String (Default: "male")
+- hire_date: DateTime (Optional)
+- location: String (Optional)
+- avatar: String (Optional - Profile image URL)
+
+API ENDPOINTS REQUIRED:
+- GET /employees
+  Response: {success: boolean, data: Employee[]}
+- POST /employees (Create new employee)
+- PUT /employees/{id} (Update employee)
+- DELETE /employees/{id} (Delete employee)
+- POST /employees/pattern (Assign pattern to employee)
+  Request: {employee_id: number, pattern_code: string|null}
+  Response: {success: boolean}
+
+INTEGRATION NOTES:
+- pattern_code determines default shift rotation pattern
+- department_id must link to existing Department
+- email must be unique across all employees
+- is_active controls visibility in shift management
+
+===============================================
+           2. DEPARTMENTS DATA REQUIREMENTS
+===============================================
+
+REQUIRED FIELDS:
+- id: Integer (Primary Key)
+- name: String (Required)
+- description: String (Optional)
+- manager_id: Integer (Optional - Foreign Key to Employee)
+
+API ENDPOINTS REQUIRED:
+- GET /departments
+  Response: {success: boolean, data: Department[]}
+- POST /departments (Create new department)
+- PUT /departments/{id} (Update department)
+- DELETE /departments/{id} (Delete department)
+
+INTEGRATION NOTES:
+- manager_id links to Employee who manages the department
+- All employees must belong to a department
+- Department deletion should handle employee reassignment
+
+===============================================
+           3. SHIFTS DATA REQUIREMENTS
+===============================================
+
+REQUIRED FIELDS:
+- id: Integer (Primary Key)
+- name: String (Required - English name)
+- name_ar: String (Required - Arabic name)
+- start_time: String (Required - Format: HH:MM)
+- end_time: String (Required - Format: HH:MM)
+- min_members: Integer (Default: 2)
+- max_members: Integer (Default: 5)
+
+API ENDPOINTS REQUIRED:
+- GET /shifts
+  Response: {success: boolean, data: Shift[]}
+- POST /shifts (Create new shift)
+- PUT /shifts/{id} (Update shift)
+- DELETE /shifts/{id} (Delete shift)
+
+INTEGRATION NOTES:
+- Time format: 24-hour format (HH:MM)
+- min_members: Minimum staff required for shift
+- max_members: Maximum staff allowed for shift
+- Both English and Arabic names required
+
+===============================================
+           4. SHIFT PATTERNS DATA REQUIREMENTS
+===============================================
+
+REQUIRED FIELDS:
+- id: Integer (Primary Key)
+- code: String (Required, Unique - Pattern identifier)
+- name: String (Required - English name)
+- name_ar: String (Optional - Arabic name)
+
+API ENDPOINTS REQUIRED:
+- GET /shifts/patterns
+  Response: {success: boolean, patterns: Pattern[]}
+- POST /shifts/patterns (Create new pattern)
+  Request: {code: string, name: string, name_ar?: string}
+- POST /shifts/patterns/assign (Assign employees to pattern)
+  Request: {pattern_code: string, employee_ids: number[]}
+  Response: {success: boolean, assigned_count: number}
+
+INTEGRATION NOTES:
+- code must be unique (e.g., "alpha", "beta", "gamma")
+- Used for automatic shift rotation scheduling
+- Employees can be assigned to specific patterns
+
+===============================================
+           5. AVAILABILITY DATA REQUIREMENTS
+===============================================
+
+REQUIRED FIELDS:
+- id: Integer (Primary Key)
+- employee_id: Integer (Required - Foreign Key)
+- date: DateTime (Required - Date of unavailability)
+- reason: String (Required - English reason)
+- reason_ar: String (Optional - Arabic reason)
+- notes: String (Optional - Additional notes)
+- created_by: Integer (Required - User who created record)
+- created_at: DateTime (Auto-generated)
+
+API ENDPOINTS REQUIRED:
+- GET /shifts/availability?year=YYYY&month=MM
+  Response: {success: boolean, data: Availability[]}
+- POST /shifts/availability (Create unavailability record)
+  Request: {
+    employee_id: number,
+    date: "YYYY-MM-DD",
+    reason: string,
+    reason_ar?: string,
+    notes?: string,
+    created_by: number
+  }
+- DELETE /shifts/availability?id=ID (Remove unavailability)
+
+INTEGRATION NOTES:
+- Prevents employee from being scheduled on specific dates
+- Used by auto-scheduling algorithm
+- Unique constraint: (employee_id, date)
+
+===============================================
+           6. ASSIGNMENTS DATA REQUIREMENTS
+===============================================
+
+REQUIRED FIELDS:
+- id: Integer (Primary Key)
+- date: DateTime (Required - Assignment date)
+- shift_id: Integer (Required - Foreign Key)
+- employee_id: Integer (Required - Foreign Key)
+- assigned_by: Integer (Required - User who made assignment)
+- assigned_at: DateTime (Auto-generated)
+- status: String (Default: "assigned")
+- shift: Object {id, name, name_ar, start_time, end_time}
+- employee: Object {id, name, name_ar, email, job_title}
+
+API ENDPOINTS REQUIRED:
+- GET /shifts/assignments?year=YYYY&month=MM
+  Response: {success: boolean, data: Assignment[]}
+- POST /shifts/assign (Create manual assignment)
+  Request: {
+    date: "YYYY-MM-DD",
+    shift_id: number,
+    employee_id: number,
+    assigned_by: number
+  }
+- DELETE /shifts/assignments?id=ID (Remove assignment)
+
+INTEGRATION NOTES:
+- Links employees to shifts for specific dates
+- Unique constraint: (date, shift_id, employee_id)
+- Includes related shift and employee data
+
+===============================================
+           7. DAY DETAILS API REQUIREMENTS
+===============================================
+
+PURPOSE: Get detailed information for a specific day (for day modal)
+
+API ENDPOINT REQUIRED:
+- GET /shifts/day?date=YYYY-MM-DD
+  Response: {
+    success: boolean,
+    assignments: Assignment[],
+    apologies: Availability[]
+  }
+
+INTEGRATION NOTES:
+- Used for day detail modal in SOC interface
+- Returns all assignments and unavailability for specific date
+- Optimized for single-day queries
+
+===============================================
+           8. AUTO-SCHEDULING API REQUIREMENTS
+===============================================
+
+PURPOSE: Automatic shift scheduling with continuity logic
+
+API ENDPOINT REQUIRED:
+- POST /shifts/auto-schedule
+
+REQUEST FORMATS:
+Month Mode:
+{
+  year: number,
+  month: number,
+  mode?: "month",
+  patterns?: string[],
+  assigned_by?: number
+}
+
+Quarter Mode:
+{
+  year: number,
+  month: number,
+  mode: "quarter",
+  patterns?: string[],
+  assigned_by?: number
+}
+
+Year Mode:
+{
+  year: number,
+  mode: "year",
+  patterns?: string[],
+  assigned_by?: number
+}
+
+RESPONSE FORMAT:
+{
+  success: boolean,
+  createdCount: number,
+  rangeStart: string (ISO Date),
+  rangeEndExclusive: string (ISO Date),
+  message?: string
+}
+
+ALGORITHM REQUIREMENTS:
+- Calculate date range based on mode
+- Fetch previous assignments for continuity
+- Maintain employee rotation patterns
+- Respect availability constraints
+- Distribute staff evenly across shifts
+
+INTEGRATION NOTES:
+- Quarter: 3 months (Q1: Jan-Mar, Q2: Apr-Jun, Q3: Jul-Sep, Q4: Oct-Dec)
+- Year: Full calendar year
+- patterns: Optional filter for specific patterns only
+- Continuity: Continue from last assignment state
+
+===============================================
+           9. CLEAR SCHEDULE API REQUIREMENTS
+===============================================
+
+PURPOSE: Remove assignments within specified range
+
+API ENDPOINT REQUIRED:
+- POST /shifts/clear-month
+
+REQUEST FORMATS:
+Month Clear:
+{
+  year: number,
+  month: number
+}
+
+Quarter Clear:
+{
+  year: number,
+  month: number,
+  mode: "quarter"
+}
+
+Year Clear:
+{
+  year: number,
+  mode: "year"
+}
+
+RESPONSE FORMAT:
+{
+  success: boolean,
+  deletedCount: number,
+  message?: string
+}
+
+INTEGRATION NOTES:
+- Removes all assignments within specified range
+- Used for rescheduling or clearing old assignments
+- Confirmation required before execution
+
+===============================================
+           10. SOC UI DATA DEPENDENCIES
+===============================================
+
+FRONTEND REQUIREMENTS:
+- Employee data: All fields for display and management
+- Shift data: Names (EN/AR) and time ranges
+- Assignment data: Employee-shift-date relationships
+- Availability data: Unavailable dates per employee
+- Pattern data: Available patterns for selection
+- Day API: Single-day detailed view
+
+PERFORMANCE REQUIREMENTS:
+- Endpoints should support year/month filtering
+- Pagination for large datasets
+- Optimized queries for calendar views
+- Real-time updates for critical data
+
+===============================================
+           11. INTEGRATION CHECKLIST
+===============================================
+
+DATA VALIDATION:
+□ Date formats: YYYY-MM-DD for daily operations
+□ Null vs undefined: Use null for optional fields
+□ Unique constraints: Email addresses, pattern codes
+□ Foreign key relationships: Valid references
+
+API ENDPOINTS:
+□ GET /employees - Complete employee list
+□ GET /departments - Department structure
+□ GET /shifts - Available shifts
+□ GET /shifts/patterns - Shift patterns
+□ GET /shifts/assignments - Monthly assignments
+□ GET /shifts/availability - Monthly unavailability
+□ GET /shifts/day - Single day details
+□ POST /shifts/auto-schedule - Auto scheduling
+□ POST /shifts/assign - Manual assignment
+□ POST /shifts/availability - Add unavailability
+□ POST /employees/pattern - Assign pattern
+□ POST /shifts/clear-month - Clear assignments
+
+AUTHENTICATION:
+□ API Key / Bearer Token mechanism
+□ Authorization header format
+□ Token refresh handling
+□ Error responses for unauthorized access
+
+ERROR HANDLING:
+□ Standardized error response format
+□ HTTP status codes
+□ Validation error messages
+□ Network timeout handling
+
+===============================================
+           12. COMPANY API DATA REQUIREMENTS
+===============================================
+
+EMPLOYEE DATA NEEDED:
+- Complete employee directory with all fields
+- Department assignments
+- Job titles (EN/AR)
+- Contact information
+- Employment status
+- Shift pattern assignments
+
+DEPARTMENT DATA NEEDED:
+- Organizational structure
+- Department names and descriptions
+- Manager assignments
+- Employee counts
+
+HISTORICAL DATA NEEDED:
+- Last 30-60 days of assignments (for continuity)
+- Employee availability records
+- Shift pattern history
+- Assignment patterns
+
+REAL-TIME UPDATES NEEDED:
+- Employee status changes
+- Department transfers
+- New hires and terminations
+- Availability changes
+- Pattern assignments
+
+===============================================
+           13. IMPLEMENTATION PRIORITIES
+===============================================
+
+PHASE 1 - CRITICAL (Immediate):
+□ Employee data synchronization
+□ Department structure alignment
+□ Basic shift management
+□ Assignment tracking
+
+PHASE 2 - IMPORTANT (Short-term):
+□ Pattern management
+□ Availability tracking
+□ Auto-scheduling integration
+□ Day detail views
+
+PHASE 3 - ENHANCEMENT (Long-term):
+□ Real-time updates
+□ Advanced reporting
+□ Performance optimization
+□ Mobile API support
+
+===============================================
+           14. TESTING REQUIREMENTS
+===============================================
+
+INTEGRATION TESTING:
+□ API endpoint connectivity
+□ Data format validation
+□ Authentication flow
+□ Error handling scenarios
+□ Performance under load
+
+DATA VALIDATION TESTING:
+□ Employee data integrity
+□ Assignment consistency
+□ Availability conflicts
+□ Pattern assignments
+□ Date range calculations
+
+USER ACCEPTANCE TESTING:
+□ SOC interface functionality
+□ Auto-scheduling accuracy
+□ Manual assignment workflow
+□ Availability management
+□ Reporting accuracy
+
+===============================================
+           15. DOCUMENTATION REQUIREMENTS
+===============================================
+
+API DOCUMENTATION:
+□ Endpoint specifications
+□ Request/response examples
+□ Authentication methods
+□ Error codes and messages
+□ Rate limiting information
+
+INTEGRATION GUIDE:
+□ Setup instructions
+□ Configuration parameters
+□ Data mapping specifications
+□ Troubleshooting guide
+□ Support contact information
+
+===============================================
+           CONTACT INFORMATION
+===============================================
+
+For questions or clarifications regarding this integration:
+- Project: CyberHub SOC Development
+- Status: Ready for Implementation
+- Next Phase: Vacation Tracker Planning
+
+===============================================
+           END OF INTEGRATION REQUIREMENTS
+===============================================
+
+Generated: January 2025
+Project: CyberHub SOC Integration
+Status: Ready for IT Team Review ✅
+Next: Implementation Phase 🚀

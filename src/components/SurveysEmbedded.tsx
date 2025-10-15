@@ -160,6 +160,15 @@ export default function SurveysEmbedded() {
   const [responses, setResponses] = useState<any[]>([]);
   const [responsesLoading, setResponsesLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [visibleQuestionIds, setVisibleQuestionIds] = useState<number[] | null>(null);
+  const metaColumnsConfig = [
+    { id: 'index', label_en: '#', label_ar: '#'},
+    { id: 'name', label_en: t('reports.name'), label_ar: t('reports.name') },
+    { id: 'department', label_en: t('reports.department'), label_ar: t('reports.department') },
+    { id: 'date', label_en: t('reports.date'), label_ar: t('reports.date') },
+  ] as const;
+  type MetaColumnId = (typeof metaColumnsConfig)[number]['id'];
+  const [visibleMetaColumns, setVisibleMetaColumns] = useState<MetaColumnId[]>(metaColumnsConfig.map(col => col.id));
 
   useEffect(() => {
     fetchSurveys();
@@ -296,16 +305,19 @@ export default function SurveysEmbedded() {
 
   function openAddModal() {
     resetForm();
+    setError('');
     setShowAdd(true);
   }
 
   function closeAddModal() {
     setShowAdd(false);
+    setError('');
     resetForm();
   }
 
   function openEditModal(survey: any) {
     setSelectedSurvey(survey);
+    setError('');
     setForm({
       title_en: survey.title_en,
       title_ar: survey.title_ar,
@@ -316,10 +328,17 @@ export default function SurveysEmbedded() {
         type: q.question_type,
         required: q.required,
         rating_scale: q.rating_scale || '',
-        rating_options: q.rating_options || [],
+        rating_options: q.rating_options || (q.rating_scale ? getRatingScaleById(q.rating_scale)?.options || [] : []),
       })),
     });
     setShowEdit(true);
+  }
+
+  function closeEditModal() {
+    setShowEdit(false);
+    setSelectedSurvey(null);
+    setError('');
+    resetForm();
   }
 
   function openDeleteModal(survey: any) {
@@ -343,6 +362,150 @@ export default function SurveysEmbedded() {
       ...prev,
       questions: prev.questions.map((q, i) => (i === index ? { ...q, [field]: value } : q)),
     }));
+  }
+
+  function renderSurveyFormFields(mode: 'add' | 'edit') {
+    return (
+      <div className="space-y-4">
+        <div>
+          <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`} htmlFor={`${mode}-title-en`}>
+            {t('survey.label_en')}
+          </label>
+          <input
+            id={`${mode}-title-en`}
+            className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
+            value={form.title_en}
+            onChange={e => setForm({ ...form, title_en: e.target.value })}
+            placeholder={lang === 'ar' ? 'أدخل العنوان بالإنجليزية' : 'Enter title in English'}
+          />
+        </div>
+
+        <div>
+          <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`} htmlFor={`${mode}-title-ar`}>
+            {t('survey.label_ar')}
+          </label>
+          <input
+            id={`${mode}-title-ar`}
+            className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
+            value={form.title_ar}
+            onChange={e => setForm({ ...form, title_ar: e.target.value })}
+            placeholder={lang === 'ar' ? 'أدخل العنوان بالعربية' : 'Enter title in Arabic'}
+          />
+        </div>
+
+        <div>
+          <div className={`font-semibold mb-2 ${colors.textPrimary}`}>
+            {t('survey.questions')}
+          </div>
+          {form.questions.map((question, idx) => (
+            <div key={`${mode}-question-${idx}`} className={`border ${colors.borderPrimary} rounded-lg p-4 mb-4`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`} htmlFor={`${mode}-question-${idx}-en`}>
+                    {t('survey.label_en')}
+                  </label>
+                  <input
+                    id={`${mode}-question-${idx}-en`}
+                    className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
+                    placeholder={lang === 'ar' ? 'أدخل السؤال بالإنجليزية' : 'Enter question in English'}
+                    value={question.label_en}
+                    onChange={e => updateQuestion(idx, 'label_en', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`} htmlFor={`${mode}-question-${idx}-ar`}>
+                    {t('survey.label_ar')}
+                  </label>
+                  <input
+                    id={`${mode}-question-${idx}-ar`}
+                    className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
+                    placeholder={lang === 'ar' ? 'أدخل السؤال بالعربية' : 'Enter question in Arabic'}
+                    value={question.label_ar}
+                    onChange={e => updateQuestion(idx, 'label_ar', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`} htmlFor={`${mode}-question-type-${idx}`}>
+                    {t('survey.question_type')}
+                  </label>
+                  <select
+                    id={`${mode}-question-type-${idx}`}
+                    className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
+                    value={question.type}
+                    onChange={e => updateQuestion(idx, 'type', e.target.value)}
+                  >
+                    {QUESTION_TYPES.map(type => (
+                      <option key={type.id} value={type.id}>
+                        {lang === 'ar' ? type.name_ar : type.name_en}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {question.type === 'rating' && (
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`} htmlFor={`${mode}-rating-scale-${idx}`}>
+                      {t('survey.rating_scale')}
+                    </label>
+                    <select
+                      id={`${mode}-rating-scale-${idx}`}
+                      className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500`}
+                      value={question.rating_scale}
+                      onChange={e => {
+                        const scale = getRatingScaleById(e.target.value);
+                        updateQuestion(idx, 'rating_scale', e.target.value);
+                        updateQuestion(idx, 'rating_options', scale?.options || []);
+                      }}
+                    >
+                      <option value="">{t('survey.select_scale')}</option>
+                      {RATING_SCALES.map(scale => (
+                        <option key={scale.id} value={scale.id}>
+                          {lang === 'ar' ? scale.name_ar : scale.name_en}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center mb-4">
+                <input
+                  type="checkbox"
+                  id={`${mode}-required-${idx}`}
+                  checked={question.required}
+                  onChange={e => updateQuestion(idx, 'required', e.target.checked)}
+                  className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                />
+                <label htmlFor={`${mode}-required-${idx}`} className={`ml-2 text-sm ${colors.textPrimary}`}>
+                  {t('survey.required_question')}
+                </label>
+              </div>
+
+              <button
+                type="button"
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs transition-all duration-200"
+                onClick={() => removeQuestion(idx)}
+                disabled={form.questions.length === 1}
+              >
+                {t('survey.remove_question')}
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            className={`${colors.primaryBg} hover:${colors.primaryBgHover} text-white px-4 py-2 rounded-lg text-sm transition-all duration-200`}
+            onClick={addQuestion}
+          >
+            + {t('survey.add_question')}
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // Invite generation is handled within Link Management in full page; omitted here to keep embedded surface smaller
@@ -460,9 +623,99 @@ export default function SurveysEmbedded() {
   }
 
   function openResponsesModal(survey: any) {
-    setSelectedSurveyForResponses(survey);
+    const surveyWithQuestionOptions = {
+      ...survey,
+      questions: survey.questions?.map((q: any) => {
+        const ratingScale = q.rating_scale || q.scale_id || '';
+        const questionType = q.question_type || q.type;
+        return {
+          ...q,
+          type: questionType,
+          rating_scale: ratingScale,
+          rating_options: q.rating_options || getRatingScaleById(ratingScale || '')?.options || [],
+        };
+      }),
+    };
+    setSelectedSurveyForResponses(surveyWithQuestionOptions);
+    setVisibleQuestionIds(surveyWithQuestionOptions.questions?.map((q: any) => q.id) || []);
+    setVisibleMetaColumns(metaColumnsConfig.map(col => col.id));
     setShowResponsesModal(true);
     fetchResponses(Number(survey.id));
+  }
+
+  function formatAnswer(question: any, answerRecord: any) {
+    if (!answerRecord || answerRecord.answer === undefined || answerRecord.answer === null || answerRecord.answer === '') {
+      return '-';
+    }
+
+    const questionType = question?.type || question?.question_type;
+    const rawAnswer = answerRecord.answer;
+
+    if (questionType === 'rating') {
+      const numericValue = Number(rawAnswer);
+      if (Number.isNaN(numericValue)) {
+        return typeof rawAnswer === 'string' ? rawAnswer : `${rawAnswer}`;
+      }
+      const rawOptions = question?.rating_options ?? getRatingScaleById(question?.rating_scale || '')?.options ?? [];
+      let options: Array<{ value: number; label_en?: string; label_ar?: string; label?: string }> = [];
+      if (Array.isArray(rawOptions)) {
+        options = rawOptions as Array<{ value: number; label_en?: string; label_ar?: string; label?: string }>;
+      } else if (rawOptions && typeof rawOptions === 'object') {
+        options = Object.entries(rawOptions).map(([key, value]) => {
+          if (value && typeof value === 'object') {
+            const valObj = value as Record<string, unknown>;
+            return {
+              value: Number(valObj.value ?? key),
+              label_en: typeof valObj.label_en === 'string' ? (valObj.label_en as string) : typeof valObj.label === 'string' ? (valObj.label as string) : `${valObj.label_en ?? valObj.label ?? ''}`,
+              label_ar: typeof valObj.label_ar === 'string' ? (valObj.label_ar as string) : typeof valObj.label === 'string' ? (valObj.label as string) : `${valObj.label_ar ?? valObj.label ?? ''}`,
+            };
+          }
+          const label = typeof value === 'string' ? value : `${value}`;
+          return {
+            value: Number(key),
+            label_en: label,
+            label_ar: label,
+          };
+        });
+      }
+
+      const option = options.find((opt: any) => Number(opt.value) === numericValue);
+      const optionLabel = option ? (lang === 'ar' ? option.label_ar : option.label_en) : '';
+      return optionLabel ? `${numericValue}/5 - ${optionLabel}` : `${numericValue}/5`;
+    }
+
+    if (questionType === 'comments') {
+      if (typeof rawAnswer === 'string') {
+        try {
+          const parsed = JSON.parse(rawAnswer);
+          if (parsed && typeof parsed === 'object') {
+            const choiceRaw = parsed.choice ?? '';
+            const choice = lang === 'ar'
+              ? choiceRaw === 'Yes'
+                ? 'نعم'
+                : choiceRaw === 'No'
+                  ? 'لا'
+                  : choiceRaw
+              : choiceRaw;
+            const comment = parsed.comment ? String(parsed.comment).trim() : '';
+            return comment ? `${choice}${choice ? ' - ' : ''}${comment}` : (choice || '-');
+          }
+        } catch {
+          // Fall back to raw string rendering below
+        }
+      }
+      if (typeof rawAnswer === 'string') {
+        const trimmed = rawAnswer.trim();
+        if (lang === 'ar') {
+          if (trimmed === 'Yes') return 'نعم';
+          if (trimmed === 'No') return 'لا';
+        }
+        return trimmed || '-';
+      }
+      return `${rawAnswer}` || '-';
+    }
+
+    return typeof rawAnswer === 'string' ? rawAnswer : `${rawAnswer}`;
   }
 
   async function fetchResponses(surveyId: number) {
@@ -473,11 +726,6 @@ export default function SurveysEmbedded() {
       if (data.success) {
         const newResponses = data.responses || [];
         setResponses(newResponses);
-        if (selectedSurveyForResponses) {
-          const updatedSurvey = { ...selectedSurveyForResponses, responses: newResponses };
-          setSelectedSurveyForResponses(updatedSurvey);
-          setSurveys(prev => prev.map(s => (s.id === surveyId ? updatedSurvey : s)));
-        }
       } else {
         setError(data.error || 'Failed to fetch responses');
       }
@@ -679,7 +927,7 @@ export default function SurveysEmbedded() {
           {/* Stats */}
           <div className="lg:col-span-1 flex flex-col gap-6">
             {surveyStats.map((stat, idx) => (
-              <div key={idx} className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl`}>
+              <div key={`stat-${idx}`} className={`${colors.cardBg} border ${colors.borderPrimary} p-6 rounded-xl`}>
                 <div className="flex items-center justify-center mb-4">{stat.icon}</div>
                 <div className={`text-3xl font-bold text-center mb-2 ${colors.textPrimary}`}>{stat.value}</div>
                 <div className={`text-center ${colors.textSecondary} font-medium`}>{stat.label}</div>
@@ -777,56 +1025,7 @@ export default function SurveysEmbedded() {
           <div className={`relative ${colors.cardBg} rounded-xl shadow-xl max-w-4xl w-full mx-auto p-6 z-10 max-h-[90vh] overflow-y-auto`}>
             <Dialog.Title className={`text-xl font-bold mb-4 ${colors.textPrimary}`}>{t('reports.add_survey')}</Dialog.Title>
             <div className="space-y-4">
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`}>{t('survey.label_en')}</label>
-                <input className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-4 py-2 rounded-lg`} value={form.title_en} onChange={e => setForm({ ...form, title_en: e.target.value })} />
-              </div>
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`}>{t('survey.label_ar')}</label>
-                <input className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-4 py-2 rounded-lg`} value={form.title_ar} onChange={e => setForm({ ...form, title_ar: e.target.value })} />
-              </div>
-              <div>
-                <div className={`font-semibold mb-2 ${colors.textPrimary}`}>{t('survey.questions')}</div>
-                {form.questions.map((question, idx) => (
-                  <div key={idx} className={`border ${colors.borderPrimary} rounded-lg p-4 mb-4`}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`}>{t('survey.label_en')}</label>
-                        <input className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-3 py-2 rounded-lg`} value={question.label_en} onChange={e => updateQuestion(idx, 'label_en', e.target.value)} />
-                      </div>
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`}>{t('survey.label_ar')}</label>
-                        <input className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-3 py-2 rounded-lg`} value={question.label_ar} onChange={e => updateQuestion(idx, 'label_ar', e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`}>{t('survey.question_type')}</label>
-                        <select className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-3 py-2 rounded-lg`} value={question.type} onChange={e => updateQuestion(idx, 'type', e.target.value)}>
-                          {QUESTION_TYPES.map(type => (
-                            <option key={type.id} value={type.id}>{lang === 'ar' ? type.name_ar : type.name_en}</option>
-                          ))}
-                        </select>
-                      </div>
-                      {question.type === 'rating' && (
-                        <div>
-                          <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`}>{t('survey.rating_scale')}</label>
-                          <select className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-3 py-2 rounded-lg`} value={question.rating_scale} onChange={e => { const scale = getRatingScaleById(e.target.value); updateQuestion(idx, 'rating_scale', e.target.value); updateQuestion(idx, 'rating_options', scale?.options || []); }}>
-                            <option value="">{t('survey.select_scale')}</option>
-                            {RATING_SCALES.map(scale => (<option key={scale.id} value={scale.id}>{lang === 'ar' ? scale.name_ar : scale.name_en}</option>))}
-                          </select>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center mb-4">
-                      <input type="checkbox" id={`required-${idx}`} checked={question.required} onChange={e => updateQuestion(idx, 'required', e.target.checked)} className="w-4 h-4" />
-                      <label htmlFor={`required-${idx}`} className={`ml-2 text-sm ${colors.textPrimary}`}>{t('survey.required_question')}</label>
-                    </div>
-                    <button type="button" className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs" onClick={() => removeQuestion(idx)} disabled={form.questions.length === 1}>{t('survey.remove_question')}</button>
-                  </div>
-                ))}
-                <button type="button" className={`${colors.primaryBg} hover:${colors.primaryBgHover} text-white px-4 py-2 rounded-lg text-sm`} onClick={addQuestion}>+ {t('survey.add_question')}</button>
-              </div>
+              {renderSurveyFormFields('add')}
               {error && <div className={`text-red-500 text-sm mt-2 ${colors.textPrimary}`}>{error}</div>}
               <div className="flex justify-end gap-2 mt-6">
                 <button className={`${colors.cardBgHover} border ${colors.borderPrimary} ${colors.textPrimary} px-4 py-2 rounded-lg`} onClick={closeAddModal}>{t('survey.cancel')}</button>
@@ -837,25 +1036,16 @@ export default function SurveysEmbedded() {
         </div>
       </Dialog>
 
-      <Dialog open={showEdit} onClose={() => setShowEdit(false)} className="fixed z-50 inset-0 overflow-y-auto">
+      <Dialog open={showEdit} onClose={closeEditModal} className="fixed z-50 inset-0 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4">
           <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
           <div className={`relative ${colors.cardBg} rounded-xl shadow-xl max-w-4xl w-full mx-auto p-6 z-10 max-h-[90vh] overflow-y-auto`}>
             <Dialog.Title className={`text-xl font-bold mb-4 ${colors.textPrimary}`}>{t('survey.edit')}</Dialog.Title>
-            {/* Same form content as Add, bound to form state */}
             <div className="space-y-4">
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`}>{t('survey.label_en')}</label>
-                <input className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-4 py-2 rounded-lg`} value={form.title_en} onChange={e => setForm({ ...form, title_en: e.target.value })} />
-              </div>
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${colors.textPrimary}`}>{t('survey.label_ar')}</label>
-                <input className={`${colors.inputBg} ${colors.inputBorder} ${colors.textPrimary} w-full px-4 py-2 rounded-lg`} value={form.title_ar} onChange={e => setForm({ ...form, title_ar: e.target.value })} />
-              </div>
-              {/* Questions map same as Add */}
-              {/* ... keep concise to avoid duplication ... */}
+              {renderSurveyFormFields('edit')}
+              {error && <div className={`text-red-500 text-sm mt-2 ${colors.textPrimary}`}>{error}</div>}
               <div className="flex justify-end gap-2 mt-6">
-                <button className={`${colors.cardBgHover} border ${colors.borderPrimary} ${colors.textPrimary} px-4 py-2 rounded-lg`} onClick={() => setShowEdit(false)}>{t('survey.cancel')}</button>
+                <button className={`${colors.cardBgHover} border ${colors.borderPrimary} ${colors.textPrimary} px-4 py-2 rounded-lg`} onClick={closeEditModal}>{t('survey.cancel')}</button>
                 <button className={`${colors.primaryBg} hover:${colors.primaryBgHover} text-white px-4 py-2 rounded-lg`} onClick={handleEditSurvey}>{t('survey.save')}</button>
               </div>
             </div>
@@ -971,18 +1161,162 @@ export default function SurveysEmbedded() {
               <div className={`text-center ${colors.textSecondary}`}>{lang === 'ar' ? 'جاري التحميل...' : 'Loading...'}</div>
             ) : (
               <div className="space-y-4">
-                {responses.map((r: any, idx: number) => (
-                  <div key={idx} className={`${colors.cardBgHover} border ${colors.borderPrimary} p-4 rounded-lg`}>
-                    <div className={`text-sm ${colors.textSecondary}`}>{new Date(r.created_at).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</div>
-                    <div className={`${colors.textPrimary}`}>{r.name} - {r.department}</div>
-                  </div>
-                ))}
-                {responses.length === 0 && <div className={`text-center ${colors.textSecondary}`}>{lang === 'ar' ? 'لا توجد ردود' : 'No responses'}</div>}
-                <div className="text-right">
-                  <button className={`${colors.primaryBg} hover:${colors.primaryBgHover} text-white px-4 py-2 rounded-lg`} onClick={() => selectedSurveyForResponses && exportToCSV(selectedSurveyForResponses.id)}>
-                    <ArrowDownTrayIcon className="w-4 h-4 inline-block mr-1" />{t('reports.export')}
-                  </button>
+            {responses.length === 0 ? (
+              <div className={`text-center ${colors.textSecondary}`}>
+                {lang === 'ar' ? 'لا توجد ردود' : 'No responses'}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className={`text-sm ${colors.textSecondary}`}>
+                  {t('reports.total_responses_count')}: {responses.length}
                 </div>
+                <div className="space-y-3">
+                  <div className="inline-flex flex-wrap gap-2">
+                    {metaColumnsConfig.map(column => {
+                      const isVisible = visibleMetaColumns.includes(column.id);
+                      return (
+                        <label
+                          key={`toggle-meta-${column.id}`}
+                          className={`flex items-center gap-2 px-3 py-1 text-xs rounded-full border transition-colors duration-150 cursor-pointer ${isVisible ? `${colors.primaryBg} text-white border-transparent` : `${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary}`}`}
+                        >
+                          <input
+                            type="checkbox"
+                            className="w-3 h-3"
+                            checked={isVisible}
+                            onChange={() => {
+                              setVisibleMetaColumns(prev => {
+                                const baseline = prev || [];
+                                const alreadyVisible = baseline.includes(column.id);
+                                if (alreadyVisible) {
+                                  const remaining = baseline.filter(id => id !== column.id);
+                                  return remaining;
+                                }
+                                return [...baseline, column.id];
+                              });
+                            }}
+                          />
+                          <span>{lang === 'ar' ? column.label_ar : column.label_en}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <div className="inline-flex flex-wrap gap-2">
+                    {selectedSurveyForResponses?.questions?.map((question: any) => {
+                      const isVisible = (visibleQuestionIds || []).includes(question.id);
+                      return (
+                        <label
+                          key={`toggle-question-${question.id}`}
+                          className={`flex items-center gap-2 px-3 py-1 text-xs rounded-full border transition-colors duration-150 cursor-pointer ${isVisible ? `${colors.primaryBg} text-white border-transparent` : `${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary}`}`}
+                        >
+                          <input
+                            type="checkbox"
+                            className="w-3 h-3"
+                            checked={isVisible}
+                            onChange={() => {
+                              setVisibleQuestionIds(prev => {
+                                const baseline = prev ?? [];
+                                const alreadyVisible = baseline.includes(question.id);
+                                if (alreadyVisible) {
+                              const remaining = baseline.filter(id => id !== question.id);
+                              return remaining;
+                                }
+                                return [...baseline, question.id];
+                              });
+                            }}
+                          />
+                          <span>{lang === 'ar' ? question.label_ar : question.label_en}</span>
+                        </label>
+                      );
+                    })}
+                    <label
+                      className={`flex items-center gap-2 px-3 py-1 text-xs rounded-full border transition-colors duration-150 cursor-pointer ${colors.cardBgHover} ${colors.textPrimary} border ${colors.borderPrimary}`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="w-3 h-3"
+                        checked={selectedSurveyForResponses?.questions?.every((q: any) => (visibleQuestionIds || []).includes(q.id))}
+                        onChange={() => {
+                          const allIds: number[] = selectedSurveyForResponses?.questions?.map((q: any) => q.id) || [];
+                          const isAllVisible = allIds.every((id: number) => (visibleQuestionIds || []).includes(id));
+                          setVisibleQuestionIds(isAllVisible ? [] : allIds);
+                        }}
+                      />
+                      <span>{lang === 'ar' ? 'إظهار/إخفاء الكل' : 'Show/Hide all'}</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className={`${colors.cardBgHover} border ${colors.borderPrimary}`}>
+                        {metaColumnsConfig.map(column => {
+                          if (!visibleMetaColumns.includes(column.id)) return null;
+                          return (
+                            <th key={`meta-header-${column.id}`} className={`px-4 py-3 text-left text-sm font-semibold ${colors.textPrimary}`}>
+                              {lang === 'ar' ? column.label_ar : column.label_en}
+                            </th>
+                          );
+                        })}
+                        {selectedSurveyForResponses?.questions?.map((question: any, idx: number) => {
+                          const isVisible = (visibleQuestionIds || []).includes(question.id);
+                          if (!isVisible) return null;
+                          return (
+                            <th key={`resp-q-${question.id}`} className={`px-4 py-3 text-left text-sm font-semibold ${colors.textPrimary}`}>
+                              {idx + 1}. {lang === 'ar' ? question.label_ar : question.label_en}
+                            </th>
+                          );
+                        })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {responses.map((response: any, index: number) => (
+                        <tr key={`resp-row-${response.id}`} className={`border-b ${colors.borderPrimary} hover:${colors.cardBgHover} transition-colors`}>
+                          {visibleMetaColumns.includes('index') && (
+                            <td className={`px-4 py-3 text-sm font-medium ${colors.textPrimary}`}>{index + 1}</td>
+                          )}
+                          {visibleMetaColumns.includes('name') && (
+                            <td className={`px-4 py-3 text-sm ${colors.textPrimary}`}>{response.name || (lang === 'ar' ? 'مجهول' : 'Anonymous')}</td>
+                          )}
+                          {visibleMetaColumns.includes('department') && (
+                            <td className={`px-4 py-3 text-sm ${colors.textPrimary}`}>{response.department || '-'}</td>
+                          )}
+                          {visibleMetaColumns.includes('date') && (
+                            <td className={`px-4 py-3 text-sm ${colors.textSecondary}`}>
+                              {new Date(response.created_at).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}
+                            </td>
+                          )}
+                          {selectedSurveyForResponses?.questions?.map((question: any) => {
+                            const isVisible = (visibleQuestionIds || []).includes(question.id);
+                            if (!isVisible) return null;
+                            const answerRecord = response.answers?.find((a: any) => a.question_id === question.id);
+                            const displayAnswer = formatAnswer(question, answerRecord);
+                            return (
+                              <td key={`resp-${response.id}-q-${question.id}`} className={`px-4 py-3 text-sm ${colors.textSecondary} max-w-xs`} title={displayAnswer}>
+                                {displayAnswer}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                className={`${colors.cardBgHover} border ${colors.borderPrimary} ${colors.textPrimary} px-4 py-2 rounded-lg transition-colors duration-150`}
+                onClick={() => setShowResponsesModal(false)}
+              >
+                {t('survey.close')}
+              </button>
+              <button
+                className={`${colors.primaryBg} hover:${colors.primaryBgHover} text-white px-4 py-2 rounded-lg`}
+                onClick={() => selectedSurveyForResponses && exportToCSV(selectedSurveyForResponses.id)}
+              >
+                <ArrowDownTrayIcon className="w-4 h-4 inline-block mr-1" />{t('reports.export')}
+              </button>
+            </div>
               </div>
             )}
           </div>

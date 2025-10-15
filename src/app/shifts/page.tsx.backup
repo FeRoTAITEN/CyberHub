@@ -1,0 +1,1271 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import ClientLayout, { useLang } from "../ClientLayout";
+import { FiCalendar, FiChevronLeft, FiChevronRight, FiPlus, FiTrash2, FiUserX, FiUserPlus, FiX } from "react-icons/fi";
+
+type Shift = { id: number; name: string; name_ar: string };
+
+type Assignmenفعt = {
+  id?: number;
+  date: string;
+  shift: Shift;
+  staff: { id: number; name: string; name_ar?: string };
+  shift_id: number;
+  staff_id: number;
+  status: string;
+};
+
+type Staff = { id: number; name: string; name_ar?: string };
+
+type DayDetails = {
+  assignments: Assignment[];
+  apologies: Array<{ id: number; date: string; staff: Staff; reason: string; reason_ar?: string }>;
+};
+
+function toLocalKey(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+export default function ShiftsAdminPage() {
+  const { lang } = useLang();
+  const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [message, setMessage] = useState<string>("");
+  const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<'month'|'quarter'|'year'>('month');
+
+  // Modal state
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showApologyModal, setShowApologyModal] = useState(false);
+  const [showDayModal, setShowDayModal] = useState(false);
+  const [dayDetails, setDayDetails] = useState<DayDetails | null>(null);
+  const [dayModalDate, setDayModalDate] = useState<string>("");
+  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [assignForm, setAssignForm] = useState<{ date: string; shift_id: number; staff_id: number }>({ date: '', shift_id: 0, staff_id: 0 });
+  const [apologyForm, setApologyForm] = useState<{ date: string; staff_id: number; reason: string; shift_id?: number }>({ date: '', staff_id: 0, reason: '' });
+  const [showProfile, setShowProfile] = useState(false);
+  const [profileStaffId, setProfileStaffId] = useState<number | null>(null);
+  const [profileStaffName, setProfileStaffName] = useState<string>("");
+
+  // Clear dropdown state
+  const [showClearMenu, setShowClearMenu] = useState(false);
+  const [showScheduleMenu, setShowScheduleMenu] = useState(false);
+  const [profileViewMode, setProfileViewMode] = useState<'month'|'quarter'|'year'>('month');
+  const [profileYear, setProfileYear] = useState<number>(year);
+  const [profileMonth, setProfileMonth] = useState<number>(month);
+  const profileMonthLabel = useMemo(() => {
+    return new Date(profileYear, profileMonth - 1, 1).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' });
+  }, [profileYear, profileMonth, lang]);
+  const [profileTab, setProfileTab] = useState<'overview'|'schedule'|'apologies'>('schedule');
+  const [profileStaffInfo, setProfileStaffInfo] = useState<any>(null);
+  const [profileApologies, setProfileApologies] = useState<Array<{ id:number; date:string; reason:string }>>([]);
+
+  const monthLabel = useMemo(() => {
+    return new Date(year, month - 1, 1).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' });
+  }, [year, month, lang]);
+
+  const loadAssignments = useCallback(async () => {
+    setLoading(true);
+    try {
+      const monthsToFetch: Array<{ y: number; m: number }> = [];
+      if (viewMode === 'month') {
+        monthsToFetch.push({ y: year, m: month });
+      } else if (viewMode === 'quarter') {
+        const startMonth = Math.floor((month - 1) / 3) * 3 + 1;
+        for (let i = 0; i < 3; i++) monthsToFetch.push({ y: year, m: startMonth + i });
+      } else {
+        for (let m = 1; m <= 12; m++) monthsToFetch.push({ y: year, m });
+      }
+      const results = await Promise.all(
+        monthsToFetch.map(({ y, m }) => fetch(`/api/shifts?year=${y}&month=${m}`).then(r => r.json()))
+      );
+      const combined = results.flatMap(r => r.assignments || []);
+      setAssignments(combined);
+    } catch {
+      // noop
+    } finally {
+      setLoading(false);
+    }
+  }, [year, month, viewMode]);
+
+  // Load assignments for an arbitrary base (used by profile modal)
+  const loadAssignmentsFor = useCallback(async (baseYear: number, baseMonth: number, mode: 'month'|'quarter'|'year') => {
+    setLoading(true);
+    try {
+      const monthsToFetch: Array<{ y: number; m: number }> = [];
+      if (mode === 'month') {
+        monthsToFetch.push({ y: baseYear, m: baseMonth });
+      } else if (mode === 'quarter') {
+        const startMonth = Math.floor((baseMonth - 1) / 3) * 3 + 1;
+        for (let i = 0; i < 3; i++) monthsToFetch.push({ y: baseYear, m: startMonth + i });
+      } else {
+        for (let m = 1; m <= 12; m++) monthsToFetch.push({ y: baseYear, m });
+      }
+      const results = await Promise.all(
+        monthsToFetch.map(({ y, m }) => fetch(`/api/shifts?year=${y}&month=${m}`).then(r => r.json()))
+      );
+      const combined = results.flatMap(r => r.assignments || []);
+      setAssignments(combined);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadDay = async (date: string) => {
+    try {
+      const res = await fetch(`/api/shifts/day?date=${date}`);
+      const json = await res.json();
+      const safe = {
+        assignments: Array.isArray(json?.assignments) ? json.assignments : [],
+        apologies: Array.isArray(json?.apologies) ? json.apologies : []
+      } as DayDetails;
+      setDayDetails(safe);
+    } catch {
+      // Keep silent; modal will show empty state
+    }
+  };
+
+  const loadStaff = async () => {
+    try {
+      const res = await fetch('/api/staff');
+      const json = await res.json();
+      const data = (json.staff || []).map((s: any) => ({ id: s.id, name: s.name, name_ar: s.name_ar }));
+      setStaffList(data);
+    } catch {
+      // noop
+    }
+  };
+
+  useEffect(() => {
+    loadAssignments();
+    setSelectedStaffId(null);
+  }, [loadAssignments]);
+
+  useEffect(() => {
+    loadStaff();
+  }, []);
+
+  const [showPatternsModal, setShowPatternsModal] = useState(false);
+  const [patterns, setPatterns] = useState<Array<{ id:number; code:string; name:string; name_ar?:string }>>([]);
+  const [selectedPatternCodes, setSelectedPatternCodes] = useState<string[]>([]);
+  const [showCustomScheduleModal, setShowCustomScheduleModal] = useState(false);
+  const [customRange, setCustomRange] = useState<{ start:string; end:string }>({ start: '', end: '' });
+
+  const loadPatterns = useCallback(async () => {
+    try {
+      const res = await fetch('/api/shifts/patterns');
+      const json = await res.json();
+      setPatterns(Array.isArray(json?.patterns) ? json.patterns : []);
+    } catch {
+      setPatterns([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPatterns();
+  }, [loadPatterns]);
+
+  const togglePattern = (code: string) => {
+    setSelectedPatternCodes(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]);
+  };
+
+  const onAutoSchedule = async (reqMode: 'month'|'quarter'|'year' = 'month') => {
+    setLoading(true);
+    setMessage("");
+    try {
+      const body: any = { year, month, mode: reqMode };
+      if (selectedPatternCodes.length > 0) body.patterns = selectedPatternCodes;
+      const res = await fetch(`/api/shifts/auto-schedule`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setMessage(json.error || (lang === 'ar' ? 'فشل جدولة المناوبات' : 'Failed to auto-schedule'));
+      } else {
+        setMessage(lang === 'ar' ? 'تمت الجدولة بنجاح' : 'Auto-scheduled successfully');
+        await loadAssignments();
+        if (showDayModal && dayModalDate) await loadDay(dayModalDate);
+      }
+    } catch {
+      setMessage(lang === 'ar' ? 'حدث خطأ غير متوقع' : 'Unexpected error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onAutoScheduleCustom = async () => {
+    if (!customRange.start || !customRange.end) return;
+    if (new Date(customRange.end) < new Date(customRange.start)) {
+      setMessage(lang === 'ar' ? 'نطاق التواريخ غير صالح' : 'Invalid date range');
+      return;
+    }
+    setLoading(true);
+    setMessage("");
+    try {
+      const body: any = { start_date: customRange.start, end_date: customRange.end };
+      if (selectedPatternCodes.length > 0) body.patterns = selectedPatternCodes;
+      const res = await fetch(`/api/shifts/auto-schedule`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setMessage(json.error || (lang === 'ar' ? 'فشل الجدولة للنطاق' : 'Failed to auto-schedule for range'));
+      } else {
+        setMessage(lang === 'ar' ? 'تمت الجدولة للنطاق' : 'Auto-scheduled for range');
+        await loadAssignments();
+        if (showDayModal && dayModalDate) await loadDay(dayModalDate);
+        setShowCustomScheduleModal(false);
+      }
+    } catch {
+      setMessage(lang === 'ar' ? 'حدث خطأ غير متوقع' : 'Unexpected error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onClear = async (mode: 'month'|'quarter'|'year' = 'month') => {
+    const msg = lang === 'ar'
+      ? (mode === 'month' ? 'هل تريد حذف الجدولة لهذا الشهر؟' : mode === 'quarter' ? 'هل تريد حذف الجدولة لهذا الربع؟' : 'هل تريد حذف الجدولة لهذه السنة؟')
+      : (mode === 'month' ? 'Clear schedule for this month?' : mode === 'quarter' ? 'Clear schedule for this quarter?' : 'Clear schedule for this year?');
+    if (!confirm(msg)) return;
+    setLoading(true);
+    try {
+      const payload: any = { year, month };
+      if (mode !== 'month') payload.mode = mode;
+      const res = await fetch('/api/shifts/clear-month', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        await loadAssignments();
+        setMessage(lang === 'ar' ? 'تم حذف الجدولة' : 'Schedule cleared');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitAssign = async () => {
+    if (!assignForm.date || !assignForm.shift_id || !assignForm.staff_id) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/shifts/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(assignForm)
+      });
+      if (res.ok) {
+        setShowAssignModal(false);
+        await loadAssignments();
+        if (dayModalDate) { await loadDay(dayModalDate); }
+      }
+    } finally { setLoading(false); }
+  };
+
+  const submitApology = async () => {
+    if (!apologyForm.date || !apologyForm.staff_id) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/shifts/availability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...apologyForm })
+      });
+      if (res.ok) {
+        setShowApologyModal(false);
+        await loadAssignments();
+        if (dayModalDate) { await loadDay(dayModalDate); }
+      }
+    } finally { setLoading(false); }
+  };
+
+  const deleteStaff = async (id: number) => {
+    if (!confirm(lang === 'ar' ? 'حذف الموظف؟ سيحذف أيضاً جدول هذا الموظف.' : 'Delete staff? This will remove their schedule.')) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/staff/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        await loadAssignments();
+        await loadStaff();
+        setSelectedStaffId(prev => (prev === id ? null : prev));
+      }
+    } finally { setLoading(false); }
+  };
+
+  const calendar = useMemo(() => {
+    const map = new Map<string, Map<number, Assignment[]>>();
+    for (const a of assignments) {
+      const dt = new Date(a.date as any);
+      const d = toLocalKey(dt);
+      if (!map.has(d)) map.set(d, new Map());
+      const inner = map.get(d)!;
+      if (!inner.has(a.shift.id)) inner.set(a.shift.id, []);
+      inner.get(a.shift.id)!.push(a);
+    }
+    return map;
+  }, [assignments]);
+
+  const staffSummaries = useMemo(() => {
+    type Summary = {
+      staff_id: number;
+      name: string;
+      name_ar?: string;
+      morning: number;
+      lateMorning: number;
+      day: number;
+      night: number;
+      total: number;
+    };
+    const map = new Map<number, Summary>();
+    const isMorning = (s: Shift) => s.name.toLowerCase() === 'morning' || s.name_ar === 'صباح';
+    const isLateMorning = (s: Shift) => s.name.toLowerCase() === 'late morning' || s.name_ar === 'صباح متأخر';
+    const isDay = (s: Shift) => s.name.toLowerCase() === 'day' || s.name_ar === 'نهار';
+    const isNight = (s: Shift) => s.name.toLowerCase() === 'night' || s.name_ar === 'ليل';
+
+    for (const a of assignments) {
+      const key = a.staff_id;
+      if (!map.has(key)) {
+        map.set(key, {
+          staff_id: key,
+          name: a.staff.name,
+          name_ar: a.staff.name_ar,
+          morning: 0,
+          lateMorning: 0,
+          day: 0,
+          night: 0,
+          total: 0
+        });
+      }
+      const s = map.get(key)!;
+      if (isMorning(a.shift)) s.morning += 1;
+      else if (isLateMorning(a.shift)) s.lateMorning += 1;
+      else if (isDay(a.shift)) s.day += 1;
+      else if (isNight(a.shift)) s.night += 1;
+      s.total += 1;
+    }
+
+    const arr = Array.from(map.values());
+    arr.sort((a, b) => (lang === 'ar' ? (a.name_ar || a.name).localeCompare(b.name_ar || b.name) : a.name.localeCompare(b.name)));
+    return arr;
+  }, [assignments, lang]);
+
+  const countsByStaffId = useMemo(() => {
+    const m = new Map<number, { morning: number; lateMorning: number; day: number; night: number; total: number }>();
+    for (const s of staffSummaries) {
+      m.set(s.staff_id, { morning: s.morning, lateMorning: s.lateMorning, day: s.day, night: s.night, total: s.total });
+    }
+    return m;
+  }, [staffSummaries]);
+
+  const weekStartsOn = lang === 'ar' ? 0 : 0;
+  const buildWeeks = (y: number, m: number) => {
+    const firstOfMonth = new Date(y, m - 1, 1);
+    const lastOfMonth = new Date(y, m, 0);
+    const start = new Date(firstOfMonth);
+    const offsetStart = (firstOfMonth.getDay() - weekStartsOn + 7) % 7;
+    start.setDate(firstOfMonth.getDate() - offsetStart);
+    const end = new Date(lastOfMonth);
+    const offsetEnd = (weekStartsOn + 6 - lastOfMonth.getDay() + 7) % 7;
+    end.setDate(lastOfMonth.getDate() + offsetEnd);
+    const days: Date[] = [];
+    for (let d = new Date(start); d <= end; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+      days.push(new Date(d));
+    }
+    const weeks: Date[][] = [];
+    for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));
+    const isInCurrentMonth = (d: Date) => d.getMonth() === (m - 1);
+    return { weeks, isInCurrentMonth };
+  };
+
+  const weekdayLabels = useMemo(() => (
+    lang === 'ar'
+      ? ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  ), [lang]);
+
+  const getShiftItems = (date: Date, predicate: (s: Shift) => boolean) => {
+    const dateStr = toLocalKey(date);
+    const map = calendar.get(dateStr);
+    if (!map) return [] as Assignment[];
+    const all = Array.from(map.entries()).flatMap(([, arr]) => arr).filter(a => predicate(a.shift));
+    if (selectedStaffId) {
+      return all.filter(a => a.staff_id === selectedStaffId);
+    }
+    return all;
+  };
+
+  const openDayModal = async (date: Date) => {
+    const dateStr = toLocalKey(date);
+    setDayModalDate(dateStr);
+    await loadDay(dateStr);
+    setShowDayModal(true);
+  };
+
+  const getStaffShiftForDate = (date: Date, staffId: number) => {
+    const dateStr = toLocalKey(date);
+    const map = calendar.get(dateStr);
+    if (!map) return 'none' as const;
+    const all = Array.from(map.entries()).flatMap(([, arr]) => arr).filter(a => a.staff_id === staffId);
+    if (all.length === 0) return 'none' as const;
+    const a = all[0];
+    const n = a.shift.name.toLowerCase();
+    const ar = a.shift.name_ar;
+    if (n === 'morning' || ar === 'صباح') return 'morning' as const;
+    if (n === 'late morning' || ar === 'صباح متأخر') return 'lateMorning' as const;
+    if (n === 'day' || ar === 'نهار') return 'day' as const;
+    if (n === 'night' || ar === 'ليل') return 'night' as const;
+    return 'none' as const;
+  };
+
+  // Prev/Next navigation honoring viewMode
+  const moveByMonths = (delta: number) => {
+    let newYear = year;
+    let newMonth = month + delta;
+    while (newMonth < 1) { newMonth += 12; newYear -= 1; }
+    while (newMonth > 12) { newMonth -= 12; newYear += 1; }
+    setYear(newYear);
+    setMonth(newMonth);
+  };
+
+  const handlePrev = () => {
+    if (viewMode === 'month') {
+      moveByMonths(-1);
+    } else if (viewMode === 'quarter') {
+      const startMonth = Math.floor((month - 1) / 3) * 3 + 1;
+      const prevStart = startMonth - 3;
+      if (prevStart < 1) {
+        setYear(y => y - 1);
+        setMonth(prevStart + 12);
+      } else {
+        setMonth(prevStart);
+      }
+    } else {
+      setYear(y => y - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (viewMode === 'month') {
+      moveByMonths(1);
+    } else if (viewMode === 'quarter') {
+      const startMonth = Math.floor((month - 1) / 3) * 3 + 1;
+      const nextStart = startMonth + 3;
+      if (nextStart > 12) {
+        setYear(y => y + 1);
+        setMonth(nextStart - 12);
+      } else {
+        setMonth(nextStart);
+      }
+    } else {
+      setYear(y => y + 1);
+    }
+  };
+
+  const openProfile = (staffId: number, label: string) => {
+    setProfileStaffId(staffId);
+    setProfileStaffName(label);
+    setProfileYear(year);
+    setProfileMonth(month);
+    setProfileTab('schedule');
+    setShowProfile(true);
+    // Ensure assignments for this month are loaded
+    void loadAssignmentsFor(year, month, profileViewMode);
+    // Load staff details and apologies
+    void (async () => {
+      try {
+        const infoRes = await fetch(`/api/staff/${staffId}`);
+        const info = await infoRes.json();
+        setProfileStaffInfo(info);
+      } catch {}
+      try {
+        const apRes = await fetch(`/api/shifts/availability?staffId=${staffId}&year=${year}&month=${month}`);
+        const apJson = await apRes.json();
+        const aps = (apJson?.availability || []).map((a: any) => ({ id: a.id, date: a.date, reason: a.reason }));
+        setProfileApologies(aps);
+      } catch {}
+    })();
+  };
+
+  // Profile prev/next navigation honoring profileViewMode
+  const moveProfileByMonths = (delta: number) => {
+    let newYear = profileYear;
+    let newMonth = profileMonth + delta;
+    while (newMonth < 1) { newMonth += 12; newYear -= 1; }
+    while (newMonth > 12) { newMonth -= 12; newYear += 1; }
+    setProfileYear(newYear);
+    setProfileMonth(newMonth);
+    // Keep underlying data in sync
+    setYear(newYear);
+    setMonth(newMonth);
+    void loadAssignmentsFor(newYear, newMonth, profileViewMode);
+  };
+
+  const handlePrevProfile = () => {
+    if (profileViewMode === 'month') {
+      moveProfileByMonths(-1);
+    } else if (profileViewMode === 'quarter') {
+      const startMonth = Math.floor((profileMonth - 1) / 3) * 3 + 1;
+      const prevStart = startMonth - 3;
+      if (prevStart < 1) {
+        setProfileYear(y => y - 1);
+        setProfileMonth(prevStart + 12);
+        setYear(profileYear - 1);
+        setMonth(prevStart + 12);
+        void loadAssignmentsFor(profileYear - 1, prevStart + 12, profileViewMode);
+      } else {
+        setProfileMonth(prevStart);
+        setMonth(prevStart);
+        void loadAssignmentsFor(profileYear, prevStart, profileViewMode);
+      }
+    } else {
+      setProfileYear(y => y - 1);
+      setYear(y => y - 1);
+      void loadAssignmentsFor(profileYear - 1, profileMonth, profileViewMode);
+    }
+  };
+
+  const handleNextProfile = () => {
+    if (profileViewMode === 'month') {
+      moveProfileByMonths(1);
+    } else if (profileViewMode === 'quarter') {
+      const startMonth = Math.floor((profileMonth - 1) / 3) * 3 + 1;
+      const nextStart = startMonth + 3;
+      if (nextStart > 12) {
+        setProfileYear(y => y + 1);
+        setProfileMonth(nextStart - 12);
+        setYear(profileYear + 1);
+        setMonth(nextStart - 12);
+        void loadAssignmentsFor(profileYear + 1, nextStart - 12, profileViewMode);
+      } else {
+        setProfileMonth(nextStart);
+        setMonth(nextStart);
+        void loadAssignmentsFor(profileYear, nextStart, profileViewMode);
+      }
+    } else {
+      setProfileYear(y => y + 1);
+      setYear(y => y + 1);
+      void loadAssignmentsFor(profileYear + 1, profileMonth, profileViewMode);
+    }
+  };
+
+  // Colors per shift row with alert when count < 2
+  const shiftRow = (label: string, color: 'green' | 'sky' | 'amber' | 'violet', count: number) => {
+    const alert = count < 2;
+    const base = 'flex items-center justify-between rounded border px-2 py-1 text-xs';
+    const okCls = color === 'green'
+      ? 'bg-green-900/10 border-green-800 text-green-300'
+      : color === 'sky'
+      ? 'bg-sky-900/10 border-sky-800 text-sky-300'
+      : color === 'amber'
+      ? 'bg-amber-900/10 border-amber-800 text-amber-300'
+      : 'bg-violet-900/10 border-violet-800 text-violet-300';
+    const alertCls = 'bg-rose-900/20 border-rose-700 text-rose-300';
+    return (
+      <div className={`${base} ${alert ? alertCls : okCls}`}>
+        <span>{label}</span>
+        <span className={`inline-flex items-center rounded-full px-2 py-0.5 border text-[10px] ${alert ? 'border-rose-600 bg-rose-900/40' : 'border-slate-600 bg-slate-900/40'}`}>{count}</span>
+      </div>
+    );
+  };
+
+  const deleteApology = async (id: number) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/shifts/availability?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        await loadAssignments();
+        if (dayModalDate) await loadDay(dayModalDate);
+      }
+    } finally { setLoading(false); }
+  };
+
+  const clearDayAssignments = async (dateStr: string) => {
+    if (!confirm(lang === 'ar' ? 'حذف تعيينات هذا اليوم؟' : 'Clear assignments for this day?')) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/shifts/day?date=${dateStr}`, { method: 'DELETE' });
+      if (res.ok) {
+        await loadAssignments();
+        await loadDay(dateStr);
+        setMessage(lang === 'ar' ? 'تم حذف تعيينات اليوم' : 'Day assignments cleared');
+      }
+    } finally { setLoading(false); }
+  };
+
+  const deleteAssignment = async (id: number) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/shifts/assignments?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        await loadAssignments();
+        if (dayModalDate) await loadDay(dayModalDate);
+      }
+    } finally { setLoading(false); }
+  };
+
+  const [managePatternCode, setManagePatternCode] = useState<string>('alpha');
+  const [manageSelectedStaffIds, setManageSelectedStaffIds] = useState<number[]>([]);
+
+  const openManagePattern = (code: string) => {
+    setManagePatternCode(code);
+    // preload staff in this pattern
+    const ids = staffList
+      .filter(s => (assignments.find(a => a.staff_id === s.id)?.staff as any)?.pattern?.code === code || false);
+    setManageSelectedStaffIds(ids.map(s => s.id));
+    setShowPatternsModal(true);
+  };
+
+  const toggleManageStaff = (id: number) => {
+    setManageSelectedStaffIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const saveManagePattern = async () => {
+    try {
+      await fetch('/api/shifts/patterns/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pattern_code: managePatternCode, staff_ids: manageSelectedStaffIds })
+      });
+      await loadAssignments();
+      await loadStaff();
+      setShowPatternsModal(false);
+    } catch {}
+  };
+
+  return (
+    <ClientLayout>
+      <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center gap-3 bg-slate-950/60 border border-slate-800 rounded px-3 py-2">
+          <div className="flex items-center gap-2 text-slate-200">
+            <FiCalendar />
+            <h1 className="text-xl font-semibold">
+              {lang === 'ar' ? 'إدارة المناوبات' : 'Shift Management'}
+            </h1>
+            <span className="text-slate-400">{monthLabel}</span>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <select value={viewMode} onChange={(e) => setViewMode(e.target.value as any)} className="bg-slate-900 border border-slate-700 text-xs rounded px-2 py-1">
+              <option value="month">{lang === 'ar' ? 'شهر' : 'Month'}</option>
+              <option value="quarter">{lang === 'ar' ? 'ربع' : 'Quarter'}</option>
+              <option value="year">{lang === 'ar' ? 'سنة' : 'Year'}</option>
+            </select>
+            {selectedStaffId && (
+              <button
+                onClick={() => setSelectedStaffId(null)}
+                className="px-3 py-1 rounded border border-slate-700 hover:bg-slate-900"
+                title={lang === 'ar' ? 'إلغاء التحديد' : 'Clear Filter'}
+              >
+                <FiX className="inline -mt-0.5" />
+              </button>
+            )}
+            <button
+              onClick={() => { setShowAssignModal(true); setAssignForm({ date: `${year}-${String(month).padStart(2,'0')}-01`, shift_id: 0, staff_id: 0 }); }}
+              className="px-3 py-1 rounded border border-slate-700 hover:bg-slate-900"
+            >
+              <FiUserPlus className="inline mr-1 -mt-0.5" /> {lang === 'ar' ? 'تعيين' : 'Assign'}
+            </button>
+            <button
+              onClick={() => { setShowApologyModal(true); setApologyForm({ date: `${year}-${String(month).padStart(2,'0')}-01`, staff_id: 0, reason: '', shift_id: undefined }); }}
+              className="px-3 py-1 rounded border border-slate-700 hover:bg-slate-900"
+            >
+              <FiUserX className="inline mr-1 -mt-0.5" /> {lang === 'ar' ? 'اعتذار' : 'Apology'}
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowClearMenu(v => !v)}
+                className="px-3 py-1 rounded border border-rose-700 text-rose-300 hover:bg-rose-900/30"
+              >
+                <FiTrash2 className="inline mr-1 -mt-0.5" /> {lang === 'ar' ? 'حذف' : 'Clear'}
+              </button>
+              {showClearMenu && (
+                <div className="absolute right-0 mt-1 min-w-[180px] z-20 rounded border border-slate-800 bg-slate-950 shadow">
+                  <button onClick={() => { setShowClearMenu(false); onClear('month'); }} className="block w-full text-left px-3 py-2 hover:bg-slate-900 border-b border-slate-800">
+                    {lang === 'ar' ? 'حذف الشهر' : 'Clear Month'}
+                  </button>
+                  <button onClick={() => { setShowClearMenu(false); onClear('quarter'); }} className="block w-full text-left px-3 py-2 hover:bg-slate-900 border-b border-slate-800">
+                    {lang === 'ar' ? 'حذف ربع السنة' : 'Clear Quarter'}
+                  </button>
+                  <button onClick={() => { setShowClearMenu(false); onClear('year'); }} className="block w-full text-left px-3 py-2 hover:bg-slate-900">
+                    {lang === 'ar' ? 'حذف السنة' : 'Clear Year'}
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* Teams UI removed */}
+            <div className="h-6 w-px bg-slate-800 mx-1" />
+            <button
+              onClick={handlePrev}
+              className="px-2 py-1 rounded border border-slate-700 hover:bg-slate-900"
+              title={lang === 'ar' ? 'السابق' : 'Prev'}
+            >
+              <FiChevronLeft />
+            </button>
+            <button
+              onClick={handleNext}
+              className="px-2 py-1 rounded border border-slate-700 hover:bg-slate-900"
+              title={lang === 'ar' ? 'التالي' : 'Next'}
+            >
+              <FiChevronRight />
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowScheduleMenu(v => !v)}
+                disabled={loading}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+              >
+                <FiPlus className="inline mr-1 -mt-0.5" /> {loading ? (lang === 'ar' ? 'جاري...' : 'Scheduling...') : (lang === 'ar' ? 'جدولة تلقائية' : 'Auto-Schedule')}
+              </button>
+              {showScheduleMenu && (
+                <div className="absolute right-0 mt-1 min-w-[220px] z-20 rounded border border-slate-800 bg-slate-950 shadow">
+                  <div className="px-3 py-2 text-xs text-slate-300 border-b border-slate-800">
+                    {lang === 'ar' ? 'الأنماط المستهدفة' : 'Target Patterns'}
+                  </div>
+                  <div className="max-h-40 overflow-auto p-2 space-y-1">
+                    {patterns.length === 0 && (
+                      <div className="text-xs text-slate-500 px-2">{lang === 'ar' ? 'لا توجد أنماط' : 'No patterns'}</div>
+                    )}
+                    {patterns.map(p => (
+                      <label key={p.id} className="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-slate-900 cursor-pointer">
+                        <input type="checkbox" className="accent-green-600" checked={selectedPatternCodes.includes(p.code)} onChange={() => togglePattern(p.code)} />
+                        <span>{lang === 'ar' ? (p.name_ar || p.name) : p.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="border-t border-slate-800">
+                    <button onClick={() => { setShowScheduleMenu(false); onAutoSchedule('month'); }} className="block w-full text-left px-3 py-2 hover:bg-slate-900 border-b border-slate-800">
+                      {lang === 'ar' ? 'الشهر' : 'Month'}
+                    </button>
+                    <button onClick={() => { setShowScheduleMenu(false); onAutoSchedule('quarter'); }} className="block w-full text-left px-3 py-2 hover:bg-slate-900 border-b border-slate-800">
+                      {lang === 'ar' ? 'ربع السنة' : 'Quarter'}
+                    </button>
+                    <button onClick={() => { setShowScheduleMenu(false); onAutoSchedule('year'); }} className="block w-full text-left px-3 py-2 hover:bg-slate-900 border-b border-slate-800">
+                      {lang === 'ar' ? 'سنة كاملة' : 'Full Year'}
+                    </button>
+                    <button onClick={() => { setShowScheduleMenu(false); setShowCustomScheduleModal(true); setCustomRange({ start: `${year}-${String(month).padStart(2,'0')}-01`, end: `${year}-${String(month).padStart(2,'0')}-28` }); }} className="block w-full text-left px-3 py-2 hover:bg-slate-900">
+                      {lang === 'ar' ? 'نطاق مخصص...' : 'Custom Range...'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <button onClick={() => { void loadPatterns(); setShowPatternsModal(true); }} className="px-3 py-1 rounded border border-slate-700 hover:bg-slate-900">
+              {lang === 'ar' ? 'الأنماط' : 'Patterns'}
+            </button>
+          </div>
+        </div>
+
+        {message && (
+          <div className="rounded bg-slate-900 border border-slate-800 p-3 text-sm">
+            {message}
+          </div>
+        )}
+
+        {/* Calendar grids (month/quarter/year) */}
+        {(() => {
+          const monthsToRender: Array<{ y: number; m: number }> = [];
+          if (viewMode === 'month') monthsToRender.push({ y: year, m: month });
+          else if (viewMode === 'quarter') {
+            const startMonth = Math.floor((month - 1) / 3) * 3 + 1;
+            for (let i = 0; i < 3; i++) monthsToRender.push({ y: year, m: startMonth + i });
+          } else {
+            for (let m = 1; m <= 12; m++) monthsToRender.push({ y: year, m });
+          }
+          return (
+            <div className="overflow-x-auto pb-2">
+              <div className={`flex gap-6 snap-x snap-mandatory ${viewMode === 'month' ? 'justify-center' : ''}`}>
+                {monthsToRender.map(({ y, m }) => {
+                  const { weeks, isInCurrentMonth } = buildWeeks(y, m);
+                  const label = new Date(y, m - 1, 1).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' });
+                  return (
+                    <div key={`${y}-${m}`} className="min-w-[860px] snap-start border border-slate-800 rounded overflow-hidden shadow-sm">
+                      <div className="px-3 py-2 bg-slate-900/70 text-sm text-slate-300">{label}</div>
+                      <div className="grid grid-cols-7 bg-slate-900/70 text-xs">
+                        {weekdayLabels.map((w, idx) => (
+                          <div key={idx} className="px-3 py-2 border-b border-slate-800 text-slate-300">{w}</div>
+                        ))}
+                      </div>
+                      <div className="divide-y divide-slate-800">
+                        {weeks.map((week, wi) => (
+                          <div key={wi} className="grid grid-cols-7">
+                            {week.map((date, di) => {
+                              const isCurrent = isInCurrentMonth(date);
+                              const dateNum = date.getDate();
+                              if (!isCurrent && (viewMode === 'month' || viewMode === 'quarter')) {
+                                return (
+                                  <div key={di} className="min-h-[120px] border-r border-slate-800 p-2 bg-transparent pointer-events-none" />
+                                );
+                              }
+                              const morning = getShiftItems(date, s => (s.name.toLowerCase() === 'morning' || s.name_ar === 'صباح'));
+                              const dayShift = getShiftItems(date, s => (s.name.toLowerCase() === 'day' || s.name_ar === 'نهار'));
+                              const night = getShiftItems(date, s => (s.name.toLowerCase() === 'night' || s.name_ar === 'ليل'));
+                              const lateMorning = getShiftItems(date, s => (s.name.toLowerCase() === 'late morning' || s.name_ar === 'صباح متأخر'));
+                              return (
+                                <div key={di} onClick={() => openDayModal(date)} className={`cursor-pointer min-h-[120px] border-r border-slate-800 p-2 transition-colors ${!isCurrent ? 'bg-slate-950/30 text-slate-500 hover:bg-slate-900/40' : 'bg-slate-950 hover:bg-slate-900'}`}>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="text-xs font-semibold text-slate-300">{dateNum}</div>
+                                  </div>
+                                  <div className="space-y-1">
+                                    {shiftRow(lang === 'ar' ? 'صباح' : 'Morning', 'green', morning.length)}
+                                    {shiftRow(lang === 'ar' ? 'صباح متأخر' : 'Late Morning', 'sky', lateMorning.length)}
+                                    {shiftRow(lang === 'ar' ? 'نهار' : 'Day', 'amber', dayShift.length)}
+                                    {shiftRow(lang === 'ar' ? 'ليل' : 'Night', 'violet', night.length)}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Staff summary as cards */}
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">{lang === 'ar' ? 'جميع الموظفين' : 'All Staff'}</h2>
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {staffList
+              .slice()
+              .sort((a, b) => (lang === 'ar' ? (a.name_ar || a.name).localeCompare(b.name_ar || b.name) : a.name.localeCompare(b.name)))
+              .map((person) => {
+                const counts = countsByStaffId.get(person.id) || { morning: 0, lateMorning: 0, day: 0, night: 0, total: 0 };
+                const label = lang === 'ar' ? (person.name_ar || person.name) : person.name;
+                return (
+                  <div key={person.id} className={`rounded border border-slate-800 bg-slate-950 p-3 hover:bg-slate-900 transition-colors cursor-pointer`} onClick={() => openProfile(person.id, label)}>
+                    <div className="flex items-start justify-between">
+                      <div className="font-medium text-slate-200">{label}</div>
+                      <button onClick={(e) => { e.stopPropagation(); deleteStaff(person.id); }} className="text-rose-300 hover:text-rose-200" title={lang === 'ar' ? 'حذف' : 'Delete'}>
+                        <FiTrash2 />
+                      </button>
+                    </div>
+                    <div className="mt-2 text-xs text-slate-400">{lang === 'ar' ? 'الإجمالي' : 'Total'}: {counts.total}</div>
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-green-700 bg-green-900/20 text-green-300">{lang === 'ar' ? 'صباح' : 'Morning'} <b>{counts.morning}</b></span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-sky-700 bg-sky-900/20 text-sky-300">{lang === 'ar' ? 'صباح متأخر' : 'Late Morning'} <b>{(counts as any).lateMorning || 0}</b></span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-amber-700 bg-amber-900/20 text-amber-300">{lang === 'ar' ? 'نهار' : 'Day'} <b>{counts.day}</b></span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-violet-700 bg-violet-900/20 text-violet-300">{lang === 'ar' ? 'ليل' : 'Night'} <b>{counts.night}</b></span>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+
+        {/* Assign Modal */}
+        {showAssignModal && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60]">
+            <div className="bg-slate-950 border border-slate-800 rounded p-4 w-[420px] space-y-3 shadow-xl">
+              <div className="text-lg font-semibold flex items-center gap-2">
+                <FiUserPlus /> {lang === 'ar' ? 'تعيين موظف' : 'Assign Staff'}
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm">
+                  {lang === 'ar' ? 'التاريخ' : 'Date'}
+                  <input type="date" className="w-full mt-1 bg-slate-900 border border-slate-800 rounded px-2 py-1" value={assignForm.date} onChange={e => setAssignForm(f => ({ ...f, date: e.target.value }))} />
+                </label>
+                <label className="block text-sm">
+                  {lang === 'ar' ? 'المناوبة' : 'Shift'}
+                  <select className="w-full mt-1 bg-slate-900 border border-slate-800 rounded px-2 py-1" value={assignForm.shift_id} onChange={e => setAssignForm(f => ({ ...f, shift_id: parseInt(e.target.value) }))}>
+                    <option value={0}>--</option>
+                    <option value={1}>{lang === 'ar' ? 'صباح' : 'Morning'}</option>
+                    <option value={2}>{lang === 'ar' ? 'نهار' : 'Day'}</option>
+                    <option value={3}>{lang === 'ar' ? 'ليل' : 'Night'}</option>
+                    <option value={4}>{lang === 'ar' ? 'صباح متأخر' : 'Late Morning'}</option>
+                  </select>
+                </label>
+                <label className="block text-sm">
+                  {lang === 'ar' ? 'الموظف' : 'Staff'}
+                  <select className="w-full mt-1 bg-slate-900 border border-slate-800 rounded px-2 py-1" value={assignForm.staff_id} onChange={e => setAssignForm(f => ({ ...f, staff_id: parseInt(e.target.value) }))}>
+                    <option value={0}>--</option>
+                    {staffList.map(s => (
+                      <option key={s.id} value={s.id}>{lang === 'ar' ? (s.name_ar || s.name) : s.name}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setShowAssignModal(false)} className="px-3 py-1 rounded border border-slate-700">{lang === 'ar' ? 'إلغاء' : 'Cancel'}</button>
+                <button onClick={submitAssign} className="px-3 py-1 rounded bg-green-600 text-white">{lang === 'ar' ? 'تعيين' : 'Assign'}</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Apology Modal */}
+        {showApologyModal && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60]">
+            <div className="bg-slate-950 border border-slate-800 rounded p-4 w-[420px] space-y-3 shadow-xl">
+              <div className="text-lg font-semibold flex items-center gap-2">
+                <FiUserX /> {lang === 'ar' ? 'اعتذار' : 'Apology'}
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm">
+                  {lang === 'ar' ? 'التاريخ' : 'Date'}
+                  <input type="date" className="w-full mt-1 bg-slate-900 border border-slate-800 rounded px-2 py-1" value={apologyForm.date} onChange={e => setApologyForm(f => ({ ...f, date: e.target.value }))} />
+                </label>
+                <label className="block text-sm">
+                  {lang === 'ar' ? 'الموظف' : 'Staff'}
+                  <select className="w-full mt-1 bg-slate-900 border border-slate-800 rounded px-2 py-1" value={apologyForm.staff_id} onChange={e => setApologyForm(f => ({ ...f, staff_id: parseInt(e.target.value) }))}>
+                    <option value={0}>--</option>
+                    {staffList.map(s => (
+                      <option key={s.id} value={s.id}>{lang === 'ar' ? (s.name_ar || s.name) : s.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-sm">
+                  {lang === 'ar' ? 'الفترة (اختياري)' : 'Shift (optional)'}
+                  <select className="w-full mt-1 bg-slate-900 border border-slate-800 rounded px-2 py-1" value={apologyForm.shift_id || 0} onChange={e => setApologyForm(f => ({ ...f, shift_id: parseInt(e.target.value) || undefined }))}>
+                    <option value={0}>--</option>
+                    <option value={1}>{lang === 'ar' ? 'صباح' : 'Morning'}</option>
+                    <option value={2}>{lang === 'ar' ? 'نهار' : 'Day'}</option>
+                    <option value={3}>{lang === 'ar' ? 'ليل' : 'Night'}</option>
+                    <option value={4}>{lang === 'ar' ? 'صباح متأخر' : 'Late Morning'}</option>
+                  </select>
+                </label>
+                <label className="block text-sm">
+                  {lang === 'ar' ? 'السبب' : 'Reason'}
+                  <input type="text" className="w-full mt-1 bg-slate-900 border border-slate-800 rounded px-2 py-1" value={apologyForm.reason} onChange={e => setApologyForm(f => ({ ...f, reason: e.target.value }))} />
+                </label>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setShowApologyModal(false)} className="px-3 py-1 rounded border border-slate-700">{lang === 'ar' ? 'إلغاء' : 'Cancel'}</button>
+                <button onClick={submitApology} className="px-3 py-1 rounded bg-green-600 text-white">{lang === 'ar' ? 'حفظ' : 'Save'}</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Day Details Modal */}
+        {showDayModal && dayDetails && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+            <div className="bg-slate-950 border border-slate-800 rounded p-4 w-[780px] max-h-[80vh] overflow-auto space-y-4 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-semibold flex items-center gap-2">
+                  <FiCalendar /> {lang === 'ar' ? 'تفاصيل اليوم' : 'Day Details'} — {dayModalDate}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => clearDayAssignments(dayModalDate)} className="px-3 py-1 rounded border border-rose-700 text-rose-300 hover:bg-rose-900/30">
+                    <FiTrash2 className="inline mr-1 -mt-0.5" /> {lang === 'ar' ? 'حذف اليوم' : 'Clear Day'}
+                  </button>
+                  <button onClick={() => { setShowAssignModal(true); setAssignForm({ date: dayModalDate, shift_id: 0, staff_id: 0 }); }} className="px-3 py-1 rounded border border-slate-700 hover:bg-slate-900">
+                    <FiUserPlus className="inline mr-1 -mt-0.5" /> {lang === 'ar' ? 'تعيين' : 'Assign'}
+                  </button>
+                  <button onClick={() => { setShowApologyModal(true); setApologyForm({ date: dayModalDate, staff_id: 0, reason: '', shift_id: undefined }); }} className="px-3 py-1 rounded border border-slate-700 hover:bg-slate-900">
+                    <FiUserX className="inline mr-1 -mt-0.5" /> {lang === 'ar' ? 'اعتذار' : 'Apology'}
+                  </button>
+                  <button onClick={() => setShowDayModal(false)} className="px-3 py-1 rounded border border-slate-700"><FiX /></button>
+                </div>
+              </div>
+
+              {(['morning','lateMorning','day','night'] as const).map((key) => {
+                const title = key === 'morning' ? (lang === 'ar' ? 'صباح' : 'Morning') : key === 'day' ? (lang === 'ar' ? 'نهار' : 'Day') : (lang === 'ar' ? 'ليل' : 'Night');
+                const items = dayDetails.assignments.filter(a => {
+                  const n = a.shift.name.toLowerCase();
+                  const ar = a.shift.name_ar;
+                  return (key === 'morning' && (n === 'morning' || ar === 'صباح')) || (key === 'lateMorning' && (n === 'late morning' || ar === 'صباح متأخر')) || (key === 'day' && (n === 'day' || ar === 'نهار')) || (key === 'night' && (n === 'night' || ar === 'ليل'));
+                });
+                return (
+                  <div key={key} className="border border-slate-800 rounded p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm font-semibold">{key==='lateMorning' ? (lang === 'ar' ? 'صباح متأخر' : 'Late Morning') : title}</div>
+                      <div className="text-[11px] text-slate-400">{items.length} {lang === 'ar' ? 'موظف' : 'staff'}</div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {items.length === 0 && <span className="text-slate-400 text-xs">{lang === 'ar' ? 'لا يوجد' : 'None'}</span>}
+                      {items.map((a, idx) => {
+                        const label = lang === 'ar' ? (a.staff.name_ar || a.staff.name) : a.staff.name;
+                        return (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1 bg-slate-800 border border-slate-700 px-2 py-1 rounded text-sm"
+                          >
+                            <button
+                            onClick={() => openProfile(a.staff.id, label)}
+                              className="hover:underline"
+                          >
+                            {label}
+                            </button>
+                            {a.status !== 'assigned' && (
+                              <span className="text-[10px] text-yellow-400">{a.status}</span>
+                            )}
+                            <button onClick={() => deleteAssignment(a.id!)} className="ml-1 text-rose-300 hover:text-rose-200" title={lang === 'ar' ? 'حذف التعيين' : 'Delete assignment'}>
+                              <FiX />
+                          </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div className="border border-slate-800 rounded p-3">
+                <div className="text-sm font-semibold mb-2">{lang === 'ar' ? 'الاعتذارات' : 'Apologies'}</div>
+                <div className="flex flex-wrap gap-2">
+                  {dayDetails.apologies.length === 0 && <span className="text-slate-400 text-xs">{lang === 'ar' ? 'لا يوجد' : 'None'}</span>}
+                  {dayDetails.apologies.map((ap, idx) => (
+                    <span key={idx} className="inline-flex items-center gap-1 bg-slate-800 border border-slate-700 px-2 py-1 rounded text-sm">
+                      {lang === 'ar' ? (ap.staff.name_ar || ap.staff.name) : ap.staff.name}
+                      {ap.reason && <span className="text-[10px] text-slate-400">— {ap.reason}</span>}
+                      <button onClick={() => deleteApology(ap.id)} className="ml-1 text-rose-300 hover:text-rose-200" title={lang === 'ar' ? 'حذف الاعتذار' : 'Delete apology'}>
+                        <FiX />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Staff Profile Modal */}
+        {showProfile && profileStaffId && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70]">
+            <div className="bg-slate-950 border border-slate-800 rounded p-4 w-[980px] max-h-[85vh] overflow-auto space-y-4 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-semibold flex items-center gap-2">
+                  <FiCalendar /> {lang === 'ar' ? 'ملف الموظف' : 'Staff Profile'} — {profileStaffName} ({profileMonthLabel})
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={handlePrevProfile} className="px-2 py-1 rounded border border-slate-700 hover:bg-slate-900" title={lang === 'ar' ? 'السابق' : 'Prev'}>
+                    <FiChevronLeft />
+                  </button>
+                  <select value={profileViewMode} onChange={(e) => setProfileViewMode(e.target.value as any)} className="bg-slate-900 border border-slate-700 text-xs rounded px-2 py-1">
+                    <option value="month">{lang === 'ar' ? 'شهر' : 'Month'}</option>
+                    <option value="quarter">{lang === 'ar' ? 'ربع' : 'Quarter'}</option>
+                    <option value="year">{lang === 'ar' ? 'سنة' : 'Year'}</option>
+                  </select>
+                  <button onClick={handleNextProfile} className="px-2 py-1 rounded border border-slate-700 hover:bg-slate-900" title={lang === 'ar' ? 'التالي' : 'Next'}>
+                    <FiChevronRight />
+                  </button>
+                  <button onClick={() => setShowProfile(false)} className="px-3 py-1 rounded border border-slate-700"><FiX /></button>
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex gap-2">
+                {[
+                  { key: 'overview', label: lang === 'ar' ? 'نظرة عامة' : 'Overview' },
+                  { key: 'schedule', label: lang === 'ar' ? 'الجدول' : 'Schedule' },
+                  { key: 'apologies', label: lang === 'ar' ? 'الاعتذارات' : 'Apologies' }
+                ].map(t => (
+                  <button key={t.key} onClick={() => setProfileTab(t.key as any)} className={`px-3 py-1 rounded border text-sm ${profileTab === t.key ? 'bg-slate-800 border-slate-600' : 'bg-slate-900 border-slate-800 hover:bg-slate-800/60'}`}>{t.label}</button>
+                ))}
+              </div>
+
+              {/* Overview */}
+              {profileTab === 'overview' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="border border-slate-800 rounded p-3">
+                    <div className="text-sm font-semibold mb-2">{lang === 'ar' ? 'معلومات الموظف' : 'Staff Info'}</div>
+                    {!profileStaffInfo ? (
+                      <div className="text-slate-400 text-sm">{lang === 'ar' ? 'جار التحميل...' : 'Loading...'}</div>
+                    ) : (
+                      <div className="text-sm text-slate-300 space-y-1">
+                        <div>{lang === 'ar' ? 'الاسم' : 'Name'}: {lang === 'ar' ? (profileStaffInfo.name_ar || profileStaffInfo.name) : profileStaffInfo.name}</div>
+                        {profileStaffInfo.job_title && <div>{lang === 'ar' ? 'المسمى' : 'Title'}: {lang === 'ar' ? (profileStaffInfo.job_title_ar || profileStaffInfo.job_title) : profileStaffInfo.job_title}</div>}
+                        {profileStaffInfo.email && <div>Email: {profileStaffInfo.email}</div>}
+                        {profileStaffInfo.phone && <div>{lang === 'ar' ? 'الجوال' : 'Phone'}: {profileStaffInfo.phone}</div>}
+                      </div>
+                    )}
+                  </div>
+                  <div className="border border-slate-800 rounded p-3">
+                    <div className="text-sm font-semibold mb-2">{lang === 'ar' ? 'الاعتذارات (الشهر)' : 'Apologies (Month)'}</div>
+                    <div className="flex flex-wrap gap-2 text-sm">
+                      {profileApologies.length === 0 && <span className="text-slate-400 text-xs">{lang === 'ar' ? 'لا يوجد' : 'None'}</span>}
+                      {profileApologies.map((ap, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 bg-slate-800 border border-slate-700 px-2 py-1 rounded text-sm">
+                          {ap.date.slice(0,10)} — {ap.reason}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Schedule */}
+              {profileTab === 'schedule' && (() => {
+                const monthsToRender: Array<{ y: number; m: number }> = [];
+                if (profileViewMode === 'month') monthsToRender.push({ y: profileYear, m: profileMonth });
+                else if (profileViewMode === 'quarter') {
+                  const startMonth = Math.floor((profileMonth - 1) / 3) * 3 + 1;
+                  for (let i = 0; i < 3; i++) monthsToRender.push({ y: profileYear, m: startMonth + i });
+                } else {
+                  for (let m = 1; m <= 12; m++) monthsToRender.push({ y: profileYear, m });
+                }
+                return (
+                  <div className="overflow-x-auto pb-2">
+                    <div className={`flex gap-6 snap-x snap-mandatory ${profileViewMode === 'month' ? 'justify-center' : ''}`}>
+                      {monthsToRender.map(({ y, m }) => {
+                        const { weeks, isInCurrentMonth } = buildWeeks(y, m);
+                        const label = new Date(y, m - 1, 1).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' });
+                        return (
+                          <div key={`${y}-${m}`} className="min-w-[700px] snap-start border border-slate-800 rounded overflow-hidden shadow-sm">
+                            <div className="px-3 py-2 bg-slate-900/70 text-sm text-slate-300">{label}</div>
+                            <div className="grid grid-cols-7 bg-slate-900/70 text-xs">
+                              {weekdayLabels.map((w, idx) => (
+                                <div key={idx} className="px-3 py-2 border-b border-slate-800 text-slate-300">{w}</div>
+                              ))}
+                            </div>
+                            <div className="divide-y divide-slate-800">
+                              {weeks.map((week, wi) => (
+                                <div key={wi} className="grid grid-cols-7">
+                                  {week.map((date, di) => {
+                                    const isCurrent = isInCurrentMonth(date);
+                                    const dateNum = date.getDate();
+                                    const assigned = getStaffShiftForDate(date, profileStaffId);
+                                    const cellRow = (active: boolean, label: string, color: string) => (
+                                      <div className={`flex items-center justify-between rounded border px-2 py-0.5 text-[11px] ${active ? color : 'bg-slate-900/30 border-slate-700 text-slate-400'}`}>
+                                        <span>{label}</span>
+                                        {active && <span className="inline-flex items-center rounded-full px-2 py-0.5 border border-slate-600 bg-slate-900/40">✓</span>}
+                                      </div>
+                                    );
+                                    return (
+                                      <div key={di} className={`min-h-[110px] border-r border-slate-800 p-2 ${!isCurrent ? 'bg-slate-950/30 text-slate-500' : 'bg-slate-950'}`}>
+                                        <div className="text-xs font-semibold text-slate-300 mb-1">{dateNum}</div>
+                                        <div className="space-y-1">
+                                          {cellRow(assigned === 'morning', (lang === 'ar' ? 'صباح' : 'Morning'), 'bg-green-900/10 border-green-800 text-green-300')}
+                                          {cellRow(assigned === 'lateMorning', (lang === 'ar' ? 'صباح متأخر' : 'Late Morning'), 'bg-sky-900/10 border-sky-800 text-sky-300')}
+                                          {cellRow(assigned === 'day', (lang === 'ar' ? 'نهار' : 'Day'), 'bg-amber-900/10 border-amber-800 text-amber-300')}
+                                          {cellRow(assigned === 'night', (lang === 'ar' ? 'ليل' : 'Night'), 'bg-violet-900/10 border-violet-800 text-violet-300')}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Apologies Tab */}
+              {profileTab === 'apologies' && (
+                <div className="border border-slate-800 rounded p-3">
+                  <div className="text-sm font-semibold mb-2">{lang === 'ar' ? 'الاعتذارات' : 'Apologies'}</div>
+                  <div className="space-y-2 text-sm">
+                    {profileApologies.length === 0 && <div className="text-slate-400">{lang === 'ar' ? 'لا يوجد' : 'None'}</div>}
+                    {profileApologies.map((ap, i) => (
+                      <div key={i} className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded px-2 py-1">
+                        <span className="text-slate-300">{ap.date.slice(0,10)}</span>
+                        <span className="text-slate-400">{ap.reason}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Patterns Manage Modal */}
+        {showPatternsModal && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[65]">
+            <div className="bg-slate-950 border border-slate-800 rounded p-4 w-[720px] max-h-[80vh] overflow-auto space-y-3 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-semibold">{lang === 'ar' ? 'إدارة الأنماط' : 'Manage Patterns'}</div>
+                <button onClick={() => setShowPatternsModal(false)} className="px-2 py-1 rounded border border-slate-700"><FiX /></button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-300">{lang === 'ar' ? 'النمط' : 'Pattern'}</span>
+                <select value={managePatternCode} onChange={(e)=>setManagePatternCode(e.target.value)} className="bg-slate-900 border border-slate-700 text-xs rounded px-2 py-1">
+                  {patterns.map(p => (
+                    <option key={p.id} value={p.code}>{lang === 'ar' ? (p.name_ar || p.name) : p.name}</option>
+                  ))}
+                </select>
+                <button onClick={saveManagePattern} className="ml-auto bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">{lang === 'ar' ? 'حفظ' : 'Save'}</button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="border border-slate-800 rounded p-2">
+                  <div className="text-sm font-semibold mb-2">{lang === 'ar' ? 'الموظفون' : 'Staff'}</div>
+                  <div className="max-h-64 overflow-auto space-y-1">
+                    {staffList.map(s => (
+                      <label key={s.id} className="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-slate-900 cursor-pointer">
+                        <input type="checkbox" className="accent-green-600" checked={manageSelectedStaffIds.includes(s.id)} onChange={()=>toggleManageStaff(s.id)} />
+                        <span>{lang === 'ar' ? (s.name_ar || s.name) : s.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="border border-slate-800 rounded p-2">
+                  <div className="text-sm font-semibold mb-2">{lang === 'ar' ? 'الأنماط' : 'Patterns'}</div>
+                  <div className="space-y-2">
+                    {patterns.map(p => (
+                      <div key={p.id} className={`flex items-center justify-between px-2 py-2 rounded border ${managePatternCode===p.code ? 'border-green-700 bg-green-900/10' : 'border-slate-800 bg-slate-900'}`}>
+                        <div className="text-sm">{lang === 'ar' ? (p.name_ar || p.name) : p.name}</div>
+                        <button className="text-xs px-2 py-0.5 rounded border border-slate-700 hover:bg-slate-800" onClick={()=>openManagePattern(p.code)}>{lang === 'ar' ? 'تحديد' : 'Select'}</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Custom Auto-Schedule Modal */}
+        {showCustomScheduleModal && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[66]">
+            <div className="bg-slate-950 border border-slate-800 rounded p-4 w-[520px] space-y-3 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-semibold">{lang === 'ar' ? 'جدولة تلقائية (نطاق مخصص)' : 'Auto-Schedule (Custom Range)'}</div>
+                <button onClick={() => setShowCustomScheduleModal(false)} className="px-2 py-1 rounded border border-slate-700"><FiX /></button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label className="block text-sm">
+                  {lang === 'ar' ? 'من تاريخ' : 'Start Date'}
+                  <input type="date" className="w-full mt-1 bg-slate-900 border border-slate-800 rounded px-2 py-1" value={customRange.start} onChange={e => setCustomRange(r => ({ ...r, start: e.target.value }))} />
+                </label>
+                <label className="block text-sm">
+                  {lang === 'ar' ? 'إلى تاريخ' : 'End Date'}
+                  <input type="date" className="w-full mt-1 bg-slate-900 border border-slate-800 rounded px-2 py-1" value={customRange.end} onChange={e => setCustomRange(r => ({ ...r, end: e.target.value }))} />
+                </label>
+              </div>
+              <div className="border border-slate-800 rounded">
+                <div className="px-3 py-2 text-xs text-slate-300 border-b border-slate-800">
+                  {lang === 'ar' ? 'الأنماط المستهدفة' : 'Target Patterns'}
+                </div>
+                <div className="max-h-40 overflow-auto p-2 space-y-1">
+                  {patterns.length === 0 && (
+                    <div className="text-xs text-slate-500 px-2">{lang === 'ar' ? 'لا توجد أنماط' : 'No patterns'}</div>
+                  )}
+                  {patterns.map(p => (
+                    <label key={p.id} className="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-slate-900 cursor-pointer">
+                      <input type="checkbox" className="accent-green-600" checked={selectedPatternCodes.includes(p.code)} onChange={() => togglePattern(p.code)} />
+                      <span>{lang === 'ar' ? (p.name_ar || p.name) : p.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setShowCustomScheduleModal(false)} className="px-3 py-1 rounded border border-slate-700">{lang === 'ar' ? 'إلغاء' : 'Cancel'}</button>
+                <button onClick={onAutoScheduleCustom} disabled={!customRange.start || !customRange.end} className="px-3 py-1 rounded bg-green-600 text-white disabled:opacity-50">{lang === 'ar' ? 'جدولة' : 'Schedule'}</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </ClientLayout>
+  );
+} 
